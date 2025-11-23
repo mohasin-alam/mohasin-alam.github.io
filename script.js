@@ -1,7 +1,7 @@
 document.getElementById('viewSourceBtn').addEventListener('click', fetchSourceCode);
 
 // *** আপনার Cloudflare Worker URL এখানে যুক্ত করা হলো ***
-const workerUrl = "https://yellow-heart-57a1.csmmhoasinalam.workers.dev"; 
+const workerUrl = "https://yellow-heart-57a1.csmmohasinalam.workers.dev/"; 
 
 function fetchSourceCode() {
     const websiteInput = document.getElementById('websiteUrl').value;
