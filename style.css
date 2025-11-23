@@ -2,12 +2,12 @@
 /* ১. ফন্ট ইমপোর্ট এবং বেস স্টাইল (টার্মিনাল লুক) */
 /* -------------------------------------- */
 
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&display=swap');
 
 :root {
-    --color-dark-bg: #0d121c;         /* টার্মিনাল স্ক্রিন ব্যাকগ্রাউন্ড */
+    --color-dark-bg: #0d121c;         /* প্রধান ব্যাকগ্রাউন্ড */
     --color-text: #39ff14;            /* নিয়ন গ্রিন টেক্সট */
-    --color-accent: #00ff00;          /* উজ্জ্বল অ্যাকসেন্ট */
+    --color-accent: #00ff00;          /* উজ্জ্বল অ্যাকসেন্ট (নিয়ন গ্রিন) */
     --color-border: #008000;          /* গাঢ় সবুজ বর্ডার */
     --color-error: #ff5757;           /* ত্রুটি রং */
     --shadow-glow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent);
@@ -27,14 +27,14 @@ body {
 }
 
 .container {
-    background: #060b14;
+    background: #060b14; 
     padding: 30px 40px;
-    border-radius: 0;
+    border-radius: 0; 
     box-shadow: 0 0 15px var(--color-border); 
     border: 1px solid var(--color-border);
     width: 100%;
     max-width: 900px;
-    animation: neon-pulse 4s infinite ease-in-out; /* পালস স্লো করা হলো */
+    animation: neon-pulse 4s infinite ease-in-out; /* স্লো পালস অ্যানিমেশন */
 }
 
 h1 {
@@ -45,7 +45,6 @@ h1 {
     letter-spacing: 3px;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 10px;
-    /* গ্লিচ ইফেক্টের বেস স্টাইল */
 }
 
 /* ইনপুট এবং বাটন স্টাইল */
@@ -88,7 +87,7 @@ input[type="url"]:focus {
     background-color: rgba(0, 255, 0, 0.1);
     box-shadow: 0 0 20px var(--color-accent);
 }
-#viewSourceBtn:disabled { /* লোডিং অবস্থায় বাটন ডিজেবল */
+#viewSourceBtn:disabled { 
     cursor: not-allowed;
     opacity: 0.7;
 }
@@ -99,8 +98,8 @@ input[type="url"]:focus {
 
 .code-area {
     margin-top: 20px;
-    background: #030508; 
-    border: 1px dashed var(--color-border);
+    background: #000000; /* খাঁটি কালো ব্যাকগ্রাউন্ড */
+    border: 1px dashed var(--color-border); 
     border-radius: 0;
     padding: 15px;
     max-height: 500px;
@@ -109,22 +108,60 @@ input[type="url"]:focus {
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
     line-height: 1.4;
     position: relative;
-    /* টার্মিনাল কার্সার ইফেক্ট */
 }
 
-/* Prism.js হাইলাইটিং কালার (হ্যাকার লুক) */
-.code-area code {
-    color: var(--color-text); 
-    /* কীবোর্ড কার্সার স্টাইল - লোডিং এর সময় দেখাবে */
+/* স্ট্যাটাস মেসেজ - টার্মিনাল প্রম্পট */
+#statusMessage {
+    text-align: left;
+    color: var(--color-text);
+    font-weight: bold;
+    display: none;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    font-family: 'Share Tech Mono', monospace;
 }
-.code-area.loading code:after {
-    content: '_'; /* কীবোর্ড কার্সার */
-    display: inline;
-    animation: blink-caret .75s step-end infinite;
+#statusMessage:before {
+    content: "[ATTEMPTING ACCESS]>"; /* টার্মিনাল প্রম্পট */
+    color: #ff5757;
+    margin-right: 5px;
+}
+
+.hidden {
+    display: none !important;
+}
+.code-area code {
+    display: block; 
 }
 
 /* -------------------------------------- */
-/* ৩. অ্যানিমেশন এবং ইফেক্ট */
+/* ৩. সিনট্যাক্স হাইলাইটিং ফিক্স (Prism.js Override) */
+/* -------------------------------------- */
+
+/* নিশ্চিত করা হলো যে কোড এরিয়াতে সবুজ রং দেখা যাবে */
+.code-area code {
+    color: var(--color-text) !important; 
+}
+
+/* সিনট্যাক্স টোকেন কাস্টমাইজেশন */
+.token.tag, .token.attr-name, .token.selector {
+    color: #00ffff !important; /* সায়ান ট্যাগ/অ্যাট্রিবিউট */
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+.token.punctuation, .token.operator {
+    color: #ff00ff !important; /* ম্যাজেন্টা চিহ্ণ */
+}
+.token.attr-value, .token.string {
+    color: #39ff14 !important; /* উজ্জ্বল সবুজ স্ট্রিং */
+}
+.token.comment {
+    color: #008000 !important; /* গাঢ় সবুজ কমেন্ট */
+}
+.token.doctype, .token.prolog {
+    color: #ffa500 !important; /* কমলা ডকটাইপ */
+}
+
+/* -------------------------------------- */
+/* ৪. অ্যানিমেশন এবং ইফেক্ট */
 /* -------------------------------------- */
 
 /* A. ধীর গতির গ্লিচ ইফেক্ট (কম দৃশ্যমান) */
@@ -139,19 +176,17 @@ input[type="url"]:focus {
     animation: glitch 4s infinite alternate step-end; /* স্লো করা হলো */
 }
 
-/* B. টাইপিং লোডিং অ্যানিমেশন (JavaScript দিয়ে স্ট্যাটাস মেসেজে পরিবর্তন আনতে হবে) */
-@keyframes typing {
-    from { width: 0 }
-    to { width: 100% }
-}
-@keyframes blink-caret {
-    from, to { border-color: transparent }
-    50% { border-color: var(--color-accent) }
-}
-/* কীবোর্ড কার্সার */
+/* B. কীবোর্ড কার্সার অ্যানিমেশন (লোডিং এর জন্য) */
 @keyframes blink-caret {
     0%, 100% { opacity: 0; }
     50% { opacity: 1; }
+}
+
+/* কীবোর্ড কার্সার স্টাইল - লোডিং এর সময় দেখাবে */
+.code-area.loading code:after {
+    content: '_'; 
+    display: inline;
+    animation: blink-caret .75s step-end infinite;
 }
 
 /* C. কন্টেইনার পালস */
