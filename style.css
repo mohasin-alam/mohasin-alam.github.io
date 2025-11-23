@@ -1,22 +1,22 @@
 /* -------------------------------------- */
-/* ১. ফিউচারিস্টিক বেস স্টাইল */
+/* ১. ফন্ট ইমপোর্ট এবং বেস স্টাইল (টার্মিনাল লুক) */
 /* -------------------------------------- */
 
-/* ফন্ট ইমপোর্ট (যেমন Google Fonts থেকে Monospace/টেকনিক্যাল ফন্ট) */
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+/* টার্মিনাল ফন্ট: Monospace */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
-    /* কালার প্যালেট */
-    --color-dark-bg: #1a1a2e;        /* প্রধান গাঢ় ব্যাকগ্রাউন্ড */
-    --color-primary: #0f4c75;        /* গাঢ় প্রাইমারি রং */
-    --color-accent: #37b7c3;         /* নিয়ন ব্লু অ্যাকসেন্ট (হাইলাইট) */
-    --color-text: #e0e0e0;           /* হালকা ধূসর টেক্সট */
-    --color-error: #ff5757;          /* ত্রুটি রং */
-    --color-border: rgba(55, 183, 195, 0.5); /* স্বচ্ছ বর্ডার */
+    --color-dark-bg: #0d121c;         /* টার্মিনাল স্ক্রিন ব্যাকগ্রাউন্ড */
+    --color-text: #39ff14;            /* নিয়ন গ্রিন টেক্সট */
+    --color-accent: #00ff00;          /* উজ্জ্বল অ্যাকসেন্ট */
+    --color-border: #008000;          /* গাঢ় সবুজ বর্ডার */
+    --color-error: #ff5757;           /* ত্রুটি রং */
+    --shadow-glow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent);
 }
 
 body {
-    font-family: 'Space Mono', monospace; /* ফিউচারিস্টিক ফন্ট */
+    font-family: 'Share Tech Mono', monospace;
     background-color: var(--color-dark-bg);
     color: var(--color-text);
     margin: 0;
@@ -25,108 +25,154 @@ body {
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .container {
-    background: rgba(20, 20, 40, 0.9); /* স্বচ্ছ গাঢ় পটভূমি */
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 0 30px var(--color-primary); /* উজ্জ্বল শ্যাডো */
+    background: #060b14; /* একটু গাঢ় কন্টেইনার */
+    padding: 30px 40px;
+    border-radius: 0; /* টার্মিনালের মতো তীক্ষ্ণ কোণ */
+    box-shadow: 0 0 15px var(--color-border); /* হালকা সবুজ আউটলাইন */
     border: 1px solid var(--color-border);
     width: 100%;
     max-width: 900px;
 }
 
 h1 {
-    color: var(--color-accent); /* নিয়ন ব্লু হেডলাইন */
+    color: var(--color-accent);
     text-align: center;
     margin-bottom: 30px;
-    text-shadow: 0 0 10px var(--color-accent); /* নিয়ন ইফেক্ট */
-    letter-spacing: 2px;
+    text-shadow: var(--shadow-glow);
+    letter-spacing: 3px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
 }
 
 /* ইনপুট এবং বাটন স্টাইল */
 input[type="url"] {
     width: 100%;
-    padding: 15px;
+    padding: 12px;
     margin-bottom: 20px;
-    border: 2px solid var(--color-primary);
-    border-radius: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 0;
     box-sizing: border-box;
     font-size: 16px;
-    background-color: #0f0f1d;
+    background-color: #030508;
     color: var(--color-text);
-    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: inset 0 0 5px rgba(0, 128, 0, 0.5);
+    font-family: 'Share Tech Mono', monospace;
 }
 
 input[type="url"]:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 10px var(--color-accent);
+    box-shadow: var(--shadow-glow);
     outline: none;
 }
 
 #viewSourceBtn {
-    background-color: var(--color-primary);
-    color: white;
-    padding: 15px 20px;
+    background-color: transparent;
+    color: var(--color-accent);
+    padding: 12px 20px;
     border: 2px solid var(--color-accent);
-    border-radius: 5px;
+    border-radius: 0;
     cursor: pointer;
-    font-size: 18px;
-    transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
+    font-size: 16px;
+    transition: background-color 0.3s, box-shadow 0.3s;
     width: 100%;
     margin-bottom: 30px;
     text-transform: uppercase;
+    box-shadow: var(--shadow-glow);
 }
 
 #viewSourceBtn:hover {
-    background-color: var(--color-accent);
-    color: var(--color-dark-bg);
-    box-shadow: 0 0 15px var(--color-accent);
+    background-color: rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 20px var(--color-accent);
 }
 
-/* কোড দেখানোর এরিয়া */
+/* -------------------------------------- */
+/* ২. কোড এরিয়া এবং সিনট্যাক্স হাইলাইট (টার্মিনাল লুক) */
+/* -------------------------------------- */
+
 .code-area {
-    margin-top: 30px;
-    background: #0d121c; /* কোড ব্লকের জন্য গাঢ় পটভূমি */
-    border: 1px solid var(--color-primary);
-    border-radius: 5px;
+    margin-top: 20px;
+    background: #030508; 
+    border: 1px dashed var(--color-border); /* ড্যাশড বর্ডার */
+    border-radius: 0;
     padding: 15px;
     max-height: 500px;
     overflow: auto;
     font-size: 14px;
-    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    line-height: 1.4;
 }
 
-/* Prism.js হাইলাইটিং কালার ফিউচারিস্টিক করুন */
+/* Prism.js হাইলাইটিং কালার (হ্যাকার লুক) */
 .code-area code {
     color: var(--color-text); 
-    /* Prism.js এর ডিফল্ট রং এখানে ওভাররাইড করা হয় */
 }
 .token.tag, .token.attr-name, .token.selector {
-    color: #ff5757; /* লালচে হাইলাইট */
+    color: #00ffff; /* সায়ান */
+    text-shadow: 0 0 5px #00ffff;
 }
 .token.punctuation {
-    color: var(--color-accent); /* নিয়ন ব্লু */
+    color: var(--color-text);
 }
 .token.attr-value, .token.string {
-    color: #4cd964; /* উজ্জ্বল সবুজ */
+    color: #ff00ff; /* ম্যাজেন্টা */
+}
+.token.comment {
+    color: #4cd964; /* হালকা সবুজ কমেন্ট */
+}
+.token.doctype {
+    color: #ffa500; /* কমলা */
 }
 
-/* স্ট্যাটাস মেসেজ */
+/* স্ট্যাটাস মেসেজ - টার্মিনাল প্রম্পট */
 #statusMessage {
-    text-align: center;
-    color: var(--color-accent);
+    text-align: left;
+    color: var(--color-text);
     font-weight: bold;
     display: none;
     margin-bottom: 15px;
-    text-shadow: 0 0 5px var(--color-accent);
+    padding-left: 10px;
+}
+#statusMessage:before {
+    content: "[ATTEMPTING ACCESS]>"; /* টার্মিনাল প্রম্পট */
+    color: #ff5757;
+    margin-right: 5px;
 }
 
 .hidden {
     display: none !important;
 }
 
-.code-area code {
-    display: block; 
+/* -------------------------------------- */
+/* ৩. অ্যানিমেশন: নিয়ন গ্লিচ ইফেক্ট (ঐচ্ছিক) */
+/* -------------------------------------- */
+
+/* গ্লিচ ইফেক্টের জন্য HTML body তে 'glitch-text' ক্লাস যোগ করতে হবে */
+@keyframes glitch {
+    0% { text-shadow: 2px 2px var(--color-accent), -2px -2px #ff00ff; }
+    25% { text-shadow: -2px 2px #ff00ff, 2px -2px var(--color-accent); }
+    50% { text-shadow: 3px -3px var(--color-accent), -3px 3px #ff00ff; }
+    75% { text-shadow: -3px -3px #ff00ff, 3px 3px var(--color-accent); }
+    100% { text-shadow: 2px 2px var(--color-accent), -2px -2px #ff00ff; }
+}
+
+.glitch-text {
+    animation: glitch 1.5s infinite alternate linear;
+}
+
+/* -------------------------------------- */
+/* ৪. অ্যানিমেশন: কন্টেইনার ব্লিঙ্কিং আউটলাইন */
+/* -------------------------------------- */
+@keyframes neon-pulse {
+    0% { box-shadow: 0 0 5px var(--color-border); }
+    50% { box-shadow: 0 0 10px var(--color-accent), 0 0 20px var(--color-accent); }
+    100% { box-shadow: 0 0 5px var(--color-border); }
+}
+
+.container {
+    /* আগের স্টাইলের সাথে এই অ্যানিমেশন যোগ করুন */
+    animation: neon-pulse 3s infinite ease-in-out;
 }
