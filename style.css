@@ -2,8 +2,6 @@
 /* ১. ফন্ট ইমপোর্ট এবং বেস স্টাইল (টার্মিনাল লুক) */
 /* -------------------------------------- */
 
-/* টার্মিনাল ফন্ট: Monospace */
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 :root {
@@ -29,13 +27,14 @@ body {
 }
 
 .container {
-    background: #060b14; /* একটু গাঢ় কন্টেইনার */
+    background: #060b14;
     padding: 30px 40px;
-    border-radius: 0; /* টার্মিনালের মতো তীক্ষ্ণ কোণ */
-    box-shadow: 0 0 15px var(--color-border); /* হালকা সবুজ আউটলাইন */
+    border-radius: 0;
+    box-shadow: 0 0 15px var(--color-border); 
     border: 1px solid var(--color-border);
     width: 100%;
     max-width: 900px;
+    animation: neon-pulse 4s infinite ease-in-out; /* পালস স্লো করা হলো */
 }
 
 h1 {
@@ -46,6 +45,7 @@ h1 {
     letter-spacing: 3px;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 10px;
+    /* গ্লিচ ইফেক্টের বেস স্টাইল */
 }
 
 /* ইনপুট এবং বাটন স্টাইল */
@@ -84,19 +84,23 @@ input[type="url"]:focus {
     box-shadow: var(--shadow-glow);
 }
 
-#viewSourceBtn:hover {
+#viewSourceBtn:hover:not(:disabled) {
     background-color: rgba(0, 255, 0, 0.1);
     box-shadow: 0 0 20px var(--color-accent);
 }
+#viewSourceBtn:disabled { /* লোডিং অবস্থায় বাটন ডিজেবল */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 
 /* -------------------------------------- */
-/* ২. কোড এরিয়া এবং সিনট্যাক্স হাইলাইট (টার্মিনাল লুক) */
+/* ২. কোড এরিয়া (টার্মিনাল লুক) */
 /* -------------------------------------- */
 
 .code-area {
     margin-top: 20px;
     background: #030508; 
-    border: 1px dashed var(--color-border); /* ড্যাশড বর্ডার */
+    border: 1px dashed var(--color-border);
     border-radius: 0;
     padding: 15px;
     max-height: 500px;
@@ -104,75 +108,55 @@ input[type="url"]:focus {
     font-size: 14px;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
     line-height: 1.4;
+    position: relative;
+    /* টার্মিনাল কার্সার ইফেক্ট */
 }
 
 /* Prism.js হাইলাইটিং কালার (হ্যাকার লুক) */
 .code-area code {
     color: var(--color-text); 
+    /* কীবোর্ড কার্সার স্টাইল - লোডিং এর সময় দেখাবে */
 }
-.token.tag, .token.attr-name, .token.selector {
-    color: #00ffff; /* সায়ান */
-    text-shadow: 0 0 5px #00ffff;
-}
-.token.punctuation {
-    color: var(--color-text);
-}
-.token.attr-value, .token.string {
-    color: #ff00ff; /* ম্যাজেন্টা */
-}
-.token.comment {
-    color: #4cd964; /* হালকা সবুজ কমেন্ট */
-}
-.token.doctype {
-    color: #ffa500; /* কমলা */
-}
-
-/* স্ট্যাটাস মেসেজ - টার্মিনাল প্রম্পট */
-#statusMessage {
-    text-align: left;
-    color: var(--color-text);
-    font-weight: bold;
-    display: none;
-    margin-bottom: 15px;
-    padding-left: 10px;
-}
-#statusMessage:before {
-    content: "[ATTEMPTING ACCESS]>"; /* টার্মিনাল প্রম্পট */
-    color: #ff5757;
-    margin-right: 5px;
-}
-
-.hidden {
-    display: none !important;
+.code-area.loading code:after {
+    content: '_'; /* কীবোর্ড কার্সার */
+    display: inline;
+    animation: blink-caret .75s step-end infinite;
 }
 
 /* -------------------------------------- */
-/* ৩. অ্যানিমেশন: নিয়ন গ্লিচ ইফেক্ট (ঐচ্ছিক) */
+/* ৩. অ্যানিমেশন এবং ইফেক্ট */
 /* -------------------------------------- */
 
-/* গ্লিচ ইফেক্টের জন্য HTML body তে 'glitch-text' ক্লাস যোগ করতে হবে */
+/* A. ধীর গতির গ্লিচ ইফেক্ট (কম দৃশ্যমান) */
 @keyframes glitch {
-    0% { text-shadow: 2px 2px var(--color-accent), -2px -2px #ff00ff; }
-    25% { text-shadow: -2px 2px #ff00ff, 2px -2px var(--color-accent); }
-    50% { text-shadow: 3px -3px var(--color-accent), -3px 3px #ff00ff; }
-    75% { text-shadow: -3px -3px #ff00ff, 3px 3px var(--color-accent); }
-    100% { text-shadow: 2px 2px var(--color-accent), -2px -2px #ff00ff; }
+    0%, 100% { text-shadow: 1px 0 0 var(--color-accent), -1px 0 0 #ff00ff; }
+    10% { text-shadow: -1px 0 0 #ff00ff, 1px 0 0 var(--color-accent); }
+    12% { text-shadow: 2px 0 0 var(--color-accent), -2px 0 0 #ff00ff; }
+    20% { text-shadow: -2px 0 0 #ff00ff, 2px 0 0 var(--color-accent); }
 }
 
 .glitch-text {
-    animation: glitch 1.5s infinite alternate linear;
+    animation: glitch 4s infinite alternate step-end; /* স্লো করা হলো */
 }
 
-/* -------------------------------------- */
-/* ৪. অ্যানিমেশন: কন্টেইনার ব্লিঙ্কিং আউটলাইন */
-/* -------------------------------------- */
+/* B. টাইপিং লোডিং অ্যানিমেশন (JavaScript দিয়ে স্ট্যাটাস মেসেজে পরিবর্তন আনতে হবে) */
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--color-accent) }
+}
+/* কীবোর্ড কার্সার */
+@keyframes blink-caret {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* C. কন্টেইনার পালস */
 @keyframes neon-pulse {
     0% { box-shadow: 0 0 5px var(--color-border); }
-    50% { box-shadow: 0 0 10px var(--color-accent), 0 0 20px var(--color-accent); }
+    50% { box-shadow: 0 0 15px var(--color-accent), 0 0 30px var(--color-accent); }
     100% { box-shadow: 0 0 5px var(--color-border); }
-}
-
-.container {
-    /* আগের স্টাইলের সাথে এই অ্যানিমেশন যোগ করুন */
-    animation: neon-pulse 3s infinite ease-in-out;
 }
