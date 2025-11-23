@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Source Code Hacker by Csm Mohasin Alam</title>
+    <title>ওয়েবসাইট সোর্স কোড ভিউয়ার</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css" rel="stylesheet" />
 </head>
@@ -15,64 +14,16 @@
         <input type="url" id="websiteUrl" placeholder="এখানে ওয়েবসাইটের URL দিন (যেমন: https://google.com)" required>
         <button id="viewSourceBtn">সোর্স কোড দেখুন</button>
         
-        <p id="statusMessage" class="hidden">প্রসেস হচ্ছে...</p>
+        <p id="statusMessage" class="hidden"></p>
+        
         <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
-   
-    
-    
-    
-    
-    
-    
-    <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
-    </div>
+        
         <div class="action-buttons hidden" id="actionButtons">
             <button id="copyCodeBtn">কোড কপি করুন</button>
             <button id="downloadCodeBtn">HTML ডাউনলোড করুন</button>
         </div>
         
-    </div> 
-
-    <style>
-        
-    .action-buttons {
-    display: flex;
-    justify-content: flex-end; /* বাটনগুলি ডানদিকে থাকবে */
-    gap: 15px; /* বাটনগুলির মধ্যে দূরত্ব */
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-.action-buttons button {
-    background-color: transparent;
-    color: var(--color-accent);
-    padding: 10px 15px;
-    border: 1px solid var(--color-accent);
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    text-transform: uppercase;
-    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
-    font-family: 'Share Tech Mono', monospace;
-}
-
-.action-buttons button:hover {
-    background-color: rgba(0, 255, 0, 0.15);
-    box-shadow: 0 0 10px var(--color-accent);
-}
-
-.action-buttons button:active {
-    background-color: rgba(0, 255, 0, 0.3);
-}
-    
-</style>
-    
-    
-    
-    
-    
-    
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
