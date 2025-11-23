@@ -2,7 +2,7 @@ document.getElementById('viewSourceBtn').addEventListener('click', fetchSourceCo
 document.getElementById('copyCodeBtn').addEventListener('click', copyCode);
 document.getElementById('downloadCodeBtn').addEventListener('click', downloadCode);
 
-// আপনার Cloudflare Worker URL (সংশোধিত) এখানে যুক্ত করা হলো
+// *** আপনার Cloudflare Worker URL (সংশোধিত) এখানে যুক্ত করা হলো ***
 const workerUrl = "https://yellow-heart-57a1.csmmohasinalam.workers.dev"; 
 
 function fetchSourceCode() {
@@ -18,14 +18,15 @@ function fetchSourceCode() {
         return;
     }
 
-    // লোডিং শুরু
+    // লোডিং শুরু: বাটন ডিজেবল, স্ট্যাটাস আপডেট, কার্সার ইফেক্ট যোগ
     viewButton.disabled = true;
     actionButtons.classList.add('hidden'); // বাটন লুকিয়ে রাখুন
     outputElement.textContent = '';
-    outputArea.classList.add('loading');
+    outputArea.classList.add('loading'); // কীবোর্ড কার্সার দেখাবে
     statusMessage.textContent = 'ওয়েবসাইটের সোর্স কোড আনা হচ্ছে... এনক্রিপশন প্রসেস শুরু হচ্ছে...';
     statusMessage.classList.remove('hidden');
     
+    // Worker-কে URL প্যারামিটার সহ কল করার জন্য URL তৈরি
     const fetchWorkerUrl = `${workerUrl}?url=${encodeURIComponent(websiteInput)}`;
     
     fetch(fetchWorkerUrl)
