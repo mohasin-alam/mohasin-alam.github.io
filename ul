@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare URL Shortener</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background-color: #f7f7f7; }
+        h1 { color: #f48120; }
+        input[type="url"], input[type="text"], button { 
+            padding: 10px; margin: 8px 0; box-sizing: border-box; font-size: 16px; border-radius: 4px; border: 1px solid #ddd; 
+        }
+        input[type="url"], input[type="text"] { width: 100%; }
+        button { background-color: #f48120; color: white; border: none; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #e37418; }
+        
+        #result-container { 
+            margin-top: 20px; padding: 15px; border: 2px solid #28a745; background-color: #e9f7ef; border-radius: 4px; display: none; 
+        }
+        #shortUrlBox { 
+            display: flex; gap: 10px; margin-top: 10px;
+        }
+        #shortUrlInput {
+            flex-grow: 1; /* টেক্সট বক্স পুরো জায়গা নেবে */
+            background-color: #fff;
+            cursor: pointer; /* দেখানোর জন্য যে এটি ইন্টারেক্টিভ */
+        }
+        #copyButton {
+            width: auto;
+            padding: 10px 15px;
+            background-color: #007bff; /* কপির জন্য অন্য রং */
+        }
+        #copyButton:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 Cloudflare URL Shortener</h1>
+    <p>আপনার লং URL দিন এবং শর্ট কোড তৈরি করুন।</p>
+
+    <form id="shortenerForm">
+        <label for="longUrl">লং URL:</label>
+        <input type="url" id="longUrl" placeholder="এখানে সম্পূর্ণ URL দিন (যেমন: https://example.com/very/long/path)" required>
+
+        <label for="customKey">কাস্টম শর্ট কোড (ঐচ্ছিক):</label>
+        <input type="text" id="customKey" placeholder="যেমন: mylink">
+
+        <button type="submit">Shorten!</button>
+    </form>
+
+    <div id="result-container">
+        <p><strong>শর্টেন্ড URL তৈরি হয়েছে:</strong></p>
+        <div id="shortUrlBox">
+            <input type="text" id="shortUrlInput" value="" readonly>
+            <button type="button" id="copyButton">Copy</button>
+        </div>
+        <p style="margin-top: 10px;">আসল URL: <span id="originalLink"></span></p>
+    </div>
+    
+    <p id="error" style="color: red; font-weight: bold;"></p>
+
+    <script>
+        // আপনার Worker URL এখানে সেট করা হয়েছে
+        const workerUrl = "https://url.csmmohasinalam.workers.dev/create"; 
+        
+        const form = document.getElementById('shortenerForm');
+        const resultContainer = document.getElementById('result-container');
+        const shortUrlInput = document.getElementById('shortUrlInput');
+        const originalLink = document.getElementById('originalLink');
+        const errorP = document.getElementById('error');
+        const copyButton = document.getElementById('copyButton');
+
+        // --- A. শর্ট লিঙ্ক তৈরি ফাংশন ---
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            errorP.textContent = '';
+            resultContainer.style.display = 'none';
+            shortUrlInput.value = '';
+
+            const longUrl = document.getElementById('longUrl').value;
+            const customKey = document.getElementById('customKey').value;
+
+            try {
+                new URL(longUrl);
+            } catch (_) {
+                errorP.textContent = 'দয়া করে একটি বৈধ URL দিন।';
+                return;
+            }
+
+            const payload = {
+                url: longUrl,
+                ...(customKey && { key: customKey.toLowerCase() })
+            };
+
+            try {
+                const response = await fetch(workerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // সফল হলে ইনপুট ফিল্ডে URL শো করা
+                    shortUrlInput.value = data.short_url;
+                    originalLink.textContent = data.original_url;
+                    resultContainer.style.display = 'block';
+                    form.reset(); 
+                } else {
+                    errorP.textContent = `ত্রুটি: ${data.error || 'লিঙ্ক তৈরি করা যায়নি। অনুগ্রহ করে কী বা URL চেক করুন।'}`;
+                }
+            } catch (error) {
+                errorP.textContent = 'নেটওয়ার্ক ত্রুটি বা অপ্রত্যাশিত সমস্যা হয়েছে।';
+                console.error('Fetch error:', error);
+            }
+        });
+
+        // --- B. কপি ফাংশন ---
+        copyButton.addEventListener('click', function() {
+            // ইনপুট ফিল্ডের টেক্সট নির্বাচন করা
+            shortUrlInput.select();
+            // মোবাইল ডিভাইসের জন্য পূর্ণাঙ্গ নির্বাচন নিশ্চিত করা
+            shortUrlInput.setSelectionRange(0, 99999); 
+
+            try {
+                // Clipboard API ব্যবহার করে কপি করা
+                navigator.clipboard.writeText(shortUrlInput.value)
+                    .then(() => {
+                        copyButton.textContent = 'Copied! 🎉';
+                        // কিছু সময় পর বাটন টেক্সট ফিরিয়ে আনা
+                        setTimeout(() => {
+                            copyButton.textContent = 'Copy';
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                        copyButton.textContent = 'Failed!';
+                    });
+            } catch (err) {
+                 // যদি navigator.clipboard কাজ না করে (পুরোনো ব্রাউজার)
+                document.execCommand('copy');
+                copyButton.textContent = 'Copied! 🎉';
+                setTimeout(() => {
+                    copyButton.textContent = 'Copy';
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>
