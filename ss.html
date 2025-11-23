@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ওয়েবসাইট স্ক্রিনশট টিকার - টার্মিনাল স্টাইল</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        /* গ্লোবাল স্টাইলস */
+        body {
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            background-color: #0d1117; 
+            color: #00ff00; 
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        /* টার্মিনাল কন্টেইনার */
+        .terminal-container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #1a1a1a; 
+            border: 1px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4); 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* শিরোনাম */
+        h1, h2 {
+            color: #00ffff;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 10px;
+        }
+        h2 {
+            margin-top: 30px;
+            font-size: 1.3em;
+        }
+
+        /* ইনপুট ফিল্ড এবং বাটন (আগের মতোই) */
+        input[type="url"] {
+            background-color: #222;
+            border: 1px solid #00ff00;
+            color: #fff;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+            box-sizing: border-box;
+            width: 100%; 
+            margin-bottom: 15px;
+            outline: none;
+        }
+        input[type="url"]:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+        }
+        button {
+            background-color: #008000; 
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #00b300;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+
+        /* স্ট্যাটাস মেসেজ */
+        #status {
+            margin-top: 10px;
+            padding: 8px;
+            border-left: 3px solid;
+            margin-bottom: 20px;
+            color: #eee; 
+        }
+        .success { border-color: #00ff00; color: #00ff00; }
+        .error { border-color: #ff0000; color: #ff0000; }
+        .info { border-color: #00ffff; color: #00ffff; }
+
+        /* স্ক্রিনশট সাইজ অপশনস */
+        .size-options {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px dashed #00ff00;
+            border-radius: 4px;
+        }
+        .size-options label {
+            margin-right: 15px;
+            color: #eee;
+            cursor: pointer;
+        }
+        .size-options input[type="radio"] {
+            accent-color: #00ff00;
+            margin-right: 5px;
+        }
+        
+        /* কাস্টম সাইজ ডিসপ্লে */
+        #customSizeDisplay {
+            color: #ffcc00;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        /* ইমেজ আউটপুট (আগের মতোই) */
+        #screenshotOutput { 
+            padding: 10px; 
+            border: 1px solid #00ff00; 
+            border-radius: 4px; 
+            background-color: #0a0a0a; 
+            text-align: center;
+        }
+        #screenshotOutput img {
+            max-width: 100%;
+            height: auto;
+            border: 2px dashed #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-container">
+        <h1>[ Screenshot-Taker@Terminal ]</h1>
+        <p>Enter the URL and choose the screenshot size.</p>
+
+        <input type="url" id="websiteUrl" placeholder=">> Enter website URL (e.g., https://google.com)" required>
+        
+        <div class="size-options">
+            <label>
+                <input type="radio" name="screenshotSize" value="desktop" checked> 
+                Desktop (1024x768)
+            </label>
+            <label>
+                <input type="radio" name="screenshotSize" value="mobile"> 
+                Mobile (480x800)
+            </label>
+            <label>
+                <input type="radio" name="screenshotSize" value="custom" id="customRadio"> 
+                Custom 
+                <span id="customSizeDisplay"> (1024x768)</span>
+            </label>
+        </div>
+        
+        <button id="captureButton">>>> CAPTURE SCREENSHOT</button>
+
+        <div id="status" class="info">Status: Ready.</div>
+
+        <h2>[ Screenshot-Output ]</h2>
+        <div id="screenshotOutput">
+            <p>Screenshot will appear here.</p>
+        </div>
+    </div>
+
+    <script>
+        // ⭐ API Key এবং ডিফল্ট সেটিংস
+        const API_KEY = "fbc5e7"; 
+        const API_BASE_URL = "https://api.screenshotmachine.com";
+        let IMAGE_DIMENSION = "1024x768"; // ডিফল্ট মান
+
+        // কাস্টম সাইজ হ্যান্ডেলার
+        function handleCustomSize() {
+            const width = prompt("Enter Custom Width (e.g., 1280):");
+            const height = prompt("Enter Custom Height (e.g., 900):");
+
+            if (width && height && !isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+                IMAGE_DIMENSION = `${width}x${height}`;
+                document.getElementById('customSizeDisplay').textContent = ` (${IMAGE_DIMENSION})`;
+            } else {
+                alert("Invalid dimensions. Defaulting to 1024x768.");
+                IMAGE_DIMENSION = "1024x768";
+                document.getElementById('customSizeDisplay').textContent = ` (1024x768)`;
+                document.getElementById('customRadio').checked = false; // কাস্টম চেক আউট করে দেওয়া
+                document.querySelector('input[value="desktop"]').checked = true; // ডেস্কটপ চেক করা
+            }
+        }
+
+        // রেডিও বাটন পরিবর্তনের ইভেন্ট
+        document.querySelectorAll('input[name="screenshotSize"]').forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                const selectedValue = event.target.value;
+                if (selectedValue === 'desktop') {
+                    IMAGE_DIMENSION = "1024x768";
+                } else if (selectedValue === 'mobile') {
+                    IMAGE_DIMENSION = "480x800";
+                } else if (selectedValue === 'custom') {
+                    handleCustomSize();
+                }
+                // স্ট্যাটাস আপডেটের জন্য
+                document.getElementById('status').textContent = `Status: Size set to ${IMAGE_DIMENSION}.`;
+                document.getElementById('status').className = 'info';
+            });
+        });
+
+
+        // ক্যাপচার বাটন ক্লিক লজিক
+        document.getElementById('captureButton').addEventListener('click', async () => {
+            const urlInput = document.getElementById('websiteUrl').value;
+            const statusMessage = document.getElementById('status');
+            const screenshotOutput = document.getElementById('screenshotOutput');
+            
+            statusMessage.className = 'info';
+            statusMessage.textContent = "Status: Initializing capture...";
+            screenshotOutput.innerHTML = '<p>Processing...</p>'; 
+
+            if (!urlInput) {
+                statusMessage.className = 'error';
+                statusMessage.textContent = "Error: Please enter a valid URL.";
+                return;
+            }
+
+            statusMessage.className = 'info';
+            statusMessage.textContent = "Status: Generating API link and loading image...";
+            
+            try {
+                // 1. টার্গেট URL এনকোড করা
+                const encodedUrl = encodeURIComponent(urlInput);
+
+                // 2. সরাসরি API লিঙ্ক তৈরি করা (গ্লোবাল ডাইমেনশন ব্যবহার করে)
+                const screenshotApiLink = `${API_BASE_URL}?key=${API_KEY}&url=${encodedUrl}&dimension=${IMAGE_DIMENSION}`;
+                
+                // 3. সরাসরি আউটপুট DIV-এ ইমেজ ট্যাগ তৈরি করা
+                screenshotOutput.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = screenshotApiLink; 
+                img.alt = `Screenshot of ${urlInput} at ${IMAGE_DIMENSION}`;
+                
+                // 4. লোডিং স্ট্যাটাস হ্যান্ডেল করা
+                img.onload = function() {
+                    statusMessage.className = 'success'; 
+                    statusMessage.textContent = `Success: Screenshot captured at ${IMAGE_DIMENSION} and displayed!`;
+                };
+
+                img.onerror = function() {
+                    statusMessage.className = 'error';
+                    screenshotOutput.innerHTML = '<p style="color: red;">Error: Failed to load image. Check the URL or API Key status.</p>';
+                    statusMessage.textContent = `Error: Screenshot API failed to return the image. (Possible invalid URL or API issue)`;
+                };
+                
+                screenshotOutput.appendChild(img);
+
+
+            } catch (error) {
+                console.error("General Error:", error);
+                statusMessage.className = 'error'; 
+                statusMessage.textContent = `Error: An unexpected error occurred.`;
+                screenshotOutput.innerHTML = `<p style="color: red;">Process failed. Check console for details.</p>`;
+            }
+        });
+    </script>
+
+</body>
+</html>
