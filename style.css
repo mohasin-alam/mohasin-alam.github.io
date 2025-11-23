@@ -122,7 +122,7 @@ input[type="url"]:focus {
 }
 #statusMessage:before {
     content: "[ATTEMPTING ACCESS]>"; /* টার্মিনাল প্রম্পট */
-    color: #ff5757;
+    color: var(--color-error);
     margin-right: 5px;
 }
 
@@ -137,12 +137,10 @@ input[type="url"]:focus {
 /* ৩. সিনট্যাক্স হাইলাইটিং ফিক্স (Prism.js Override) */
 /* -------------------------------------- */
 
-/* নিশ্চিত করা হলো যে কোড এরিয়াতে সবুজ রং দেখা যাবে */
 .code-area code {
     color: var(--color-text) !important; 
 }
 
-/* সিনট্যাক্স টোকেন কাস্টমাইজেশন */
 .token.tag, .token.attr-name, .token.selector {
     color: #00ffff !important; /* সায়ান ট্যাগ/অ্যাট্রিবিউট */
     text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
@@ -161,7 +159,42 @@ input[type="url"]:focus {
 }
 
 /* -------------------------------------- */
-/* ৪. অ্যানিমেশন এবং ইফেক্ট */
+/* ৪. বাটন এরিয়া স্টাইল (FINAL) */
+/* -------------------------------------- */
+.action-buttons {
+    display: flex;
+    justify-content: flex-end; /* বাটনগুলি ডানদিকে থাকবে */
+    gap: 15px; 
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.action-buttons button {
+    background-color: transparent;
+    color: var(--color-accent);
+    padding: 10px 15px;
+    border: 1px solid var(--color-accent);
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-transform: uppercase;
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.action-buttons button:hover {
+    background-color: rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 10px var(--color-accent);
+}
+
+.action-buttons button:active {
+    background-color: rgba(0, 255, 0, 0.3);
+}
+
+
+/* -------------------------------------- */
+/* ৫. অ্যানিমেশন এবং ইফেক্ট */
 /* -------------------------------------- */
 
 /* A. ধীর গতির গ্লিচ ইফেক্ট (কম দৃশ্যমান) */
@@ -173,7 +206,7 @@ input[type="url"]:focus {
 }
 
 .glitch-text {
-    animation: glitch 4s infinite alternate step-end; /* স্লো করা হলো */
+    animation: glitch 4s infinite alternate step-end; 
 }
 
 /* B. কীবোর্ড কার্সার অ্যানিমেশন (লোডিং এর জন্য) */
