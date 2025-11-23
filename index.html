@@ -1,1 +1,26 @@
 
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ওয়েবসাইট সোর্স কোড ভিউয়ার</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-coy.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <h1>ওয়েবসাইট সোর্স কোড ভিউয়ার</h1>
+        
+        <input type="url" id="websiteUrl" placeholder="এখানে ওয়েবসাইটের URL দিন (যেমন: https://google.com)" required>
+        <button id="viewSourceBtn">সোর্স কোড দেখুন</button>
+        
+        <p id="statusMessage" class="hidden">প্রসেস হচ্ছে...</p>
+        <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
