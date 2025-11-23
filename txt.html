@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>টেক্সট এক্সট্র্যাক্টর টুল</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input[type="url"], button { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        textarea { width: 100%; height: 300px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #status { margin-top: 10px; color: #d9534f; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ওয়েবসাইট টেক্সট এক্সট্র্যাক্টর</h1>
+        <p>যে কোনো ওয়েবসাইটের লিঙ্ক দিন:</p>
+
+        <input type="url" id="websiteUrl" placeholder="যেমন: https://example.com" required>
+        <button id="extractButton">টেক্সট বের করুন</button>
+
+        <p id="status"></p>
+
+        <h2>প্রাপ্ত টেক্সট:</h2>
+        <textarea id="outputText" readonly></textarea>
+    </div>
+
+    <script>
+        // এখানে আপনার Cloudflare Worker-এর URL দিন
+        const WORKER_URL = "আপনার-Cloudflare-Worker-এর-URL-এখানে-দিন"; 
+
+        document.getElementById('extractButton').addEventListener('click', async () => {
+            const urlInput = document.getElementById('websiteUrl').value;
+            const outputTextarea = document.getElementById('outputText');
+            const statusMessage = document.getElementById('status');
+            
+            // ইনপুট চেক
+            if (!urlInput) {
+                statusMessage.textContent = "দয়া করে একটি বৈধ URL দিন।";
+                return;
+            }
+
+            statusMessage.textContent = "প্রক্রিয়া চলছে... অপেক্ষা করুন।";
+            outputTextarea.value = ""; // আগের আউটপুট মুছে ফেলা
+
+            try {
+                // Cloudflare Worker-কে কল করা
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    // Worker-কে URL পাঠানো
+                    body: JSON.stringify({ targetUrl: urlInput }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Worker Error: ${response.statusText}`);
+                }
+
+                // Worker থেকে পরিষ্কার টেক্সট পাওয়া
+                const resultText = await response.text(); 
+                
+                outputTextarea.value = resultText;
+                statusMessage.textContent = "সফলভাবে টেক্সট বের করা হয়েছে!";
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                statusMessage.textContent = `ত্রুটি: ${error.message}. এটি CORS বা সার্ভারের সমস্যার কারণে হতে পারে।`;
+                outputTextarea.value = "টেক্সট বের করা যায়নি। ত্রুটির জন্য উপরে দেখুন।";
+            }
+        });
+    </script>
+
+</body>
+</html>
