@@ -3,7 +3,7 @@ document.getElementById('copyCodeBtn').addEventListener('click', copyCode);
 document.getElementById('downloadCodeBtn').addEventListener('click', downloadCode);
 
 // *** আপনার Cloudflare Worker URL (সংশোধিত) এখানে যুক্ত করা হলো ***
-const workerUrl = "https://yellow-heart-57a1.csmmohasinalam.workers.dev"; 
+const workerUrl = "https://delicate-tree-21a6.csmmohasinalam.workers.dev/"; 
 
 function fetchSourceCode() {
     const websiteInput = document.getElementById('websiteUrl').value;
