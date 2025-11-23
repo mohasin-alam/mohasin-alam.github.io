@@ -21,14 +21,14 @@
             display: flex; gap: 10px; margin-top: 10px;
         }
         #shortUrlInput {
-            flex-grow: 1; /* টেক্সট বক্স পুরো জায়গা নেবে */
+            flex-grow: 1; 
             background-color: #fff;
-            cursor: pointer; /* দেখানোর জন্য যে এটি ইন্টারেক্টিভ */
+            cursor: pointer; 
         }
         #copyButton {
             width: auto;
             padding: 10px 15px;
-            background-color: #007bff; /* কপির জন্য অন্য রং */
+            background-color: #007bff; 
         }
         #copyButton:hover {
             background-color: #0056b3;
@@ -61,8 +61,11 @@
     <p id="error" style="color: red; font-weight: bold;"></p>
 
     <script>
-        // আপনার Worker URL এখানে সেট করা হয়েছে
-        const workerUrl = "https://url.csmmohasinalam.workers.dev/create"; 
+        // *** আপনার নতুন Worker URL এখানে সেট করা হয়েছে (POST রিকোয়েস্টের জন্য) ***
+        const workerUrl = "https://odd.short-302.workers.dev/create"; 
+
+        // আপনার GitHub Pages ডোমেইন (CORS Header এর সাথে ম্যাচ করার জন্য)
+        const githubPagesUrl = "https://csmmohasin-alam.github.io";
         
         const form = document.getElementById('shortenerForm');
         const resultContainer = document.getElementById('result-container');
@@ -71,7 +74,6 @@
         const errorP = document.getElementById('error');
         const copyButton = document.getElementById('copyButton');
 
-        // --- A. শর্ট লিঙ্ক তৈরি ফাংশন ---
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             errorP.textContent = '';
@@ -90,7 +92,7 @@
 
             const payload = {
                 url: longUrl,
-                ...(customKey && { key: customKey.toLowerCase() })
+                ...(customKey && { key: customKey.toLowerCase() }) 
             };
 
             try {
@@ -98,6 +100,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Origin': githubPagesUrl 
                     },
                     body: JSON.stringify(payload),
                 });
@@ -105,7 +108,6 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // সফল হলে ইনপুট ফিল্ডে URL শো করা
                     shortUrlInput.value = data.short_url;
                     originalLink.textContent = data.original_url;
                     resultContainer.style.display = 'block';
@@ -114,40 +116,28 @@
                     errorP.textContent = `ত্রুটি: ${data.error || 'লিঙ্ক তৈরি করা যায়নি। অনুগ্রহ করে কী বা URL চেক করুন।'}`;
                 }
             } catch (error) {
-                errorP.textContent = 'নেটওয়ার্ক ত্রুটি বা অপ্রত্যাশিত সমস্যা হয়েছে।';
+                // এই ত্রুটি মানে Network Issue বা CORS Preflight Fail হয়েছে
+                errorP.textContent = 'নেটওয়ার্ক ত্রুটি বা অপ্রত্যাশিত সমস্যা হয়েছে। Worker URL বা CORS কনফিগারেশন চেক করুন।';
                 console.error('Fetch error:', error);
             }
         });
 
-        // --- B. কপি ফাংশন ---
+        // --- কপি ফাংশন ---
         copyButton.addEventListener('click', function() {
-            // ইনপুট ফিল্ডের টেক্সট নির্বাচন করা
             shortUrlInput.select();
-            // মোবাইল ডিভাইসের জন্য পূর্ণাঙ্গ নির্বাচন নিশ্চিত করা
             shortUrlInput.setSelectionRange(0, 99999); 
 
-            try {
-                // Clipboard API ব্যবহার করে কপি করা
-                navigator.clipboard.writeText(shortUrlInput.value)
-                    .then(() => {
-                        copyButton.textContent = 'Copied! 🎉';
-                        // কিছু সময় পর বাটন টেক্সট ফিরিয়ে আনা
-                        setTimeout(() => {
-                            copyButton.textContent = 'Copy';
-                        }, 1500);
-                    })
-                    .catch(err => {
-                        console.error('Could not copy text: ', err);
-                        copyButton.textContent = 'Failed!';
-                    });
-            } catch (err) {
-                 // যদি navigator.clipboard কাজ না করে (পুরোনো ব্রাউজার)
-                document.execCommand('copy');
-                copyButton.textContent = 'Copied! 🎉';
-                setTimeout(() => {
-                    copyButton.textContent = 'Copy';
-                }, 1500);
-            }
+            navigator.clipboard.writeText(shortUrlInput.value)
+                .then(() => {
+                    copyButton.textContent = 'Copied! 🎉';
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy';
+                    }, 1500);
+                })
+                .catch(err => {
+                    copyButton.textContent = 'Failed!';
+                    console.error('Copy error:', err);
+                });
         });
     </script>
 </body>
