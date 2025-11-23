@@ -48,7 +48,7 @@
             font-size: 1.3em;
         }
 
-        /* ইনপুট ফিল্ড এবং বাটন (আগের মতোই) */
+        /* ইনপুট ফিল্ড এবং বাটন */
         input[type="url"] {
             background-color: #222;
             border: 1px solid #00ff00;
@@ -119,7 +119,7 @@
             margin-left: 10px;
         }
 
-        /* ইমেজ আউটপুট (আগের মতোই) */
+        /* ইমেজ আউটপুট */
         #screenshotOutput { 
             padding: 10px; 
             border: 1px solid #00ff00; 
@@ -133,6 +133,82 @@
             border: 2px dashed #00ffff;
             box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
         }
+
+        /* Custom Modal CSS (Hacker Terminal Style) */
+        .modal-terminal {
+            display: none; 
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8); 
+            backdrop-filter: blur(2px);
+            padding-top: 50px;
+        }
+
+        .modal-content-terminal {
+            background-color: #1a1a1a;
+            color: #00ff00;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #00ff00; 
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+            font-family: 'Roboto Mono', monospace;
+            animation: modal-open 0.4s ease-out;
+        }
+
+        @keyframes modal-open {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close-btn-terminal {
+            color: #ff0000;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn-terminal:hover,
+        .close-btn-terminal:focus {
+            color: #ffcccc;
+            text-decoration: none;
+        }
+
+        .input-group-terminal {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        .input-group-terminal input {
+            background-color: #0a0a0a;
+            border: 1px solid #00ff00;
+            color: #fff;
+            padding: 10px;
+            font-family: 'Roboto Mono', monospace;
+            width: 45%;
+            text-align: center;
+            outline: none;
+        }
+
+        .separator-terminal {
+            margin: 0 5px;
+            color: #00ffff;
+        }
+        
+        #setCustomSizeBtn {
+            width: 100%;
+            background-color: #008000;
+        }
+        
     </style>
 </head>
 <body>
@@ -168,30 +244,88 @@
             <p>Screenshot will appear here.</p>
         </div>
     </div>
+    
+    <div id="customSizeModal" class="modal-terminal">
+        <div class="modal-content-terminal">
+            <span class="close-btn-terminal">&times;</span>
+            <h3>[ Custom Dimension Input ]</h3>
+            <p>Enter required width and height (e.g., 1280x900):</p>
+            <div class="input-group-terminal">
+                <input type="number" id="customWidth" placeholder="Width (px)" min="100">
+                <span class="separator-terminal">X</span>
+                <input type="number" id="customHeight" placeholder="Height (px)" min="100">
+            </div>
+            <button id="setCustomSizeBtn">SET DIMENSION</button>
+            <p id="modalStatus" style="color: red; font-size: 0.9em; margin-top: 10px;"></p>
+        </div>
+    </div>
+
 
     <script>
         // ⭐ API Key এবং ডিফল্ট সেটিংস
         const API_KEY = "fbc5e7"; 
         const API_BASE_URL = "https://api.screenshotmachine.com";
         let IMAGE_DIMENSION = "1024x768"; // ডিফল্ট মান
+        
+        // মোডাল এলিমেন্টস
+        const modal = document.getElementById("customSizeModal");
+        const customRadio = document.getElementById("customRadio");
+        const closeModal = document.querySelector(".close-btn-terminal");
+        const setCustomSizeBtn = document.getElementById("setCustomSizeBtn");
+        const customWidthInput = document.getElementById("customWidth");
+        const customHeightInput = document.getElementById("customHeight");
+        const customSizeDisplay = document.getElementById("customSizeDisplay");
+        const modalStatus = document.getElementById("modalStatus");
+        const statusMessage = document.getElementById('status');
 
-        // কাস্টম সাইজ হ্যান্ডেলার
-        function handleCustomSize() {
-            const width = prompt("Enter Custom Width (e.g., 1280):");
-            const height = prompt("Enter Custom Height (e.g., 900):");
-
-            if (width && height && !isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
-                IMAGE_DIMENSION = `${width}x${height}`;
-                document.getElementById('customSizeDisplay').textContent = ` (${IMAGE_DIMENSION})`;
-            } else {
-                alert("Invalid dimensions. Defaulting to 1024x768.");
-                IMAGE_DIMENSION = "1024x768";
-                document.getElementById('customSizeDisplay').textContent = ` (1024x768)`;
-                document.getElementById('customRadio').checked = false; // কাস্টম চেক আউট করে দেওয়া
-                document.querySelector('input[value="desktop"]').checked = true; // ডেস্কটপ চেক করা
+        
+        // মোডাল খোলার ইভেন্ট
+        customRadio.addEventListener('change', () => {
+            if (customRadio.checked) {
+                modalStatus.textContent = '';
+                modal.style.display = "block";
             }
+        });
+
+        // মোডাল বন্ধ করার ইভেন্ট (X বাটন)
+        closeModal.onclick = function() {
+            modal.style.display = "none";
+            // কাস্টম ক্যান্সেল হলে ডেস্কটপে ফেরত
+            document.querySelector('input[value="desktop"]').checked = true;
+            IMAGE_DIMENSION = "1024x768";
+            customSizeDisplay.textContent = " (1024x768)";
+            statusMessage.textContent = `Status: Size set to ${IMAGE_DIMENSION}.`;
+            statusMessage.className = 'info';
         }
 
+        // মোডাল বন্ধ করার ইভেন্ট (বাইরে ক্লিক)
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal.onclick(); // closeModal ফাংশন কল করা হলো
+            }
+        }
+        
+        // ⭐ কাস্টম সাইজ সেট করার লজিক
+        setCustomSizeBtn.onclick = function() {
+            const width = parseInt(customWidthInput.value);
+            const height = parseInt(customHeightInput.value);
+
+            if (isNaN(width) || isNaN(height) || width < 100 || height < 100) {
+                modalStatus.textContent = "Error: Invalid or zero dimensions (Min 100x100).";
+                return;
+            }
+
+            // সফল হলে ডাইমেনশন আপডেট
+            IMAGE_DIMENSION = `${width}x${height}`;
+            customSizeDisplay.textContent = ` (${IMAGE_DIMENSION})`;
+            modalStatus.textContent = "Success! Dimension set.";
+            modal.style.display = "none";
+            
+            // স্ট্যাটাস বার আপডেট
+            statusMessage.textContent = `Status: Size set to ${IMAGE_DIMENSION}.`;
+            statusMessage.className = 'info';
+        }
+        
         // রেডিও বাটন পরিবর্তনের ইভেন্ট
         document.querySelectorAll('input[name="screenshotSize"]').forEach(radio => {
             radio.addEventListener('change', (event) => {
@@ -200,20 +334,21 @@
                     IMAGE_DIMENSION = "1024x768";
                 } else if (selectedValue === 'mobile') {
                     IMAGE_DIMENSION = "480x800";
-                } else if (selectedValue === 'custom') {
-                    handleCustomSize();
                 }
-                // স্ট্যাটাস আপডেটের জন্য
-                document.getElementById('status').textContent = `Status: Size set to ${IMAGE_DIMENSION}.`;
-                document.getElementById('status').className = 'info';
+                
+                // কাস্টম হলে মোডাল লজিক, অন্যথায় স্ট্যাটাস আপডেট
+                if (selectedValue !== 'custom') {
+                    customSizeDisplay.textContent = ` (${IMAGE_DIMENSION})`;
+                    statusMessage.textContent = `Status: Size set to ${IMAGE_DIMENSION}.`;
+                    statusMessage.className = 'info';
+                }
             });
         });
 
 
-        // ক্যাপচার বাটন ক্লিক লজিক
+        // ক্যাপচার বাটন ক্লিক লজিক (আগের মতোই)
         document.getElementById('captureButton').addEventListener('click', async () => {
             const urlInput = document.getElementById('websiteUrl').value;
-            const statusMessage = document.getElementById('status');
             const screenshotOutput = document.getElementById('screenshotOutput');
             
             statusMessage.className = 'info';
@@ -230,19 +365,15 @@
             statusMessage.textContent = "Status: Generating API link and loading image...";
             
             try {
-                // 1. টার্গেট URL এনকোড করা
                 const encodedUrl = encodeURIComponent(urlInput);
 
-                // 2. সরাসরি API লিঙ্ক তৈরি করা (গ্লোবাল ডাইমেনশন ব্যবহার করে)
                 const screenshotApiLink = `${API_BASE_URL}?key=${API_KEY}&url=${encodedUrl}&dimension=${IMAGE_DIMENSION}`;
                 
-                // 3. সরাসরি আউটপুট DIV-এ ইমেজ ট্যাগ তৈরি করা
                 screenshotOutput.innerHTML = '';
                 const img = document.createElement('img');
                 img.src = screenshotApiLink; 
                 img.alt = `Screenshot of ${urlInput} at ${IMAGE_DIMENSION}`;
                 
-                // 4. লোডিং স্ট্যাটাস হ্যান্ডেল করা
                 img.onload = function() {
                     statusMessage.className = 'success'; 
                     statusMessage.textContent = `Success: Screenshot captured at ${IMAGE_DIMENSION} and displayed!`;
