@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Custom Video Player</title>
+    
+    <style>
+        /*
+        ===================================
+        CSS STYLES
+        ===================================
+        */
+        
+        /* গ্লোবাল স্টাইল */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            font-family: sans-serif;
+        }
+
+        /* ভিডিও কনটেইনার */
+        .video-container {
+            position: relative;
+            width: 800px; /* প্লেয়ারের প্রস্থ */
+            max-width: 95%;
+            background-color: #000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-container video {
+            display: block;
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+        }
+
+        /* কাস্টম কন্ট্রোল ওভারলে */
+        .controls-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+            transition: opacity 0.3s ease;
+            opacity: 0; /* ডিফল্টভাবে লুকিয়ে থাকবে */
+            pointer-events: none; /* যাতে ভিডিওতে ক্লিক করা যায় */
+        }
+
+        /* যখন মাউস প্লেয়ারের ওপর থাকবে */
+        .video-container:hover .controls-overlay,
+        .video-container.paused .controls-overlay { 
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* কন্ট্রোল বার */
+        .controls-bar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 5px 15px;
+            box-sizing: border-box;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        /* বাটন স্টাইল */
+        .control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+            transition: color 0.2s;
+            outline: none;
+        }
+
+        .control-btn:hover {
+            color: #ff4500; /* VIP কালার: Orange Red */
+        }
+
+        /* প্রগ্রেস বার */
+        .progress-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            margin: 0 15px;
+            height: 100%;
+        }
+
+        /* Range Input (ProgressBar & VolumeSlider) Reset */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #555;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 0;
+            outline: none;
+        }
+        
+        /* ProgressBar specific style */
+        #progressBar {
+            width: 100%;
+        }
+
+        /* Progress Slider Thumb (Chrome/Safari) */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #ff4500;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(255, 69, 0, 0.5);
+            transition: background 0.2s;
+        }
+        
+        /* Progress Slider Thumb (Firefox) */
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ff4500;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* সময় প্রদর্শন */
+        .time-display {
+            color: #fff;
+            font-size: 0.85rem;
+            margin-left: 10px;
+            min-width: 80px;
+        }
+
+        /* ভলিউম কন্ট্রোল */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        #volumeSlider {
+            width: 80px;
+            height: 4px;
+            margin: 0 5px;
+        }
+
+        /* ফুলস্ক্রিন মোড */
+        .video-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100vw;
+            border-radius: 0;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-container">
+        <video id="myVideo" poster="https://via.placeholder.com/800x450.png?text=Loading+VIP+Video">
+            <source src="https://mohasin-alam.github.io/AQMAcJNoHvlM7nW1twi-ikcvf3QVRYsIauzLPjB7matoeUNSC1Utvms6d8uWzLmGcHdDhQ90PzIieEiwUvQPTQyYPqrEWmowynfV0A4oSw.mp4" type="video/mp4">
+            আপনার ব্রাউজার ভিডিও ট্যাগ সমর্থন করে না।
+        </video>
+
+        <div class="controls-overlay">
+            <div class="controls-bar">
+                <button id="playPauseBtn" class="control-btn play">▶</button>
+                
+                <div class="progress-container">
+                    <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1">
+                    <div id="timeDisplay" class="time-display">0:00 / 0:00</div>
+                </div>
+
+                <div class="volume-control">
+                    <button id="muteBtn" class="control-btn volume-btn">🔊</button>
+                    <input type="range" id="volumeSlider" value="1" min="0" max="1" step="0.1">
+                </div>
+
+                <button id="fullscreenBtn" class="control-btn fullscreen-btn">🔳</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*
+        ===================================
+        JAVASCRIPT LOGIC
+        ===================================
+        */
+        const video = document.getElementById('myVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const muteBtn = document.getElementById('muteBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const videoContainer = document.querySelector('.video-container');
+
+        // 1. প্লে/পজ ফাংশনালিটি
+        function togglePlay() {
+            if (video.paused || video.ended) {
+                video.play();
+                playPauseBtn.innerHTML = '⏸'; // পজ আইকন
+                videoContainer.classList.remove('paused');
+            } else {
+                video.pause();
+                playPauseBtn.innerHTML = '▶'; // প্লে আইকন
+                videoContainer.classList.add('paused');
+            }
+        }
+
+        playPauseBtn.addEventListener('click', togglePlay);
+        video.addEventListener('click', togglePlay); // ভিডিওতে ক্লিক করেও প্লে/পজ
+        video.addEventListener('pause', () => videoContainer.classList.add('paused'));
+        video.addEventListener('play', () => videoContainer.classList.remove('paused'));
+
+        // 2. সময় আপডেট এবং প্রগ্রেস বার
+        video.addEventListener('loadedmetadata', () => {
+            // ভিডিও লোড হওয়ার পর প্রগ্রেস বারের max ভ্যালু সেট করা
+            progressBar.max = video.duration;
+            updateTimeDisplay();
+        });
+
+        video.addEventListener('timeupdate', () => {
+            // ভিডিও চলার সাথে সাথে প্রগ্রেস বার আপডেট করা
+            progressBar.value = video.currentTime;
+            updateTimeDisplay();
+        });
+
+        // 3. প্রগ্রেস বার টেনে নিয়ে যাওয়া (Seeking)
+        progressBar.addEventListener('input', () => {
+            // যখন ইউজার প্রগ্রেস বার টানবে
+            video.currentTime = progressBar.value;
+        });
+
+        // 4. সময় প্রদর্শনের ফরম্যাট
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function updateTimeDisplay() {
+            const currentTime = formatTime(video.currentTime);
+            // ভিডিও লোড না হলে duration NaN দেখায়, সেটা হ্যান্ডেল করা হলো
+            const totalDuration = isNaN(video.duration) ? '0:00' : formatTime(video.duration);
+            timeDisplay.textContent = `${currentTime} / ${totalDuration}`;
+        }
+
+        // 5. ভলিউম কন্ট্রোল
+        volumeSlider.addEventListener('input', () => {
+            video.volume = volumeSlider.value;
+            video.muted = false; // ভলিউম চেঞ্জ করলে মিউট বন্ধ হবে
+            updateMuteButtonIcon(video.volume);
+        });
+        
+        // ডিফল্ট ভলিউম সেট করা
+        video.volume = 1;
+
+        // 6. মিউট/আনমিউট
+        let lastVolume = 1; // শেষ ভলিউম মনে রাখার জন্য
+        
+        function updateMuteButtonIcon(volume) {
+            if (volume === 0 || video.muted) {
+                muteBtn.innerHTML = '🔇';
+            } else if (volume < 0.5) {
+                muteBtn.innerHTML = '🔈';
+            } else {
+                muteBtn.innerHTML = '🔊';
+            }
+        }
+        
+        muteBtn.addEventListener('click', () => {
+            if (video.muted || video.volume === 0) {
+                // আনমিউট
+                video.muted = false;
+                video.volume = lastVolume > 0 ? lastVolume : 0.5;
+                volumeSlider.value = video.volume;
+            } else {
+                // মিউট
+                lastVolume = video.volume;
+                video.muted = true;
+                volumeSlider.value = 0;
+            }
+            updateMuteButtonIcon(video.volume);
+        });
+
+        // 7. ফুলস্ক্রিন
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                // ফুলস্ক্রিন মোডে প্রবেশ
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen();
+                } else if (videoContainer.webkitRequestFullscreen) { /* Safari */
+                    videoContainer.webkitRequestFullscreen();
+                } else if (videoContainer.msRequestFullscreen) { /* IE11 */
+                    videoContainer.msRequestFullscreen();
+                }
+            } else {
+                // ফুলস্ক্রিন মোড থেকে বের হওয়া
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        });
+        
+        // ফুলস্ক্রিন ইভেন্ট লিসেনার
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                videoContainer.classList.add('fullscreen');
+                fullscreenBtn.innerHTML = ' Minimize';
+            } else {
+                videoContainer.classList.remove('fullscreen');
+                fullscreenBtn.innerHTML = '🔳';
+            }
+        });
+    </script>
+</body>
+</html>
