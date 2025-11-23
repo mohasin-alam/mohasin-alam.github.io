@@ -1,7 +1,7 @@
 
 document.getElementById('viewSourceBtn').addEventListener('click', fetchSourceCode);
 
-const workerUrl = "YOUR_CLOUDFLARE_WORKER_URL"; // ***এই লাইনটি পরে পরিবর্তন করতে হবে***
+const workerUrl = "https://yellow-heart-57a1.csmmhoasinalam.workers.dev"; // ***এই লাইনটি পরে পরিবর্তন করতে হবে***
 
 function fetchSourceCode() {
     const websiteInput = document.getElementById('websiteUrl').value;
