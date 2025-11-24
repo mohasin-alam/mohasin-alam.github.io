@@ -4,32 +4,475 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ওয়েবসাইট সোর্স কোড ভিউয়ার</title>
-    <link rel="stylesheet" href="style.css">
-    </head>
+    
+<style>
+/* --- Embedded CSS from https://mohasin-alam.github.io/style.css --- */
+/* -------------------------------------- */
+/* ১. ফন্ট ইমপোর্ট এবং বেস স্টাইল (টার্মিনাল লুক) */
+/* -------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&display=swap');
+
+:root {
+    --color-dark-bg: #0d121c;         /* প্রধান ব্যাকগ্রাউন্ড */
+    --color-text: #39ff14;            /* নিয়ন গ্রিন টেক্সট */
+    --color-accent: #00ff00;          /* উজ্জ্বল অ্যাকসেন্ট (নিয়ন গ্রিন) */
+    --color-border: #008000;          /* গাঢ় সবুজ বর্ডার */
+    --color-error: #ff5757;           /* ত্রুটি রং */
+    --shadow-glow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent);
+}
+
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background-color: var(--color-dark-bg);
+    color: var(--color-text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* -------------------------------------- */
+/* ২. কনটেইনার এবং টাইটেল */
+/* -------------------------------------- */
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    padding: 20px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-glow);
+    background-color: #0c1016; /* সামান্য গাঢ় */
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: var(--color-accent);
+    text-shadow: var(--shadow-glow);
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 10px;
+}
+
+/* -------------------------------------- */
+/* ৩. ইনপুট এবং বাটন স্টাইল */
+/* -------------------------------------- */
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#websiteUrl {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #000;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 1em;
+    border-radius: 4px;
+    box-shadow: inset 0 0 5px var(--color-border);
+}
+
+.terminal-button {
+    background-color: var(--color-border);
+    color: var(--color-dark-bg);
+    border: none;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+    box-shadow: 0 0 5px var(--color-border);
+}
+
+.terminal-button:hover:not(:disabled) {
+    background-color: var(--color-accent);
+    box-shadow: var(--shadow-glow);
+    color: var(--color-dark-bg);
+}
+
+.terminal-button:disabled {
+    background-color: #333;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* -------------------------------------- */
+/* ৪. কোড ডিসপ্লে এরিয়া (টার্মিনাল স্ক্রিন) */
+/* -------------------------------------- */
+
+.code-area {
+    min-height: 300px;
+    background-color: #000;
+    border: 2px solid var(--color-border);
+    padding: 15px;
+    overflow: auto;
+    border-radius: 4px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+    position: relative;
+    white-space: pre-wrap; /* কোড মোড়ানোর জন্য */
+    word-wrap: break-word;
+}
+
+/* টার্মিনাল কার্সার সিমুলেশন */
+.code-area::before {
+    content: '>';
+    position: absolute;
+    color: var(--color-accent);
+    font-weight: bold;
+    animation: blink-cursor 1s infinite;
+}
+
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* লোডিং ইফেক্ট */
+.code-area.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-accent);
+    font-size: 1.2em;
+    text-shadow: var(--shadow-glow);
+    position: relative;
+}
+
+.code-area.loading::after {
+    content: '...';
+    display: inline-block;
+    width: 20px;
+    overflow: hidden;
+    animation: loading-dots 1s steps(3) infinite;
+}
+
+@keyframes loading-dots {
+    0% { content: ''; }
+    33% { content: '.'; }
+    66% { content: '..'; }
+    100% { content: '...'; }
+}
+
+#sourceCodeOutput {
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    min-height: 270px;
+    font-family: inherit;
+    color: var(--color-text);
+    overflow: visible; /* যাতে Prism.js কাজ করে */
+}
+
+/* -------------------------------------- */
+/* ৫. Prism.js স্টাইল ওভাররাইড (নিয়ন থিম) */
+/* -------------------------------------- */
+
+/* প্রধান কোড রং */
+pre[class*="language-"] {
+    background: transparent;
+    color: var(--color-text);
+    text-shadow: 0 0 2px rgba(57, 255, 20, 0.5); /* হালকা গ্লো */
+    overflow: auto;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+}
+
+.token.comment, .token.prolog, .token.doctype, .token.cdata {
+    color: #00a000; /* গাঢ় সবুজ মন্তব্য */
+}
+
+.token.punctuation {
+    color: var(--color-text); /* নিয়ন গ্রিন বিরামচিহ্ন */
+}
+
+.token.namespace {
+    opacity: .7;
+}
+
+.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted {
+    color: #ffaa00; /* কমলা/হলুদ ট্যাগ/নাম্বার */
+}
+
+.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted {
+    color: #f700ff; /* ম্যাজেন্টা/পার্পল স্ট্রিং */
+}
+
+.token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string {
+    color: #ff6e00; /* উজ্জ্বল কমলা অপারেটর */
+    background: transparent;
+}
+
+.token.atrule, .token.attr-value, .token.keyword {
+    color: #00ffff; /* সায়ান কীওয়ার্ড */
+}
+
+.token.function, .token.class-name {
+    color: #00ffaa; /* উজ্জ্বল নীল-সবুজ ফাংশন */
+}
+
+.token.regex, .token.important, .token.variable {
+    color: #ff0000; /* লাল গুরুত্বপূর্ণ/ভেরিয়েবল */
+}
+
+.token.important, .token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+/* -------------------------------------- */
+/* ৬. অন্যান্য উপাদান */
+/* -------------------------------------- */
+
+#statusMessage {
+    color: var(--color-accent);
+    text-shadow: var(--shadow-glow);
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    text-align: center;
+    animation: pulse-glow 1.5s infinite alternate;
+}
+
+@keyframes pulse-glow {
+    from {
+        opacity: 0.8;
+        text-shadow: 0 0 5px var(--color-accent);
+    }
+    to {
+        opacity: 1;
+        text-shadow: 0 0 10px var(--color-accent), 0 0 15px var(--color-accent);
+    }
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.footer {
+    margin-top: auto;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 0.8em;
+    color: var(--color-border);
+}
+
+.footer a {
+    color: var(--color-text);
+    text-decoration: none;
+    text-shadow: var(--shadow-glow);
+}
+</style>
+    
+</head>
 <body>
+
     <div class="container">
-        <h1 class="glitch-text">Website Source Code Hacker by Csm Mohasin Alam</h1>
-        
-        <input type="url" id="websiteUrl" placeholder="এখানে ওয়েবসাইটের URL দিন (যেমন: https://google.com)" required>
-        <button id="viewSourceBtn">সোর্স কোড দেখুন</button>
-        
-        <p id="statusMessage" class="hidden"></p>
-        
-        <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
-        
-        <div class="action-buttons hidden" id="actionButtons">
-            <button id="copyCodeBtn">কোড কপি করুন</button>
-            <button id="downloadCodeBtn">HTML ডাউনলোড করুন</button>
+        <h1>[SYSTEM/CMD] ওয়েব সোর্স কোড ভিউয়ার</h1>
+
+        <div class="input-group">
+            <input type="text" id="websiteUrl" placeholder="URL লিখুন (যেমন: https://google.com)">
+            <button class="terminal-button" id="viewSourceBtn" onclick="fetchSourceCode()">সোর্স কোড দেখুন</button>
         </div>
-        
+
+        <div id="statusMessage" class="hidden"></div>
+
+        <div class="code-area">
+            <pre id="sourceCodeOutput">
+[SYSTEM/LOG]>> টার্গেট URL ইনপুট করুন এবং 'সোর্স কোড দেখুন' বাটনে ক্লিক করুন।
+</pre>
+        </div>
+
+        <div class="action-buttons hidden" id="actionButtons">
+            <button class="terminal-button" onclick="copyCode()">কোড কপি করুন</button>
+            <button class="terminal-button" id="downloadCodeBtn" onclick="downloadCode()">HTML ডাউনলোড করুন</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        প্রযুক্তি: <a href="https://developers.cloudflare.com/workers/" target="_blank">Cloudflare Worker</a> ও <a href="https://prismjs.com/" target="_blank">Prism.js</a>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    
-    <script src="script.js"></script>
+
+    <script>
+        // Cloudflare Worker URL (এটি আপনার অ্যাপ্লিকেশনের সোর্স কোড অনুযায়ী এখানে রাখা হলো)
+        const workerUrl = 'https://delicate-tree-21a6.csmmohasinalam.workers.dev/';
+
+        /* --- ১. normalizeUrl ফাংশন: এটি URL থেকে প্রোটোকল, www., এবং পাথ ছেঁটে দেয় --- */
+        function normalizeUrl(url) {
+            let cleanedUrl = url.toLowerCase();
+            
+            // 1. প্রোটোকল (http://, https://) অংশটি সরিয়ে দিন
+            cleanedUrl = cleanedUrl.replace(/^https?:\/\//, '');
+            
+            // 2. ঐচ্ছিক 'www.' অংশটি সরিয়ে দিন
+            cleanedUrl = cleanedUrl.replace(/^www\./, '');
+            
+            // 3. / এর পরের সব কিছু (path, query, hash) সরিয়ে দিন
+            cleanedUrl = cleanedUrl.split('/')[0];
+            
+            return cleanedUrl.trim();
+        }
+
+        /* --- ২. প্রধান ফাংশন: সোর্স কোড আনা ও ডোমেইন ব্লক করা --- */
+        function fetchSourceCode() {
+            const websiteInput = document.getElementById('websiteUrl').value;
+            const outputElement = document.getElementById('sourceCodeOutput');
+            const outputArea = document.querySelector('.code-area');
+            const statusMessage = document.getElementById('statusMessage');
+            const viewButton = document.getElementById('viewSourceBtn');
+            const actionButtons = document.getElementById('actionButtons'); 
+
+            if (!websiteInput) {
+                alert("অনুগ্রহ করে একটি URL দিন।");
+                return;
+            }
+
+            // ইনপুট URL-কে পরিষ্কার করে শুধু মূল ডোমেইনটি বের করুন
+            const normalizedInput = normalizeUrl(websiteInput);
+            
+            // আপনার ব্লক করা সাইটগুলির ডোমেইন এখানে ছোট হাতের অক্ষরে (lowercase) তালিকাভুক্ত করুন
+            const blockedDomains = [
+                "mohasin.github.io",
+                "mohasin.is-a.dev",
+                "mohasin-alam.github.io",
+                // আপনার পরবর্তী সাইটগুলো নিচে যুক্ত করুন (যেমন: "example.com"):
+                "", 
+                ""
+            ];
+            
+            // এখন চেক করুন যে পরিষ্কার করা ইনপুট ডোমেইনটি ব্লক করা তালিকার মধ্যে আছে কিনা
+            // .filter(Boolean) দিয়ে খালি স্ট্রিংগুলো বাদ দেওয়া হয়েছে, যাতে ভ্যালিড ডোমেইনের সাথে শুধু "" ম্যাচ না করে
+            const isBlocked = blockedDomains.filter(Boolean).includes(normalizedInput); 
+
+            if (isBlocked) {
+                // --- অ্যাক্সেস ডিনাই লজিক ---
+                viewButton.disabled = false;
+                actionButtons.classList.add('hidden'); 
+                outputArea.classList.remove('loading');
+                statusMessage.classList.add('hidden');
+                
+                outputElement.textContent = "[ACCESS DENIED]>> You can't view the page source of this website.";
+                outputElement.classList.remove('language-html'); 
+                
+                console.warn(`Blocked attempt to view source for: ${websiteInput}`);
+                return; // এখানেই ফাংশন বন্ধ হবে
+            }
+
+            // --- যদি ব্লক করা না থাকে, তবে স্বাভাবিক প্রক্রিয়ায় লোডিং শুরু হবে ---
+            viewButton.disabled = true;
+            actionButtons.classList.add('hidden'); 
+            outputElement.textContent = '';
+            outputArea.classList.add('loading'); 
+            statusMessage.textContent = 'ওয়েবসাইটের সোর্স কোড আনা হচ্ছে... এনক্রিপশন প্রসেস শুরু হচ্ছে...';
+            statusMessage.classList.remove('hidden');
+            
+            const fetchWorkerUrl = `${workerUrl}?url=${encodeURIComponent(websiteInput)}`;
+            
+            fetch(fetchWorkerUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        // Cloudflare Worker থেকে প্রাপ্ত ত্রুটি
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(sourceCode => {
+                    outputElement.textContent = sourceCode;
+                    outputElement.classList.add('language-html');
+                    Prism.highlightElement(outputElement);
+
+                    // লোডিং শেষ
+                    outputArea.classList.remove('loading');
+                    statusMessage.classList.add('hidden');
+                    viewButton.disabled = false;
+                    
+                    // যদি "Error:" দিয়ে কোড শুরু হয় (Worker এর নিজস্ব ত্রুটি), তবে বাটন লুকিয়ে রাখুন
+                    if (!sourceCode.startsWith("Error:")) {
+                         actionButtons.classList.remove('hidden');
+                    } else {
+                         actionButtons.classList.add('hidden'); 
+                    }
+                })
+                .catch(error => {
+                    // নেটওয়ার্ক বা অন্যান্য ত্রুটি
+                    outputArea.classList.remove('loading');
+                    statusMessage.classList.add('hidden');
+                    viewButton.disabled = false;
+                    actionButtons.classList.add('hidden'); // ত্রুটি হলে বাটন লুকিয়ে রাখুন
+                    outputElement.textContent = `[ACCESS DENIED]>> কোড লোড করা যায়নি। ত্রুটি: ${error.message}`;
+                    console.error('Fetching error:', error);
+                });
+        }
+
+        /* --- ৩. কোড কপি করার ফাংশন --- */
+        function copyCode() {
+            const code = document.getElementById('sourceCodeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('কোড সফলভাবে কপি করা হয়েছে!');
+            }).catch(err => {
+                alert('কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।');
+                console.error('Copy failed:', err);
+            });
+        }
+
+        /* --- ৪. HTML ডাউনলোড করার ফাংশন --- */
+        function downloadCode() {
+            const code = document.getElementById('sourceCodeOutput').textContent;
+            const urlInput = document.getElementById('websiteUrl').value || 'untitled';
+            
+            // URL থেকে ডোমেইন নাম বের করার চেষ্টা
+            let filename;
+            try {
+                // এটি ডাউনলোড করার জন্য, তাই এখানে আবার প্রোটোকল যোগ করার চেষ্টা করা হয়েছে
+                const urlObj = new URL(urlInput.startsWith('http') ? urlInput : `https://${urlInput}`);
+                filename = urlObj.hostname.replace('www.', '').replace(/\./g, '_');
+            } catch (e) {
+                filename = 'source_code';
+            }
+
+            const blob = new Blob([code], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${filename}.html`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`'${filename}.html' ডাউনলোড করা হচ্ছে...`);
+        }
+    </script>
 </body>
 </html>
