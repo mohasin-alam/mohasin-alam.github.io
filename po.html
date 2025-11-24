@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>root@kali:~# whoami</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            height: 100vh;
+            background: #000 url('https://i.imgur.com/3pP0L4T.gif') center/cover no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: #0f0;
+        }
+        .terminal {
+            width: 94%;
+            max-width: 960px;
+            height: 92vh;
+            background: rgba(0,0,0,0.94);
+            border-radius: 12px;
+            box-shadow: 0 0 60px #0f0, inset 0 0 30px #000;
+            border: 2px solid #0f0;
+            overflow: hidden;
+            animation: glow 3s infinite alternate;
+        }
+        @keyframes glow { from { box-shadow: 0 0 60px #0f0; } to { box-shadow: 0 0 90px #0f0; } }
+        .header {
+            background: #111;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #0f0;
+            font-weight: bold;
+        }
+        .buttons span {
+            display: inline-block;
+            width: 15px; height: 15px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        .close { background: #ff5f56; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #27ca3f; }
+        .body {
+            padding: 25px;
+            height: calc(100% - 50px);
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 18px;
+        }
+        .line { margin: 12px 0; }
+        .user { color: #ff2b6d; font-weight: bold; }
+        .host { color: #39ff14; font-weight: bold; }
+        a { color: #00ff00; text-decoration: underline; }
+        a:hover { color: #39ff14; text-shadow: 0 0 15px #0f0; }
+        .cursor { animation: blink 1s infinite; }
+        @keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+        pre { color: #0f0; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="header">
+            <span>root@kali:~/portfolio</span>
+            <div class="buttons">
+                <span class="minimize"></span>
+                <span class="maximize"></span>
+                <span class="close"></span>
+            </div>
+        </div>
+        <div class="body" id="terminal"></div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById("terminal");
+
+        const content = [
+            "┌──(<span class='user'>root</span>㉿<span class='host'>kali</span>)-[~/portfolio]",
+            "└─$ whoami",
+            "Rakibul Islam <span style='color:#ff2b6d'>(Elite Coder & Ethical Hacker)</span>",
+            "",
+            "└─$ cat about.txt",
+            "► Full-Stack Web Developer | Cybersecurity Enthusiast<br>► Language → JavaScript, Python, Go, PHP, Bash<br>► Framework → React, Next.js, Node.js, Laravel<br>► Tools → Kali Linux, Burp Suite, Metasploit, Nmap<br>► Passion → Breaking & Building Things 🔥",
+            "",
+            "└─$ ls projects/",
+            "<span style='color:#00ffff'>E-Commerce Platform</span>   <span style='color:#ffff00'>Banking Dashboard</span>   <span style='color:#ff2b6d'>Pentest Automation</span>   <span style='color:#39ff14'>AI Chatbot</span>",
+            "",
+            "└─$ ./contact.sh",
+            "GitHub   → <a href='https://github.com/yourusername' target='_blank'>github.com/yourusername</a><br>Email    → <a href='mailto:your@email.com'>your@email.com</a><br>LinkedIn → <a href='https://linkedin.com/in/yourprofile' target='_blank'>linkedin.com/in/yourprofile</a>",
+            "",
+            "└─$ neofetch",
+            `<pre>
+   <span style="color:#ff2b6d">██████╗ </span> 
+  <span style="color:#ff2b6d">██╔══██╗</span>  OS: Kali GNU/Linux Rolling
+ <span style="color:#39ff14">███████║</span>   Uptime: Hacking since 2018
+ <span style="color:#39ff14">██╔══██║</span>   Shell: zsh + oh-my-zsh
+ <span style="color:#00ffff">██║  ██║</span>   Editor: NeoVim (The Chad)
+ <span style="color:#00ffff">╚═╝  ╚═╝</span>   Mood: Ready to pwn   </pre>`,
+            "",
+            "<span style='color:#39ff14'>root@kali:~#</span> <span class='cursor'>_</span>"
+        ];
+
+        let i = 0;
+        function typeLine() {
+            if (i < content.length) {
+                const line = document.createElement("div");
+                line.className = "line";
+                line.innerHTML = content[i];
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+                i++;
+                setTimeout(typeLine, 400 + Math.random() * 300);
+            }
+        }
+
+        setTimeout(typeLine, 800);
+    </script>
+</body>
+</html>
