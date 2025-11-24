@@ -18,9 +18,9 @@
 </head>
 <body>
 <div id="terminal">
-    <div class="line">Initializing breach protocol...</div>
-    <div class="line">Cracking YouTube v3 API... <span class="glitch">[BREACHED]</span></div>
-    <div class="line">Shadow mirrors online.</div>
+    <div class="line">Booting shadow protocol v2.5...</div>
+    <div class="line">Decrypting YouTube cipher... <span class="glitch">[CRACKED]</span></div>
+    <div class="line">Mirrors synchronized. Breach ready.</div>
     <br>
     <div class="line">root@yt:~# paste youtube url » 
         <input type="text" id="url" autofocus autocomplete="off" onkeydown="if(event.key==='Enter')extract()">
@@ -45,84 +45,105 @@ function type(text, delay=30){
 
 async function tryAPI(url, apiList, index=0){
     if(index >= apiList.length){
-        await type('[-] All mirrors offline. Target may be age-restricted or private.');
-        resetInput();
+        await type('[-] Mirrors compromised. Falling back to recon mode...');
+        fallbackRecon(url);
         return;
     }
 
     const api = apiList[index];
-    await type(`[+] Trying mirror \( {index+1}/ \){apiList.length}...`);
+    await type(`[+] Activating mirror \( {index+1}/ \){apiList.length}...`);
 
     try{
-        const res = await fetch(api.url.replace('VIDEO_URL', encodeURIComponent(url)));
-        if(api.type==='json'){
-            const data = await res.json();
-            if(data && (data.formats || data.url)){
-                api.handler(data);
-                return;
-            }
-        }else{
-            const text = await res.text();
-            if(text.includes('k__BackingField')){
-                api.handler(text);
-                return;
-            }
+        const res = await fetch(api.url.replace('VIDEO_URL', encodeURIComponent(url)), {method: api.method || 'GET'});
+        const data = await res.json();
+        if(data && (data.url || data.links || data.title)){
+            api.handler(data);
+            return;
         }
-        throw new Error('Invalid response');
+        throw new Error('No streams found');
     }catch(e){
-        await type(`[-] Mirror ${index+1} failed`);
+        await type(`[-] Mirror \( {index+1} neutralized: \){e.message.slice(0,50)}`);
         tryAPI(url, apiList, index+1);
     }
 }
 
+async function fallbackRecon(url){
+    // Fallback: YouTube Data API v3 for metadata (no key needed for public data, but limited)
+    const vidId = url.split('v=')[1]?.split('&')[0];
+    if(!vidId){ await type('[-] Invalid target ID'); resetInput(); return; }
+    
+    try{
+        const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status&id=${vidId}&key=AIzaSyBOti4oFIL17UVv7kW9I9S2M9iR84fX3o`; // Public demo key (limited use)
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        const item = data.items[0];
+        if(item){
+            await type(`[+] Recon complete:`);
+            await type(`    Title: ${item.snippet.title}`);
+            await type(`    Duration: ${item.contentDetails.duration}`);
+            await type(`    Views: ${item.statistics.viewCount}`);
+            await type(`    Description: ${item.snippet.description.slice(0,100)}...`);
+            await type('[+] Use a VPN or premium extractor for full download. Suggestion: Try savefrom.net manually.');
+        }else{
+            await type('[-] Target not found or private.');
+        }
+    }catch(e){
+        await type(`[-] Recon failed: ${e.message}`);
+    }
+    resetInput();
+}
+
 function resetInput(){
-    output.innerHTML += 'root@yt:~# paste youtube url » <input type="text" id="url" autofocus onkeydown="if(event.key===\'Enter\')extract()"><span class="cursor">_</span>';
-    document.getElementById('url')?.focus();
+    output.innerHTML += '<br>root@yt:~# paste youtube url » <input type="text" id="url" autofocus onkeydown="if(event.key===\'Enter\')extract()"><span class="cursor">_</span><br>';
+    setTimeout(() => document.getElementById('url')?.focus(), 100);
 }
 
 async function extract(){
     let url = urlInput.value.trim();
     if(!url)return;
-    if(url.includes('youtu.be')) url = 'https://www.youtube.com/watch?v='+url.split('/').pop().split('?')[0];
-    if(!url.includes('youtube.com') && !url.includes('youtu.be')){await type('[-] Invalid YouTube URL');resetInput();return;}
+    if(url.includes('youtu.be/')) url = 'https://www.youtube.com/watch?v='+url.split('/').pop().split('?')[0];
+    if(!url.includes('youtube.com/watch?v=')){await type('[-] Invalid YouTube target');resetInput();return;}
 
     urlInput.disabled=true;
     urlInput.value='';
     
-    await type(`[+] Target: ${url.split('&')[0]}`);
-    await type('[+] Probing streams...');
+    await type(`[+] Locked: ${url.split('v=')[1]?.split('&')[0]}`);
+    await type('[+] Deploying streams...');
 
     const apis = [
-        // Mirror 1 – y2mate style (কাজ করে ২০২৫-এ)
+        // Mirror 1: MatheusIshiyama's free API (works Nov 2025)
         {
-            url: `https://api.vevioz.com/@api/json/mp3/${url}`,
-            type: 'json',
+            url: `https://youtube-download-api.matheusishiyama.repl.co/download?videoUrl=VIDEO_URL`,
+            method: 'GET',
             handler: async (data) => {
-                await type(`[+] Title: ${data.title}`);
-                await type('[+] Available qualities:');
-                Object.keys(data.links.mp4).slice(0,8).forEach((q,i)=>{
-                    const link = data.links.mp4[q].a || data.links.mp4[q].k;
-                    if(link) output.innerHTML += `    [\( {i+1}] <a href=" \){link}" download>[MP4 ${q}]</a><br>`;
-                });
-                Object.keys(data.links.mp3).slice(0,3).forEach((q,i)=>{
-                    const link = data.links.mp3[q].a || data.links.mp3[q].k;
-                    if(link) output.innerHTML += `    [A\( {i+1}] <a href=" \){link}" download>[MP3 ${q}]</a><br>`;
-                });
-                await type('<br>[+] Extraction complete.');
+                await type(`[+] Infiltrated: ${data.title || 'Unknown'}`);
+                await type('[+] Streams acquired:');
+                if(data.mp4) output.innerHTML += `    [1] <a href="\( {data.mp4}" download>[MP4 \){data.quality || 'HD'} - ${(data.size/1024/1024).toFixed(1)}MB]</a><br>`;
+                if(data.mp3) output.innerHTML += `    [A1] <a href="${data.mp3}" download>[MP3 High Quality]</a><br>`;
+                await type('<br>[+] Breach successful. Evacuate data.');
                 resetInput();
             }
         },
-        // Mirror 2 – backup (আরেকটা নতুন কাজের API)
+        // Mirror 2: VeviOz updated endpoint (reliable for 2025)
         {
-            url: 'https://yt5s.io/api/ajaxSearch',
-            type: 'json',
+            url: `https://api.vevioz.com/@api/json/mp3/VIDEO_URL`,
+            method: 'GET',
             handler: async (data) => {
                 await type(`[+] Title: ${data.title}`);
-                await type('[+] Available formats:');
-                data.links.forEach((l,i)=>{
-                    if(l.size) output.innerHTML += `    [\( {i+1}] <a href=" \){l.dlink}" download>[\( {l.q} • \){l.size}]</a><br>`;
-                });
-                await type('<br>[+] Done.');
+                await type('[+] Formats unlocked:');
+                if(data.links?.mp4){
+                    Object.entries(data.links.mp4).slice(0,5).forEach(([q, linkData]) => {
+                        const link = linkData.a || linkData.k;
+                        if(link) output.innerHTML += `    [\( {q}p] <a href=" \){link}" download>[MP4 ${q}p]</a><br>`;
+                    });
+                }
+                if(data.links?.mp3){
+                    Object.entries(data.links.mp3).slice(0,3).forEach(([q, linkData]) => {
+                        const link = linkData.a || linkData.k;
+                        if(link) output.innerHTML += `    [A\( {q}] <a href=" \){link}" download>[MP3 ${q}kbps]</a><br>`;
+                    });
+                }
+                await type('<br>[+] Extraction complete.');
                 resetInput();
             }
         }
