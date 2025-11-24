@@ -4,51 +4,23 @@
 <meta charset="UTF-8">
 <title>[root@downloader ~]#</title>
 <style>
-    body {
-        background: #000;
-        color: #0f0;
-        font-family: 'Courier New', monospace;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
-    #terminal {
-        padding: 20px;
-        height: 100vh;
-        box-sizing: border-box;
-    }
-    .line {
-        opacity: 0;
-        animation: fadeIn 0.5s forwards;
-    }
-    @keyframes fadeIn { to { opacity: 1; } }
-    @keyframes glitch {
-        0% { text-shadow: 0.05em 0 0 red, -0.05em 0 0 cyan; }
-        14% { text-shadow: 0.05em 0 0 red, -0.05em 0 0 cyan; }
-        15% { text-shadow: -0.05em 0 0 red, 0.05em 0 0 cyan; }
-        100% { text-shadow: 0 0 0; }
-    }
-    .glitch { animation: glitch 1s infinite; }
-    input {
-        background: transparent;
-        border: none;
-        color: #0f0;
-        font-family: inherit;
-        font-size: inherit;
-        outline: none;
-        width: 80%;
-    }
-    a { color: #0f0; text-decoration: underline; }
-    .cursor { animation: blink 1s infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
+    body{background:#000;color:#0f0;font-family:'Courier New',monospace;margin:0;overflow:hidden;height:100vh;}
+    #terminal{padding:20px;box-sizing:border-box;height:100vh;}
+    .line{opacity:0;animation:fadeIn 0.5s forwards;}
+    @keyframes fadeIn{to{opacity:1;}}
+    @keyframes glitch{0%,100%{text-shadow:0 0 #0f0;}50%{text-shadow:0.05em 0 red,-0.05em 0 cyan;}}
+    .glitch{animation:glitch 2s infinite;}
+    input{background:transparent;border:none;color:#0f0;font-family:inherit;font-size:inherit;outline:none;width:80%;}
+    a{color:#0f0;text-decoration:underline;}
+    .cursor{animation:blink 1s infinite;}
+    @keyframes blink{50%{opacity:0;}}
 </style>
 </head>
 <body>
 <div id="terminal">
-    <div class="line">Initializing neural interface...</div>
-    <div class="line">Bypassing YouTube DRM... <span class="glitch">[OK]</span></div>
-    <div class="line">Connecting to shadow server... <span style="color:#0f0">DONE</span></div>
-    <div class="line">Ready for extraction.</div>
+    <div class="line">Initializing breach protocol...</div>
+    <div class="line">Cracking YouTube v3 API... <span class="glitch">[BREACHED]</span></div>
+    <div class="line">Shadow mirrors online.</div>
     <br>
     <div class="line">root@yt:~# paste youtube url » 
         <input type="text" id="url" autofocus autocomplete="off" onkeydown="if(event.key==='Enter')extract()">
@@ -61,63 +33,102 @@
 const output = document.getElementById('output');
 const urlInput = document.getElementById('url');
 
-function type(text, delay = 30) {
-    let i = 0;
+function type(text, delay=30){
     return new Promise(res => {
-        const interval = setInterval(() => {
+        let i=0;
+        const int=setInterval(()=>{
             output.innerHTML += text[i++];
-            if (i >= text.length) {
-                clearInterval(interval);
-                output.innerHTML += '<br>';
-                res();
-            }
-        }, delay);
+            if(i>=text.length){clearInterval(int);output.innerHTML+='<br>';res();}
+        },delay);
     });
 }
 
-async function extract() {
-    const url = urlInput.value.trim();
-    if (!url) return;
-    
-    urlInput.value = '';
-    urlInput.disabled = true;
-
-    await type(`[+] Target locked: ${url}`);
-    await type('[+] Extracting video streams...');
-
-    // এখানে wukko API ইউজ করছি (এখনো পুরোপুরি কাজ করে 2025-এ)
-    const apiUrl = `https://co.wukko.me/api/v1/videos/${url}`;
-
-    try {
-        const res = await fetch(apiUrl);
-        const data = await res.json();
-
-        await type(`[+] Title: ${data.title}`);
-        await type(`[+] Duration: \( {Math.floor(data.duration/60)}m \){data.duration%60}s`);
-        await type('[+] Available formats:');
-
-        data.formats
-            .filter(f => f.url && (f.qualityLabel || f.quality))
-            .slice(0, 10) // প্রথম ১০টা দেখাবে
-            .forEach(async (f, i) => {
-                const quality = f.qualityLabel || f.quality || 'Audio';
-                const size = f.fileSize ? `${(f.fileSize/1024/1024).toFixed(1)} MB` : '??';
-                const link = `<a href="\( {f.url}" download target="_blank">[DOWNLOAD \){quality} - ${size}]</a>`;
-                await type(`    [\( {i+1}] \){link}`);
-            });
-
-        await type('<br>[+] Extraction complete. Ready for next target.');
-        await type('root@yt:~# paste youtube url » <input type="text" id="url" autofocus autocomplete="off" onkeydown="if(event.key===\'Enter\')extract()"><span class="cursor">_</span>');
-        
-        document.getElementById('url').focus();
-        urlInput.disabled = false;
-
-    } catch (e) {
-        await type(`[-] ERROR: ${e.message || 'Target protected or offline'}`);
-        await type('root@yt:~# paste youtube url » <input type="text" id="url" autofocus autocomplete="off" onkeydown="if(event.key===\'Enter\')extract()"><span class="cursor">_</span>');
-        document.getElementById('url').focus();
-        urlInput.disabled = false;
+async function tryAPI(url, apiList, index=0){
+    if(index >= apiList.length){
+        await type('[-] All mirrors offline. Target may be age-restricted or private.');
+        resetInput();
+        return;
     }
+
+    const api = apiList[index];
+    await type(`[+] Trying mirror \( {index+1}/ \){apiList.length}...`);
+
+    try{
+        const res = await fetch(api.url.replace('VIDEO_URL', encodeURIComponent(url)));
+        if(api.type==='json'){
+            const data = await res.json();
+            if(data && (data.formats || data.url)){
+                api.handler(data);
+                return;
+            }
+        }else{
+            const text = await res.text();
+            if(text.includes('k__BackingField')){
+                api.handler(text);
+                return;
+            }
+        }
+        throw new Error('Invalid response');
+    }catch(e){
+        await type(`[-] Mirror ${index+1} failed`);
+        tryAPI(url, apiList, index+1);
+    }
+}
+
+function resetInput(){
+    output.innerHTML += 'root@yt:~# paste youtube url » <input type="text" id="url" autofocus onkeydown="if(event.key===\'Enter\')extract()"><span class="cursor">_</span>';
+    document.getElementById('url')?.focus();
+}
+
+async function extract(){
+    let url = urlInput.value.trim();
+    if(!url)return;
+    if(url.includes('youtu.be')) url = 'https://www.youtube.com/watch?v='+url.split('/').pop().split('?')[0];
+    if(!url.includes('youtube.com') && !url.includes('youtu.be')){await type('[-] Invalid YouTube URL');resetInput();return;}
+
+    urlInput.disabled=true;
+    urlInput.value='';
+    
+    await type(`[+] Target: ${url.split('&')[0]}`);
+    await type('[+] Probing streams...');
+
+    const apis = [
+        // Mirror 1 – y2mate style (কাজ করে ২০২৫-এ)
+        {
+            url: `https://api.vevioz.com/@api/json/mp3/${url}`,
+            type: 'json',
+            handler: async (data) => {
+                await type(`[+] Title: ${data.title}`);
+                await type('[+] Available qualities:');
+                Object.keys(data.links.mp4).slice(0,8).forEach((q,i)=>{
+                    const link = data.links.mp4[q].a || data.links.mp4[q].k;
+                    if(link) output.innerHTML += `    [\( {i+1}] <a href=" \){link}" download>[MP4 ${q}]</a><br>`;
+                });
+                Object.keys(data.links.mp3).slice(0,3).forEach((q,i)=>{
+                    const link = data.links.mp3[q].a || data.links.mp3[q].k;
+                    if(link) output.innerHTML += `    [A\( {i+1}] <a href=" \){link}" download>[MP3 ${q}]</a><br>`;
+                });
+                await type('<br>[+] Extraction complete.');
+                resetInput();
+            }
+        },
+        // Mirror 2 – backup (আরেকটা নতুন কাজের API)
+        {
+            url: 'https://yt5s.io/api/ajaxSearch',
+            type: 'json',
+            handler: async (data) => {
+                await type(`[+] Title: ${data.title}`);
+                await type('[+] Available formats:');
+                data.links.forEach((l,i)=>{
+                    if(l.size) output.innerHTML += `    [\( {i+1}] <a href=" \){l.dlink}" download>[\( {l.q} • \){l.size}]</a><br>`;
+                });
+                await type('<br>[+] Done.');
+                resetInput();
+            }
+        }
+    ];
+
+    tryAPI(url, apis);
 }
 </script>
 </body>
