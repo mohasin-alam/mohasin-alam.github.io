@@ -29,450 +29,419 @@ body {
     margin: 0;
     padding: 20px;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    align-items: flex-start;
     min-height: 100vh;
-    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
-/* -------------------------------------- */
-/* ২. কনটেইনার এবং টাইটেল */
-/* -------------------------------------- */
-
 .container {
+    background: #060b14; 
+    padding: 30px 40px;
+    border-radius: 0; 
+    box-shadow: 0 0 15px var(--color-border); 
+    border: 1px solid var(--color-border);
     width: 100%;
-    max-width: 1000px;
-    padding: 20px;
-    border: 2px solid var(--color-border);
-    border-radius: 8px;
-    box-shadow: var(--shadow-glow);
-    background-color: #0c1016; /* সামান্য গাঢ় */
-    margin-bottom: 20px;
+    max-width: 900px;
+    animation: neon-pulse 4s infinite ease-in-out; /* স্লো পালস অ্যানিমেশন */
 }
 
 h1 {
-    text-align: center;
     color: var(--color-accent);
+    text-align: center;
+    margin-bottom: 30px;
     text-shadow: var(--shadow-glow);
-    margin-bottom: 25px;
-    font-size: 1.8em;
+    letter-spacing: 3px;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 10px;
 }
 
-/* -------------------------------------- */
-/* ৩. ইনপুট এবং বাটন স্টাইল */
-/* -------------------------------------- */
-
-.input-group {
-    display: flex;
-    gap: 10px;
+/* ইনপুট এবং বাটন স্টাইল */
+input[type="url"] {
+    width: 100%;
+    padding: 12px;
     margin-bottom: 20px;
-}
-
-#websiteUrl {
-    flex-grow: 1;
-    padding: 10px;
-    background-color: #000;
     border: 1px solid var(--color-border);
+    border-radius: 0;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: #030508;
     color: var(--color-text);
-    font-family: inherit;
-    font-size: 1em;
-    border-radius: 4px;
-    box-shadow: inset 0 0 5px var(--color-border);
+    box-shadow: inset 0 0 5px rgba(0, 128, 0, 0.5);
+    font-family: 'Share Tech Mono', monospace;
 }
 
-.terminal-button {
-    background-color: var(--color-border);
-    color: var(--color-dark-bg);
-    border: none;
-    padding: 10px 20px;
-    font-family: inherit;
-    font-size: 1em;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    font-weight: bold;
-    box-shadow: 0 0 5px var(--color-border);
-}
-
-.terminal-button:hover:not(:disabled) {
-    background-color: var(--color-accent);
+input[type="url"]:focus {
+    border-color: var(--color-accent);
     box-shadow: var(--shadow-glow);
-    color: var(--color-dark-bg);
+    outline: none;
 }
 
-.terminal-button:disabled {
-    background-color: #333;
-    color: #666;
+#viewSourceBtn {
+    background-color: transparent;
+    color: var(--color-accent);
+    padding: 12px 20px;
+    border: 2px solid var(--color-accent);
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    width: 100%;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    box-shadow: var(--shadow-glow);
+}
+
+#viewSourceBtn:hover:not(:disabled) {
+    background-color: rgba(0, 255, 0, 0.1);
+    box-shadow: 0 0 20px var(--color-accent);
+}
+#viewSourceBtn:disabled { 
     cursor: not-allowed;
-    box-shadow: none;
+    opacity: 0.7;
 }
 
 /* -------------------------------------- */
-/* ৪. কোড ডিসপ্লে এরিয়া (টার্মিনাল স্ক্রিন) */
+/* ২. কোড এরিয়া (টার্মিনাল লুক) */
 /* -------------------------------------- */
 
 .code-area {
-    min-height: 300px;
-    background-color: #000;
-    border: 2px solid var(--color-border);
-    padding: 15px;
-    overflow: auto;
-    border-radius: 4px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), var(--shadow-glow);
-    position: relative;
-    white-space: pre-wrap; /* কোড মোড়ানোর জন্য */
-    word-wrap: break-word;
-}
-
-/* টার্মিনাল কার্সার সিমুলেশন */
-.code-area::before {
-    content: '>';
-    position: absolute;
-    color: var(--color-accent);
-    font-weight: bold;
-    animation: blink-cursor 1s infinite;
-}
-
-@keyframes blink-cursor {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-/* লোডিং ইফেক্ট */
-.code-area.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--color-accent);
-    font-size: 1.2em;
-    text-shadow: var(--shadow-glow);
-    position: relative;
-}
-
-.code-area.loading::after {
-    content: '...';
-    display: inline-block;
-    width: 20px;
-    overflow: hidden;
-    animation: loading-dots 1s steps(3) infinite;
-}
-
-@keyframes loading-dots {
-    0% { content: ''; }
-    33% { content: '.'; }
-    66% { content: '..'; }
-    100% { content: '...'; }
-}
-
-#sourceCodeOutput {
-    margin: 0;
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    width: 100%;
-    min-height: 270px;
-    font-family: inherit;
-    color: var(--color-text);
-    overflow: visible; /* যাতে Prism.js কাজ করে */
-}
-
-/* -------------------------------------- */
-/* ৫. Prism.js স্টাইল ওভাররাইড (নিয়ন থিম) */
-/* -------------------------------------- */
-
-/* প্রধান কোড রং */
-pre[class*="language-"] {
-    background: transparent;
-    color: var(--color-text);
-    text-shadow: 0 0 2px rgba(57, 255, 20, 0.5); /* হালকা গ্লো */
-    overflow: auto;
-    padding: 0;
-    margin: 0;
+    margin-top: 20px;
+    background: #000000; /* খাঁটি কালো ব্যাকগ্রাউন্ড */
+    border: 1px dashed var(--color-border); 
     border-radius: 0;
+    padding: 15px;
+    max-height: 500px;
+    overflow: auto;
+    font-size: 14px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+    line-height: 1.4;
+    position: relative;
 }
 
-.token.comment, .token.prolog, .token.doctype, .token.cdata {
-    color: #00a000; /* গাঢ় সবুজ মন্তব্য */
-}
-
-.token.punctuation {
-    color: var(--color-text); /* নিয়ন গ্রিন বিরামচিহ্ন */
-}
-
-.token.namespace {
-    opacity: .7;
-}
-
-.token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted {
-    color: #ffaa00; /* কমলা/হলুদ ট্যাগ/নাম্বার */
-}
-
-.token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted {
-    color: #f700ff; /* ম্যাজেন্টা/পার্পল স্ট্রিং */
-}
-
-.token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string {
-    color: #ff6e00; /* উজ্জ্বল কমলা অপারেটর */
-    background: transparent;
-}
-
-.token.atrule, .token.attr-value, .token.keyword {
-    color: #00ffff; /* সায়ান কীওয়ার্ড */
-}
-
-.token.function, .token.class-name {
-    color: #00ffaa; /* উজ্জ্বল নীল-সবুজ ফাংশন */
-}
-
-.token.regex, .token.important, .token.variable {
-    color: #ff0000; /* লাল গুরুত্বপূর্ণ/ভেরিয়েবল */
-}
-
-.token.important, .token.bold {
-    font-weight: bold;
-}
-
-.token.italic {
-    font-style: italic;
-}
-
-.token.entity {
-    cursor: help;
-}
-
-/* -------------------------------------- */
-/* ৬. অন্যান্য উপাদান */
-/* -------------------------------------- */
-
+/* স্ট্যাটাস মেসেজ - টার্মিনাল প্রম্পট */
 #statusMessage {
-    color: var(--color-accent);
-    text-shadow: var(--shadow-glow);
+    text-align: left;
+    color: var(--color-text);
+    font-weight: bold;
+    display: none;
     margin-bottom: 15px;
-    font-size: 1.1em;
-    text-align: center;
-    animation: pulse-glow 1.5s infinite alternate;
+    padding-left: 10px;
+    font-family: 'Share Tech Mono', monospace;
 }
-
-@keyframes pulse-glow {
-    from {
-        opacity: 0.8;
-        text-shadow: 0 0 5px var(--color-accent);
-    }
-    to {
-        opacity: 1;
-        text-shadow: 0 0 10px var(--color-accent), 0 0 15px var(--color-accent);
-    }
-}
-
-.action-buttons {
-    display: flex;
-    gap: 15px;
-    margin-top: 15px;
-    justify-content: center;
+#statusMessage:before {
+    content: "[ATTEMPTING ACCESS]>"; /* টার্মিনাল প্রম্পট */
+    color: var(--color-error);
+    margin-right: 5px;
 }
 
 .hidden {
     display: none !important;
 }
-
-.footer {
-    margin-top: auto;
-    padding-top: 10px;
-    text-align: center;
-    font-size: 0.8em;
-    color: var(--color-border);
+.code-area code {
+    display: block; 
 }
 
-.footer a {
-    color: var(--color-text);
-    text-decoration: none;
-    text-shadow: var(--shadow-glow);
+/* -------------------------------------- */
+/* ৩. সিনট্যাক্স হাইলাইটিং ফিক্স (Prism.js Override) */
+/* -------------------------------------- */
+
+.code-area code {
+    color: var(--color-text) !important; 
 }
+
+.token.tag, .token.attr-name, .token.selector {
+    color: #00ffff !important; /* সায়ান ট্যাগ/অ্যাট্রিবিউট */
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+.token.punctuation, .token.operator {
+    color: #ff00ff !important; /* ম্যাজেন্টা চিহ্ণ */
+}
+.token.attr-value, .token.string {
+    color: #39ff14 !important; /* উজ্জ্বল সবুজ স্ট্রিং */
+}
+.token.comment {
+    color: #008000 !important; /* গাঢ় সবুজ কমেন্ট */
+}
+.token.doctype, .token.prolog {
+    color: #ffa500 !important; /* কমলা ডকটাইপ */
+}
+
+/* -------------------------------------- */
+/* ৪. বাটন এরিয়া স্টাইল (FINAL) */
+/* -------------------------------------- */
+.action-buttons {
+    display: flex;
+    justify-content: flex-end; /* বাটনগুলি ডানদিকে থাকবে */
+    gap: 15px; 
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.action-buttons button {
+    background-color: transparent;
+    color: var(--color-accent);
+    padding: 10px 15px;
+    border: 1px solid var(--color-accent);
+    border-radius: 0;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-transform: uppercase;
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.action-buttons button:hover {
+    background-color: rgba(0, 255, 0, 0.15);
+    box-shadow: 0 0 10px var(--color-accent);
+}
+
+.action-buttons button:active {
+    background-color: rgba(0, 255, 0, 0.3);
+}
+
+
+/* -------------------------------------- */
+/* ৫. অ্যানিমেশন এবং ইফেক্ট */
+/* -------------------------------------- */
+
+/* A. ধীর গতির গ্লিচ ইফেক্ট (কম দৃশ্যমান) */
+@keyframes glitch {
+    0%, 100% { text-shadow: 1px 0 0 var(--color-accent), -1px 0 0 #ff00ff; }
+    10% { text-shadow: -1px 0 0 #ff00ff, 1px 0 0 var(--color-accent); }
+    12% { text-shadow: 2px 0 0 var(--color-accent), -2px 0 0 #ff00ff; }
+    20% { text-shadow: -2px 0 0 #ff00ff, 2px 0 0 var(--color-accent); }
+}
+
+.glitch-text {
+    animation: glitch 4s infinite alternate step-end; 
+}
+
+/* B. কীবোর্ড কার্সার অ্যানিমেশন (লোডিং এর জন্য) */
+@keyframes blink-caret {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* কীবোর্ড কার্সার স্টাইল - লোডিং এর সময় দেখাবে */
+.code-area.loading code:after {
+    content: '_'; 
+    display: inline;
+    animation: blink-caret .75s step-end infinite;
+}
+
+/* C. কন্টেইনার পালস */
+@keyframes neon-pulse {
+    0% { box-shadow: 0 0 5px var(--color-border); }
+    50% { box-shadow: 0 0 15px var(--color-accent), 0 0 30px var(--color-accent); }
+    100% { box-shadow: 0 0 5px var(--color-border); }
+}
+
+/* ------------------------------------- */
 </style>
-    
-</head>
+>
+    </head>
 <body>
-
     <div class="container">
-        <h1>[SYSTEM/CMD] ওয়েব সোর্স কোড ভিউয়ার</h1>
-
-        <div class="input-group">
-            <input type="text" id="websiteUrl" placeholder="URL লিখুন (যেমন: https://google.com)">
-            <button class="terminal-button" id="viewSourceBtn" onclick="fetchSourceCode()">সোর্স কোড দেখুন</button>
-        </div>
-
-        <div id="statusMessage" class="hidden"></div>
-
-        <div class="code-area">
-            <pre id="sourceCodeOutput">
-[SYSTEM/LOG]>> টার্গেট URL ইনপুট করুন এবং 'সোর্স কোড দেখুন' বাটনে ক্লিক করুন।
-</pre>
-        </div>
-
+        <h1 class="glitch-text">Website Source Code Hacker by Csm Mohasin Alam</h1>
+        
+        <input type="url" id="websiteUrl" placeholder="এখানে ওয়েবসাইটের URL দিন (যেমন: https://google.com)" required>
+        <button id="viewSourceBtn">সোর্স কোড দেখুন</button>
+        
+        <p id="statusMessage" class="hidden"></p>
+        
+        <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
+        
         <div class="action-buttons hidden" id="actionButtons">
-            <button class="terminal-button" onclick="copyCode()">কোড কপি করুন</button>
-            <button class="terminal-button" id="downloadCodeBtn" onclick="downloadCode()">HTML ডাউনলোড করুন</button>
+            <button id="copyCodeBtn">কোড কপি করুন</button>
+            <button id="downloadCodeBtn">HTML ডাউনলোড করুন</button>
         </div>
+        
     </div>
 
-    <div class="footer">
-        প্রযুক্তি: <a href="https://developers.cloudflare.com/workers/" target="_blank">Cloudflare Worker</a> ও <a href="https://prismjs.com/" target="_blank">Prism.js</a>
-    </div>
+    
+<script>
+// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js ---
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(l){var n=/(?:^|\s)lang(?:uage)?-([\w-]+)(?=\s|$)/i,t=0,e={},j={manual:l.Prism&&l.Prism.manual,disableWorkerMessageHandler:l.Prism&&l.Prism.disableWorkerMessageHandler,util:{encode:function e(t){return t instanceof C?new C(t.type,e(t.content),t.alias):Array.isArray(t)?t.map(e):t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).slice(8,-1)},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function n(e,a){var r,t;switch(a=a||{},j.util.type(e)){case"Object":if(t=j.util.objId(e),a[t])return a[t];for(var s in r={},a[t]=r,e)e.hasOwnProperty(s)&&(r[s]=n(e[s],a));return r;case"Array":return(t=j.util.objId(e),a[t])?a[t]:(r=[],a[t]=r,e.forEach(function(e,t){r[t]=n(e,a)}),r);default:return e}},getLanguage:function(e){for(;e;){var t=n.exec(e.className);if(t)return t[1].toLowerCase();e=e.parentElement}return"none"},setLanguage:function(e,t){e.className=e.className.replace(RegExp(n,"gi"),""),e.classList.add("language-"+t)},currentScript:function(){if("undefined"==typeof document)return null;if("currentScript"in document)return document.currentScript;try{throw new Error}catch(e){var t=(/at [^(\r\n]*\((.*):[^:]+:[^:]+\)$/i.exec(e.stack)||[])[1];if(t){var n,a=document.getElementsByTagName("script");for(n in a)if(a[n].src==t)return a[n]}return null}},isActive:function(e,t,n){for(var a="no-"+t;e;){var r=e.classList;if(r.contains(t))return!0;if(r.contains(a))return!1;e=e.parentElement}return!!n}},languages:{plain:e,plaintext:e,text:e,txt:e,extend:function(e,t){var n,a=j.util.clone(j.languages[e]);for(n in t)a[n]=t[n];return a},insertBefore:function(n,e,t,a){var r,s=(a=a||j.languages)[n],i={};for(r in s)if(s.hasOwnProperty(r)){if(r==e)for(var o in t)t.hasOwnProperty(o)&&(i[o]=t[o]);t.hasOwnProperty(r)||(i[r]=s[r])}var l=a[n];return a[n]=i,j.languages.DFS(j.languages,function(e,t){t===l&&e!=n&&(this[e]=i)}),i},DFS:function e(t,n,a,r){r=r||{};var s,i,o,l=j.util.objId;for(s in t)t.hasOwnProperty(s)&&(n.call(t,s,t[s],a||s),i=t[s],"Object"!==(o=j.util.type(i))||r[l(i)]?"Array"!==o||r[l(i)]||(r[l(i)]=!0,e(i,n,s,r)):(r[l(i)]=!0,e(i,n,null,r)))}},plugins:{},highlightAll:function(e,t){j.highlightAllUnder(document,e,t)},highlightAllUnder:function(e,t,n){var a={callback:n,container:e,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};j.hooks.run("before-highlightall",a),a.elements=Array.prototype.slice.apply(a.container.querySelectorAll(a.selector)),j.hooks.run("before-all-elements-highlight",a);for(var r,s=0;r=a.elements[s++];)j.highlightElement(r,!0===t,a.callback)},highlightElement:function(e,t,n){var a=j.util.getLanguage(e),r=j.languages[a],s=(j.util.setLanguage(e,a),e.parentElement);s&&"pre"===s.nodeName.toLowerCase()&&j.util.setLanguage(s,a);var i={element:e,language:a,grammar:r,code:e.textContent};function o(e){i.highlightedCode=e,j.hooks.run("before-insert",i),i.element.innerHTML=i.highlightedCode,j.hooks.run("after-highlight",i),j.hooks.run("complete",i),n&&n.call(i.element)}if(j.hooks.run("before-sanity-check",i),(s=i.element.parentElement)&&"pre"===s.nodeName.toLowerCase()&&!s.hasAttribute("tabindex")&&s.setAttribute("tabindex","0"),!i.code)return j.hooks.run("complete",i),void(n&&n.call(i.element));j.hooks.run("before-highlight",i),i.grammar?t&&l.Worker?((a=new Worker(j.filename)).onmessage=function(e){o(e.data)},a.postMessage(JSON.stringify({language:i.language,code:i.code,immediateClose:!0}))):o(j.highlight(i.code,i.grammar,i.language)):o(j.util.encode(i.code))},highlight:function(e,t,n){e={code:e,grammar:t,language:n};if(j.hooks.run("before-tokenize",e),e.grammar)return e.tokens=j.tokenize(e.code,e.grammar),j.hooks.run("after-tokenize",e),C.stringify(j.util.encode(e.tokens),e.language);throw new Error('The language "'+e.language+'" has no grammar.')},tokenize:function(e,t){var n=t.rest;if(n){for(var a in n)t[a]=n[a];delete t.rest}for(var r=new u,s=(z(r,r.head,e),!function e(t,n,a,r,s,i){for(var o in a)if(a.hasOwnProperty(o)&&a[o]){var l=a[o];l=Array.isArray(l)?l:[l];for(var u=0;u<l.length;++u){if(i&&i.cause==o+","+u)return;for(var g,c=l[u],d=c.inside,p=!!c.lookbehind,m=!!c.greedy,h=c.alias,f=(m&&!c.pattern.global&&(g=c.pattern.toString().match(/[imsuy]*$/)[0],c.pattern=RegExp(c.pattern.source,g+"g")),c.pattern||c),b=r.next,y=s;b!==n.tail&&!(i&&y>=i.reach);y+=b.value.length,b=b.next){var v=b.value;if(n.length>t.length)return;if(!(v instanceof C)){var F,x=1;if(m){if(!(F=L(f,y,t,p))||F.index>=t.length)break;var k=F.index,w=F.index+F[0].length,A=y;for(A+=b.value.length;A<=k;)b=b.next,A+=b.value.length;if(A-=b.value.length,y=A,b.value instanceof C)continue;for(var P=b;P!==n.tail&&(A<w||"string"==typeof P.value);P=P.next)x++,A+=P.value.length;x--,v=t.slice(y,A),F.index-=y}else if(!(F=L(f,0,v,p)))continue;var k=F.index,$=F[0],S=v.slice(0,k),E=v.slice(k+$.length),v=y+v.length,_=(i&&v>i.reach&&(i.reach=v),b.prev),S=(S&&(_=z(n,_,S),y+=S.length),O(n,_,x),new C(o,d?j.tokenize($,d):$,h,$));b=z(n,_,S),E&&z(n,b,E),1<x&&($={cause:o+","+u,reach:v},e(t,n,a,b.prev,y,$),i&&$.reach>i.reach&&(i.reach=$.reach))}}}}}(e,r,t,r.head,0),r),i=[],o=s.head.next;o!==s.tail;)i.push(o.value),o=o.next;return i},hooks:{all:{},add:function(e,t){var n=j.hooks.all;n[e]=n[e]||[],n[e].push(t)},run:function(e,t){var n=j.hooks.all[e];if(n&&n.length)for(var a,r=0;a=n[r++];)a(t)}},Token:C};function C(e,t,n,a){this.type=e,this.content=t,this.alias=n,this.length=0|(a||"").length}function L(e,t,n,a){e.lastIndex=t;t=e.exec(n);return t&&a&&t[1]&&(e=t[1].length,t.index+=e,t[0]=t[0].slice(e)),t}function u(){var e={value:null,prev:null,next:null},t={value:null,prev:e,next:null};e.next=t,this.head=e,this.tail=t,this.length=0}function z(e,t,n){var a=t.next,n={value:n,prev:t,next:a};return t.next=n,a.prev=n,e.length++,n}function O(e,t,n){for(var a=t.next,r=0;r<n&&a!==e.tail;r++)a=a.next;(t.next=a).prev=t,e.length-=r}if(l.Prism=j,C.stringify=function t(e,n){if("string"==typeof e)return e;var a;if(Array.isArray(e))return a="",e.forEach(function(e){a+=t(e,n)}),a;var r,s={type:e.type,content:t(e.content,n),tag:"span",classes:["token",e.type],attributes:{},language:n},e=e.alias,i=(e&&(Array.isArray(e)?Array.prototype.push.apply(s.classes,e):s.classes.push(e)),j.hooks.run("wrap",s),"");for(r in s.attributes)i+=" "+r+'="'+(s.attributes[r]||"").replace(/"/g,"&quot;")+'"';return"<"+s.tag+' class="'+s.classes.join(" ")+'"'+i+">"+s.content+"</"+s.tag+">"},!l.document)return l.addEventListener&&(j.disableWorkerMessageHandler||l.addEventListener("message",function(e){var e=JSON.parse(e.data),t=e.language,n=e.code,e=e.immediateClose;l.postMessage(j.highlight(n,j.languages[t],t)),e&&l.close()},!1)),j;var a,e=j.util.currentScript();function r(){j.manual||j.highlightAll()}return e&&(j.filename=e.src,e.hasAttribute("data-manual")&&(j.manual=!0)),j.manual||("loading"===(a=document.readyState)||"interactive"===a&&e&&e.defer?document.addEventListener("DOMContentLoaded",r):window.requestAnimationFrame?window.requestAnimationFrame(r):window.setTimeout(r,16)),j}(_self);"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism),Prism.languages.markup={comment:{pattern://,greedy:!0},prolog:{pattern:/<\?[\s\S]+?\?>/,greedy:!0},doctype:{pattern:/<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:[^<"'\]]|"[^"]*"|'[^']*'|<(?!!--)|)*\]\s*)?>/i,greedy:!0,inside:{"internal-subset":{pattern:/(^[^\[]*\[)[\s\S]+(?=\]>$)/,lookbehind:!0,greedy:!0,inside:null},string:{pattern:/"[^"]*"|'[^']*'/,greedy:!0},punctuation:/^<!|>$|[[\]]/,"doctype-tag":/^DOCTYPE/i,name:/[^\s<>'"]+/}},cdata:{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,greedy:!0},tag:{pattern:/<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/,greedy:!0,inside:{tag:{pattern:/^<\/?[^\s>\/]+/,inside:{punctuation:/^<\/?/,namespace:/^[^\s>\/:]+:/}},"special-attr":[],"attr-value":{pattern:/=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,inside:{punctuation:[{pattern:/^=/,alias:"attr-equals"},{pattern:/^(\s*)["']|["']$/,lookbehind:!0}]}},punctuation:/\/?>/,"attr-name":{pattern:/[^\s>\/]+/,inside:{namespace:/^[^\s>\/:]+:/}}}},entity:[{pattern:/&[\da-z]{1,8};/i,alias:"named-entity"},/&#x?[\da-f]{1,8};/i]},Prism.languages.markup.tag.inside["attr-value"].inside.entity=Prism.languages.markup.entity,Prism.languages.markup.doctype.inside["internal-subset"].inside=Prism.languages.markup,Prism.hooks.add("wrap",function(e){"entity"===e.type&&(e.attributes.title=e.content.replace(/&amp;/,"&"))}),Object.defineProperty(Prism.languages.markup.tag,"addInlined",{value:function(e,t){var n={},n=(n["language-"+t]={pattern:/(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,lookbehind:!0,inside:Prism.languages[t]},n.cdata=/^<!\[CDATA\[|\]\]>$/i,{"included-cdata":{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,inside:n}}),t=(n["language-"+t]={pattern:/[\s\S]+/,inside:Prism.languages[t]},{});t[e]={pattern:RegExp(/(<__[^>]*>)(?:<!\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]>|(?!<!\[CDATA\[)[\s\S])*?(?=<\/__>)/.source.replace(/__/g,function(){return e}),"i"),lookbehind:!0,greedy:!0,inside:n},Prism.languages.insertBefore("markup","cdata",t)}}),Object.defineProperty(Prism.languages.markup.tag,"addAttribute",{value:function(e,t){Prism.languages.markup.tag.inside["special-attr"].push({pattern:RegExp(/(^|["'\s])/.source+"(?:"+e+")"+/\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))/.source,"i"),lookbehind:!0,inside:{"attr-name":/^[^\s=]+/,"attr-value":{pattern:/=[\s\S]+/,inside:{value:{pattern:/(^=\s*(["']|(?!["'])))\S[\s\S]*(?=\2$)/,lookbehind:!0,alias:[t,"language-"+t],inside:Prism.languages[t]},punctuation:[{pattern:/^=/,alias:"attr-equals"},/"|'/]}}}})}}),Prism.languages.html=Prism.languages.markup,Prism.languages.mathml=Prism.languages.markup,Prism.languages.svg=Prism.languages.markup,Prism.languages.xml=Prism.languages.extend("markup",{}),Prism.languages.ssml=Prism.languages.xml,Prism.languages.atom=Prism.languages.xml,Prism.languages.rss=Prism.languages.xml,function(e){var t=/(?:"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"|'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n])*')/,t=(e.languages.css={comment:/\/\*[\s\S]*?\*\//,atrule:{pattern:RegExp("@[\\w-](?:"+/[^;{\s"']|\s+(?!\s)/.source+"|"+t.source+")*?"+/(?:;|(?=\s*\{))/.source),inside:{rule:/^@[\w-]+/,"selector-function-argument":{pattern:/(\bselector\s*\(\s*(?![\s)]))(?:[^()\s]|\s+(?![\s)])|\((?:[^()]|\([^()]*\))*\))+(?=\s*\))/,lookbehind:!0,alias:"selector"},keyword:{pattern:/(^|[^\w-])(?:and|not|only|or)(?![\w-])/,lookbehind:!0}}},url:{pattern:RegExp("\\burl\\((?:"+t.source+"|"+/(?:[^\\\r\n()"']|\\[\s\S])*/.source+")\\)","i"),greedy:!0,inside:{function:/^url/i,punctuation:/^\(|\)$/,string:{pattern:RegExp("^"+t.source+"$"),alias:"url"}}},selector:{pattern:RegExp("(^|[{}\\s])[^{}\\s](?:[^{};\"'\\s]|\\s+(?![\\s{])|"+t.source+")*(?=\\s*\\{)"),lookbehind:!0},string:{pattern:t,greedy:!0},property:{pattern:/(^|[^-\w\xA0-\uFFFF])(?!\s)[-_a-z\xA0-\uFFFF](?:(?!\s)[-\w\xA0-\uFFFF])*(?=\s*:)/i,lookbehind:!0},important:/!important\b/i,function:{pattern:/(^|[^-a-z0-9])[-a-z0-9]+(?=\()/i,lookbehind:!0},punctuation:/[(){};:,]/},e.languages.css.atrule.inside.rest=e.languages.css,e.languages.markup);t&&(t.tag.addInlined("style","css"),t.tag.addAttribute("style","css"))}(Prism),Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\s\S]*?(?:\*\/|$)/,lookbehind:!0,greedy:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0,greedy:!0}],string:{pattern:/(["'])(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/(\b(?:class|extends|implements|instanceof|interface|new|trait)\s+|\bcatch\s+\()[\w.\\]+/i,lookbehind:!0,inside:{punctuation:/[.\\]/}},keyword:/\b(?:break|catch|continue|do|else|finally|for|function|if|in|instanceof|new|null|return|throw|try|while)\b/,boolean:/\b(?:false|true)\b/,function:/\b\w+(?=\()/,number:/\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,operator:/[<>]=?|[!=]=?=?|--?|\+\+?|&&?|\|\|?|[?*/~^%]/,punctuation:/[{}[\];(),.:]/},Prism.languages.javascript=Prism.languages.extend("clike",{"class-name":[Prism.languages.clike["class-name"],{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$A-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\.(?:constructor|prototype))/,lookbehind:!0}],keyword:[{pattern:/((?:^|\})\s*)catch\b/,lookbehind:!0},{pattern:/(^|[^.]|\.\.\.\s*)\b(?:as|assert(?=\s*\{)|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally(?=\s*(?:\{|$))|for|from(?=\s*(?:['"]|$))|function|(?:get|set)(?=\s*(?:[#\[$\w\xA0-\uFFFF]|$))|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,lookbehind:!0}],function:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,number:{pattern:RegExp(/(^|[^\w$])/.source+"(?:"+/NaN|Infinity/.source+"|"+/0[bB][01]+(?:_[01]+)*n?/.source+"|"+/0[oO][0-7]+(?:_[0-7]+)*n?/.source+"|"+/0[xX][\dA-Fa-f]+(?:_[\dA-Fa-f]+)*n?/.source+"|"+/\d+(?:_\d+)*n/.source+"|"+/(?:\d+(?:_\d+)*(?:\.(?:\d+(?:_\d+)*)?)?|\.\d+(?:_\d+)*)(?:[Ee][+-]?\d+(?:_\d+)*)?/.source+")"+/(?![\w$])/.source),lookbehind:!0},operator:/--|\+\+|\*\*=?|=>|&&=?|\|\|=?|[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?\?=?|\?\.?|[~:]/}),Prism.languages.javascript["class-name"][0].pattern=/(\b(?:class|extends|implements|instanceof|interface|new)\s+)[\w.\\]+/,Prism.languages.insertBefore("javascript","keyword",{regex:{pattern:RegExp(/((?:^|[^$\w\xA0-\uFFFF."'\])\s]|\b(?:return|yield))\s*)/.source+/\//.source+"(?:"+/(?:\[(?:[^\]\\\r\n]|\\.)*\]|\\.|[^/\\\[\r\n])+\/[dgimyus]{0,7}/.source+"|"+/(?:\[(?:[^[\]\\\r\n]|\\.|\[(?:[^[\]\\\r\n]|\\.|\[(?:[^[\]\\\r\n]|\\.)*\])*\])*\]|\\.|[^/\\\[\r\n])+\/[dgimyus]{0,7}v[dgimyus]{0,7}/.source+")"+/(?=(?:\s|\/\*(?:[^*]|\*(?!\/))*\*\/)*(?:$|[\r\n,.;:})\]]|\/\/))/.source),lookbehind:!0,greedy:!0,inside:{"regex-source":{pattern:/^(\/)[\s\S]+(?=\/[a-z]*$)/,lookbehind:!0,alias:"language-regex",inside:Prism.languages.regex},"regex-delimiter":/^\/|\/$/,"regex-flags":/^[a-z]+$/}},"function-variable":{pattern:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)\s*=>))/,alias:"function"},parameter:[{pattern:/(function(?:\s+(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)?\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\))/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$a-z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*=>)/i,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*=>)/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*\s*)\(\s*|\]\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*\{)/,lookbehind:!0,inside:Prism.languages.javascript}],constant:/\b[A-Z](?:[A-Z_]|\dx?)*\b/}),Prism.languages.insertBefore("javascript","string",{hashbang:{pattern:/^#!.*/,greedy:!0,alias:"comment"},"template-string":{pattern:/`(?:\\[\s\S]|\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}|(?!\$\{)[^\\`])*`/,greedy:!0,inside:{"template-punctuation":{pattern:/^`|`$/,alias:"string"},interpolation:{pattern:/((?:^|[^\\])(?:\\{2})*)\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}/,lookbehind:!0,inside:{"interpolation-punctuation":{pattern:/^\$\{|\}$/,alias:"punctuation"},rest:Prism.languages.javascript}},string:/[\s\S]+/}},"string-property":{pattern:/((?:^|[,{])[ \t]*)(["'])(?:\\(?:\r\n|[\s\S])|(?!\2)[^\\\r\n])*\2(?=\s*:)/m,lookbehind:!0,greedy:!0,alias:"property"}}),Prism.languages.insertBefore("javascript","operator",{"literal-property":{pattern:/((?:^|[,{])[ \t]*)(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*:)/m,lookbehind:!0,alias:"property"}}),Prism.languages.markup&&(Prism.languages.markup.tag.addInlined("script","javascript"),Prism.languages.markup.tag.addAttribute(/on(?:abort|blur|change|click|composition(?:end|start|update)|dblclick|error|focus(?:in|out)?|key(?:down|up)|load|mouse(?:down|enter|leave|move|out|over|up)|reset|resize|scroll|select|slotchange|submit|unload|wheel)/.source,"javascript")),Prism.languages.js=Prism.languages.javascript,function(){var l,u,g,c,e;void 0!==Prism&&"undefined"!=typeof document&&(Element.prototype.matches||(Element.prototype.matches=Element.prototype.msMatchesSelector||Element.prototype.webkitMatchesSelector),l={js:"javascript",py:"python",rb:"ruby",ps1:"powershell",psm1:"powershell",sh:"bash",bat:"batch",h:"c",tex:"latex"},c="pre[data-src]:not(["+(u="data-src-status")+'="loaded"]):not(['+u+'="'+(g="loading")+'"])',Prism.hooks.add("before-highlightall",function(e){e.selector+=", "+c}),Prism.hooks.add("before-sanity-check",function(e){var r,t,n,a,s,i,o=e.element;o.matches(c)&&(e.code="",o.setAttribute(u,g),(r=o.appendChild(document.createElement("CODE"))).textContent="Loading…",t=o.getAttribute("data-src"),"none"===(e=e.language)&&(n=(/\.(\w+)$/.exec(t)||[,"none"])[1],e=l[n]||n),Prism.util.setLanguage(r,e),Prism.util.setLanguage(o,e),(n=Prism.plugins.autoloader)&&n.loadLanguages(e),n=t,a=function(e){o.setAttribute(u,"loaded");var t,n,a=function(e){var t,n;if(e=/^\s*(\d+)\s*(?:(,)\s*(?:(\d+)\s*)?)?$/.exec(e||""))return t=Number(e[1]),n=e[2],e=e[3],n?e?[t,Number(e)]:[t,void 0]:[t,t]}(o.getAttribute("data-range"));a&&(t=e.split(/\r\n?|\n/g),n=a[0],a=null==a[1]?t.length:a[1],n<0&&(n+=t.length),n=Math.max(0,Math.min(n-1,t.length)),a<0&&(a+=t.length),a=Math.max(0,Math.min(a,t.length)),e=t.slice(n,a).join("\n"),o.hasAttribute("data-start")||o.setAttribute("data-start",String(n+1)),r.textContent=e,Prism.highlightElement(r)},s=function(e){o.setAttribute(u,"failed"),r.textContent=e},(i=new XMLHttpRequest).open("GET",n,!0),i.onreadystatechange=function(){4==i.readyState&&(i.status<400&&i.responseText?a(i.responseText):400<=i.status?s("✖ Error "+i.status+" while fetching file: "+i.statusText):s("✖ Error: File does not exist or is empty"))},i.send(null))}),e=!(Prism.plugins.fileHighlight={highlight:function(e){for(var t,n=(e||document).querySelectorAll(c),a=0;t=n[a++];)Prism.highlightElement(t)}}),Prism.fileHighlight=function(){e||(console.warn("Prism.fileHighlight is deprecated. Use `Prism.plugins.fileHighlight.highlight` instead."),e=!0),Prism.plugins.fileHighlight.highlight.apply(this,arguments)})}();
+// -------------------------------------
+</script>
+</script>
+    
+<script>
+// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js ---
+Prism.languages.markup={comment:{pattern://,greedy:!0},prolog:{pattern:/<\?[\s\S]+?\?>/,greedy:!0},doctype:{pattern:/<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:[^<"'\]]|"[^"]*"|'[^']*'|<(?!!--)|)*\]\s*)?>/i,greedy:!0,inside:{"internal-subset":{pattern:/(^[^\[]*\[)[\s\S]+(?=\]>$)/,lookbehind:!0,greedy:!0,inside:null},string:{pattern:/"[^"]*"|'[^']*'/,greedy:!0},punctuation:/^<!|>$|[[\]]/,"doctype-tag":/^DOCTYPE/i,name:/[^\s<>'"]+/}},cdata:{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,greedy:!0},tag:{pattern:/<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/,greedy:!0,inside:{tag:{pattern:/^<\/?[^\s>\/]+/,inside:{punctuation:/^<\/?/,namespace:/^[^\s>\/:]+:/}},"special-attr":[],"attr-value":{pattern:/=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,inside:{punctuation:[{pattern:/^=/,alias:"attr-equals"},{pattern:/^(\s*)["']|["']$/,lookbehind:!0}]}},punctuation:/\/?>/,"attr-name":{pattern:/[^\s>\/]+/,inside:{namespace:/^[^\s>\/:]+:/}}}},entity:[{pattern:/&[\da-z]{1,8};/i,alias:"named-entity"},/&#x?[\da-f]{1,8};/i]},Prism.languages.markup.tag.inside["attr-value"].inside.entity=Prism.languages.markup.entity,Prism.languages.markup.doctype.inside["internal-subset"].inside=Prism.languages.markup,Prism.hooks.add("wrap",(function(a){"entity"===a.type&&(a.attributes.title=a.content.replace(/&amp;/,"&"))})),Object.defineProperty(Prism.languages.markup.tag,"addInlined",{value:function(a,e){var s={};s["language-"+e]={pattern:/(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,lookbehind:!0,inside:Prism.languages[e]},s.cdata=/^<!\[CDATA\[|\]\]>$/i;var t={"included-cdata":{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,inside:s}};t["language-"+e]={pattern:/[\s\S]+/,inside:Prism.languages[e]};var n={};n[a]={pattern:RegExp("(<__[^>]*>)(?:<!\\[CDATA\\[(?:[^\\]]|\\](?!\\]>))*\\]\\]>|(?!<!\\[CDATA\\[)[^])*?(?=</__>)".replace(/__/g,(function(){return a})),"i"),lookbehind:!0,greedy:!0,inside:t},Prism.languages.insertBefore("markup","cdata",n)}}),Object.defineProperty(Prism.languages.markup.tag,"addAttribute",{value:function(a,e){Prism.languages.markup.tag.inside["special-attr"].push({pattern:RegExp("(^|[\"'\\s])(?:"+a+")\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s'\">=]+(?=[\\s>]))","i"),lookbehind:!0,inside:{"attr-name":/^[^\s=]+/,"attr-value":{pattern:/=[\s\S]+/,inside:{value:{pattern:/(^=\s*(["']|(?!["'])))\S[\s\S]*(?=\2$)/,lookbehind:!0,alias:[e,"language-"+e],inside:Prism.languages[e]},punctuation:[{pattern:/^=/,alias:"attr-equals"},/"|'/]}}}})}}),Prism.languages.html=Prism.languages.markup,Prism.languages.mathml=Prism.languages.markup,Prism.languages.svg=Prism.languages.markup,Prism.languages.xml=Prism.languages.extend("markup",{}),Prism.languages.ssml=Prism.languages.xml,Prism.languages.atom=Prism.languages.xml,Prism.languages.rss=Prism.languages.xml;
+// -------------------------------------
+</script>
+</script>
+    
+    
+<script>
+// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js ---
+!function(s){var e=/(?:"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"|'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n])*')/;s.languages.css={comment:/\/\*[\s\S]*?\*\//,atrule:{pattern:RegExp("@[\\w-](?:[^;{\\s\"']|\\s+(?!\\s)|"+e.source+")*?(?:;|(?=\\s*\\{))"),inside:{rule:/^@[\w-]+/,"selector-function-argument":{pattern:/(\bselector\s*\(\s*(?![\s)]))(?:[^()\s]|\s+(?![\s)])|\((?:[^()]|\([^()]*\))*\))+(?=\s*\))/,lookbehind:!0,alias:"selector"},keyword:{pattern:/(^|[^\w-])(?:and|not|only|or)(?![\w-])/,lookbehind:!0}}},url:{pattern:RegExp("\\burl\\((?:"+e.source+"|(?:[^\\\\\r\n()\"']|\\\\[^])*)\\)","i"),greedy:!0,inside:{function:/^url/i,punctuation:/^\(|\)$/,string:{pattern:RegExp("^"+e.source+"$"),alias:"url"}}},selector:{pattern:RegExp("(^|[{}\\s])[^{}\\s](?:[^{};\"'\\s]|\\s+(?![\\s{])|"+e.source+")*(?=\\s*\\{)"),lookbehind:!0},string:{pattern:e,greedy:!0},property:{pattern:/(^|[^-\w\xA0-\uFFFF])(?!\s)[-_a-z\xA0-\uFFFF](?:(?!\s)[-\w\xA0-\uFFFF])*(?=\s*:)/i,lookbehind:!0},important:/!important\b/i,function:{pattern:/(^|[^-a-z0-9])[-a-z0-9]+(?=\()/i,lookbehind:!0},punctuation:/[(){};:,]/},s.languages.css.atrule.inside.rest=s.languages.css;var t=s.languages.markup;t&&(t.tag.addInlined("style","css"),t.tag.addAttribute("style","css"))}(Prism);
+// -------------------------------------
+</script>
+</script>
+    
+<script>
+// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js ---
+Prism.languages.javascript=Prism.languages.extend("clike",{"class-name":[Prism.languages.clike["class-name"],{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$A-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\.(?:constructor|prototype))/,lookbehind:!0}],keyword:[{pattern:/((?:^|\})\s*)catch\b/,lookbehind:!0},{pattern:/(^|[^.]|\.\.\.\s*)\b(?:as|assert(?=\s*\{)|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally(?=\s*(?:\{|$))|for|from(?=\s*(?:['"]|$))|function|(?:get|set)(?=\s*(?:[#\[$\w\xA0-\uFFFF]|$))|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,lookbehind:!0}],function:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,number:{pattern:RegExp("(^|[^\\w$])(?:NaN|Infinity|0[bB][01]+(?:_[01]+)*n?|0[oO][0-7]+(?:_[0-7]+)*n?|0[xX][\\dA-Fa-f]+(?:_[\\dA-Fa-f]+)*n?|\\d+(?:_\\d+)*n|(?:\\d+(?:_\\d+)*(?:\\.(?:\\d+(?:_\\d+)*)?)?|\\.\\d+(?:_\\d+)*)(?:[Ee][+-]?\\d+(?:_\\d+)*)?)(?![\\w$])"),lookbehind:!0},operator:/--|\+\+|\*\*=?|=>|&&=?|\|\|=?|[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?\?=?|\?\.?|[~:]/}),Prism.languages.javascript["class-name"][0].pattern=/(\b(?:class|extends|implements|instanceof|interface|new)\s+)[\w.\\]+/,Prism.languages.insertBefore("javascript","keyword",{regex:{pattern:RegExp("((?:^|[^$\\w\\xA0-\uFFFF.\"'\\])\\s]|\\b(?:return|yield))\\s*)/(?:(?:\\[(?:[^\\]\\\\\r\n]|\\\\.)*\\]|\\\\.|[^/\\\\\\[\r\n])+/[dgimyus]{0,7}|(?:\\[(?:[^[\\]\\\\\r\n]|\\\\.|\\[(?:[^[\\]\\\\\r\n]|\\\\.|\\[(?:[^[\\]\\\\\r\n]|\\\\.)*\\])*\\])*\\]|\\\\.|[^/\\\\\\[\r\n])+/[dgimyus]{0,7}v[dgimyus]{0,7})(?=(?:\\s|/\\*(?:[^*]|\\*(?!/))*\\*/)*(?:$|[\r\n,.;:})\\]]|//))"),lookbehind:!0,greedy:!0,inside:{"regex-source":{pattern:/^(\/)[\s\S]+(?=\/[a-z]*$)/,lookbehind:!0,alias:"language-regex",inside:Prism.languages.regex},"regex-delimiter":/^\/|\/$/,"regex-flags":/^[a-z]+$/}},"function-variable":{pattern:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)\s*=>))/,alias:"function"},parameter:[{pattern:/(function(?:\s+(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)?\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\))/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$a-z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*=>)/i,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*=>)/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*\s*)\(\s*|\]\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*\{)/,lookbehind:!0,inside:Prism.languages.javascript}],constant:/\b[A-Z](?:[A-Z_]|\dx?)*\b/}),Prism.languages.insertBefore("javascript","string",{hashbang:{pattern:/^#!.*/,greedy:!0,alias:"comment"},"template-string":{pattern:/`(?:\\[\s\S]|\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}|(?!\$\{)[^\\`])*`/,greedy:!0,inside:{"template-punctuation":{pattern:/^`|`$/,alias:"string"},interpolation:{pattern:/((?:^|[^\\])(?:\\{2})*)\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}/,lookbehind:!0,inside:{"interpolation-punctuation":{pattern:/^\$\{|\}$/,alias:"punctuation"},rest:Prism.languages.javascript}},string:/[\s\S]+/}},"string-property":{pattern:/((?:^|[,{])[ \t]*)(["'])(?:\\(?:\r\n|[\s\S])|(?!\2)[^\\\r\n])*\2(?=\s*:)/m,lookbehind:!0,greedy:!0,alias:"property"}}),Prism.languages.insertBefore("javascript","operator",{"literal-property":{pattern:/((?:^|[,{])[ \t]*)(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*:)/m,lookbehind:!0,alias:"property"}}),Prism.languages.markup&&(Prism.languages.markup.tag.addInlined("script","javascript"),Prism.languages.markup.tag.addAttribute("on(?:abort|blur|change|click|composition(?:end|start|update)|dblclick|error|focus(?:in|out)?|key(?:down|up)|load|mouse(?:down|enter|leave|move|out|over|up)|reset|resize|scroll|select|slotchange|submit|unload|wheel)","javascript")),Prism.languages.js=Prism.languages.javascript;
+// -------------------------------------
+</script>
+</script>
+    
+    
+<script>
+// --- Embedded JS from https://mohasin-alam.github.io/script.js ---
+document.getElementById('viewSourceBtn').addEventListener('click', fetchSourceCode);
+document.getElementById('copyCodeBtn').addEventListener('click', copyCode);
+document.getElementById('downloadCodeBtn').addEventListener('click', downloadCode);
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+// *** আপনার Cloudflare Worker URL (সংশোধিত) এখানে যুক্ত করা হলো ***
+const workerUrl = "https://delicate-tree-21a6.csmmohasinalam.workers.dev/"; 
 
-    <script>
-        // Cloudflare Worker URL (এটি আপনার অ্যাপ্লিকেশনের সোর্স কোড অনুযায়ী এখানে রাখা হলো)
-        const workerUrl = 'https://delicate-tree-21a6.csmmohasinalam.workers.dev/';
+function fetchSourceCode() {
+    const websiteInput = document.getElementById('websiteUrl').value;
+    const outputElement = document.getElementById('sourceCodeOutput');
+    const outputArea = document.querySelector('.code-area');
+    const statusMessage = document.getElementById('statusMessage');
+    const viewButton = document.getElementById('viewSourceBtn');
+    const actionButtons = document.getElementById('actionButtons'); // নতুন বাটন এরিয়া
 
-        /* --- ১. normalizeUrl ফাংশন: এটি URL থেকে প্রোটোকল, www., এবং পাথ ছেঁটে দেয় --- */
-        function normalizeUrl(url) {
-            let cleanedUrl = url.toLowerCase();
+    // ** পরিবর্তন শুরু: ডোমেন তালিকা এবং চেকিং লজিক **
+    
+    // আপনার ব্লক করা ডোমেনগুলির তালিকা (আপনি যা দিয়েছেন)
+    const myBlockedDomains = [
+        'mohasin.github.io', 
+        'mohasin.is-a.dev', 
+        'mohasin-alam.github.io', 
+        'PLACEHOLDER_4_YOUR_DOMAIN.com', // <-- এখানে আপনার ৪ নম্বর ডোমেনটি বসান
+        'PLACEHOLDER_5_YOUR_DOMAIN.net'  // <-- এখানে আপনার ৫ নম্বর ডোমেনটি বসান
+        // আপনি চাইলে আরও ডোমেন এই তালিকার শেষে যোগ করতে পারেন
+    ];
+
+    try {
+        // ইনপুট URL-কে সঠিকভাবে পার্স করার চেষ্টা (যদি http/https না থাকে, তবে https দিয়ে চেষ্টা)
+        const inputUrl = new URL(websiteInput.startsWith('http') ? websiteInput : `https://${websiteInput}`);
+        const inputHostname = inputUrl.hostname;
+        
+        // চেক করুন ইনপুট ডোমেনটি ব্লক করা ডোমেনগুলির কোনোটির সাথে মেলে কিনা
+        const isBlocked = myBlockedDomains.some(domain => {
+            // খালি বা PLACEHOLDER ডোমেনগুলি পরীক্ষা করা থেকে বাদ দেওয়া হচ্ছে
+            if (domain.includes('PLACEHOLDER') || domain.length === 0) return false;
             
-            // 1. প্রোটোকল (http://, https://) অংশটি সরিয়ে দিন
-            cleanedUrl = cleanedUrl.replace(/^https?:\/\//, '');
-            
-            // 2. ঐচ্ছিক 'www.' অংশটি সরিয়ে দিন
-            cleanedUrl = cleanedUrl.replace(/^www\./, '');
-            
-            // 3. / এর পরের সব কিছু (path, query, hash) সরিয়ে দিন
-            cleanedUrl = cleanedUrl.split('/')[0];
-            
-            return cleanedUrl.trim();
-        }
+            // ডোমেন চেক: ইনপুট হোস্টনেম-এ ব্লক করা ডোমেন স্ট্রিংটি আছে কিনা
+            return inputHostname.includes(domain);
+        });
 
-        /* --- ২. প্রধান ফাংশন: সোর্স কোড আনা ও ডোমেইন ব্লক করা --- */
-        function fetchSourceCode() {
-            const websiteInput = document.getElementById('websiteUrl').value;
-            const outputElement = document.getElementById('sourceCodeOutput');
-            const outputArea = document.querySelector('.code-area');
-            const statusMessage = document.getElementById('statusMessage');
-            const viewButton = document.getElementById('viewSourceBtn');
-            const actionButtons = document.getElementById('actionButtons'); 
-
-            if (!websiteInput) {
-                alert("অনুগ্রহ করে একটি URL দিন।");
-                return;
-            }
-
-            // ইনপুট URL-কে পরিষ্কার করে শুধু মূল ডোমেইনটি বের করুন
-            const normalizedInput = normalizeUrl(websiteInput);
-            
-            // আপনার ব্লক করা সাইটগুলির ডোমেইন এখানে ছোট হাতের অক্ষরে (lowercase) তালিকাভুক্ত করুন
-            const blockedDomains = [
-                "mohasin.github.io",
-                "mohasin.is-a.dev",
-                "mohasin-alam.github.io",
-                // আপনার পরবর্তী সাইটগুলো নিচে যুক্ত করুন (যেমন: "example.com"):
-                "", 
-                ""
-            ];
-            
-            // এখন চেক করুন যে পরিষ্কার করা ইনপুট ডোমেইনটি ব্লক করা তালিকার মধ্যে আছে কিনা
-            // .filter(Boolean) দিয়ে খালি স্ট্রিংগুলো বাদ দেওয়া হয়েছে, যাতে ভ্যালিড ডোমেইনের সাথে শুধু "" ম্যাচ না করে
-            const isBlocked = blockedDomains.filter(Boolean).includes(normalizedInput); 
-
-            if (isBlocked) {
-                // --- অ্যাক্সেস ডিনাই লজিক ---
-                viewButton.disabled = false;
-                actionButtons.classList.add('hidden'); 
-                outputArea.classList.remove('loading');
-                statusMessage.classList.add('hidden');
-                
-                outputElement.textContent = "[ACCESS DENIED]>> You can't view the page source of this website.";
-                outputElement.classList.remove('language-html'); 
-                
-                console.warn(`Blocked attempt to view source for: ${websiteInput}`);
-                return; // এখানেই ফাংশন বন্ধ হবে
-            }
-
-            // --- যদি ব্লক করা না থাকে, তবে স্বাভাবিক প্রক্রিয়ায় লোডিং শুরু হবে ---
-            viewButton.disabled = true;
+        if (isBlocked) {
+            // যদি ব্লক করা হয়: 
+            viewButton.disabled = false;
             actionButtons.classList.add('hidden'); 
-            outputElement.textContent = '';
-            outputArea.classList.add('loading'); 
-            statusMessage.textContent = 'ওয়েবসাইটের সোর্স কোড আনা হচ্ছে... এনক্রিপশন প্রসেস শুরু হচ্ছে...';
-            statusMessage.classList.remove('hidden');
+            statusMessage.classList.add('hidden');
+            outputArea.classList.remove('loading');
             
-            const fetchWorkerUrl = `${workerUrl}?url=${encodeURIComponent(websiteInput)}`;
+            // কাস্টম বার্তা প্রদর্শন
+            outputElement.textContent = "[ACCESS DENIED]>> You can't view the page source";
+            outputElement.classList.remove('language-html'); 
             
-            fetch(fetchWorkerUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        // Cloudflare Worker থেকে প্রাপ্ত ত্রুটি
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(sourceCode => {
-                    outputElement.textContent = sourceCode;
-                    outputElement.classList.add('language-html');
-                    Prism.highlightElement(outputElement);
+            return; // ফাংশনটি এখান থেকেই শেষ হয়ে যাবে
+        }
+    } catch (e) {
+        // যদি URL পার্স করা না যায়, তবে সাধারণ প্রসেস চালিয়ে যান
+    }
+    // ** পরিবর্তন শেষ **
 
-                    // লোডিং শেষ
-                    outputArea.classList.remove('loading');
-                    statusMessage.classList.add('hidden');
-                    viewButton.disabled = false;
-                    
-                    // যদি "Error:" দিয়ে কোড শুরু হয় (Worker এর নিজস্ব ত্রুটি), তবে বাটন লুকিয়ে রাখুন
-                    if (!sourceCode.startsWith("Error:")) {
-                         actionButtons.classList.remove('hidden');
-                    } else {
-                         actionButtons.classList.add('hidden'); 
+    if (!websiteInput) {
+        alert("অনুগ্রহ করে একটি URL দিন।");
+        return;
+    }
+
+    // লোডিং শুরু: বাটন ডিজেবল, স্ট্যাটাস আপডেট, কার্সার ইফেক্ট যোগ
+    viewButton.disabled = true;
+    actionButtons.classList.add('hidden'); // বাটন লুকিয়ে রাখুন
+    outputElement.textContent = '';
+    outputArea.classList.add('loading'); // কীবোর্ড কার্সার দেখাবে
+    statusMessage.textContent = 'ওয়েবসাইটের সোর্স কোড আনা হচ্ছে... এনক্রিপশন প্রসেস শুরু হচ্ছে...';
+    statusMessage.classList.remove('hidden');
+    
+    // Worker-কে URL প্যারামিটার সহ কল করার জন্য URL তৈরি
+    const fetchWorkerUrl = `${workerUrl}?url=${encodeURIComponent(websiteInput)}`;
+    
+    fetch(fetchWorkerUrl)
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        throw new Error(data.error || `Worker ত্রুটি: HTTP ${response.status}`);
+                    } catch (e) {
+                        throw new Error(`নেটওয়ার্ক ত্রুটি: HTTP ${response.status}.`);
                     }
-                })
-                .catch(error => {
-                    // নেটওয়ার্ক বা অন্যান্য ত্রুটি
-                    outputArea.classList.remove('loading');
-                    statusMessage.classList.add('hidden');
-                    viewButton.disabled = false;
-                    actionButtons.classList.add('hidden'); // ত্রুটি হলে বাটন লুকিয়ে রাখুন
-                    outputElement.textContent = `[ACCESS DENIED]>> কোড লোড করা যায়নি। ত্রুটি: ${error.message}`;
-                    console.error('Fetching error:', error);
                 });
-        }
-
-        /* --- ৩. কোড কপি করার ফাংশন --- */
-        function copyCode() {
-            const code = document.getElementById('sourceCodeOutput').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                alert('কোড সফলভাবে কপি করা হয়েছে!');
-            }).catch(err => {
-                alert('কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।');
-                console.error('Copy failed:', err);
-            });
-        }
-
-        /* --- ৪. HTML ডাউনলোড করার ফাংশন --- */
-        function downloadCode() {
-            const code = document.getElementById('sourceCodeOutput').textContent;
-            const urlInput = document.getElementById('websiteUrl').value || 'untitled';
-            
-            // URL থেকে ডোমেইন নাম বের করার চেষ্টা
-            let filename;
-            try {
-                // এটি ডাউনলোড করার জন্য, তাই এখানে আবার প্রোটোকল যোগ করার চেষ্টা করা হয়েছে
-                const urlObj = new URL(urlInput.startsWith('http') ? urlInput : `https://${urlInput}`);
-                filename = urlObj.hostname.replace('www.', '').replace(/\./g, '_');
-            } catch (e) {
-                filename = 'source_code';
             }
+            return response.text();
+        })
+        .then(htmlCode => {
+            // লোডিং শেষ
+            statusMessage.classList.add('hidden');
+            outputArea.classList.remove('loading');
+            viewButton.disabled = false;
+            actionButtons.classList.remove('hidden'); // বাটন দেখান
 
-            const blob = new Blob([code], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${filename}.html`;
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert(`'${filename}.html' ডাউনলোড করা হচ্ছে...`);
-        }
-    </script>
+            // কোড দেখানো
+            outputElement.textContent = htmlCode;
+            outputElement.classList.add('language-html');
+            Prism.highlightElement(outputElement); 
+        })
+        .catch(error => {
+            // ত্রুটি হলে
+            statusMessage.classList.add('hidden');
+            outputArea.classList.remove('loading');
+            viewButton.disabled = false;
+            actionButtons.classList.add('hidden'); // ত্রুটি হলে বাটন লুকিয়ে রাখুন
+            outputElement.textContent = `[ACCESS DENIED]>> কোড লোড করা যায়নি। ত্রুটি: ${error.message}`;
+            console.error('Fetching error:', error);
+        });
+}
+
+function copyCode() {
+    const code = document.getElementById('sourceCodeOutput').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        alert('কোড সফলভাবে কপি করা হয়েছে!');
+    }).catch(err => {
+        alert('কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।');
+        console.error('Copy failed:', err);
+    });
+}
+
+function downloadCode() {
+    const code = document.getElementById('sourceCodeOutput').textContent;
+    const urlInput = document.getElementById('websiteUrl').value || 'untitled';
+    
+    // URL থেকে ডোমেইন নাম বের করার চেষ্টা
+    let filename;
+    try {
+        const urlObj = new URL(urlInput.startsWith('http') ? urlInput : `https://${urlInput}`);
+        filename = urlObj.hostname.replace('www.', '').replace(/\./g, '_');
+    } catch (e) {
+        filename = 'source_code';
+    }
+
+    const blob = new Blob([code], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${filename}.html`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    alert(`'${filename}.html' ডাউনলোড করা হচ্ছে...`);
+}
+
+// -------------------------------------
+</script>
+</script>
 </body>
 </html>
