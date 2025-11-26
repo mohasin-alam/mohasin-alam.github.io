@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal QR Stylizer & Logo Embedder</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        /* ফন্ট এবং বেসিক কালার */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        :root {
+            --bg-color: #0d0d0d;
+            --text-color: #00ff00;
+            --accent-color: #ff00ff; /* ম্যাজেন্টা */
+            --border-color: #008000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'VT323', monospace;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .terminal-header {
+            background-color: var(--border-color);
+            color: var(--bg-color);
+            padding: 5px 20px;
+            font-size: 1.2em;
+            border-bottom: 2px solid var(--text-color);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .panel {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+
+        /* ফর্ম এবং ইনপুট স্টাইল */
+        label {
+            display: block;
+            margin-top: 10px;
+            color: var(--accent-color);
+        }
+
+        input[type="text"], select {
+            width: calc(100% - 10px);
+            padding: 8px 5px;
+            margin-top: 5px;
+            background-color: #000;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            font-family: 'VT323', monospace;
+            font-size: 1em;
+        }
+
+        input[type="file"] {
+            margin-top: 5px;
+            font-family: 'VT323', monospace;
+        }
+
+        button {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px 15px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-family: 'VT323', monospace;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        /* আউটপুট এবং QR কন্টেইনার */
+        #terminalOutput {
+            background-color: var(--bg-color);
+            border: 1px dashed var(--accent-color);
+            padding: 10px;
+            min-height: 50px;
+            text-align: left;
+        }
+
+        #status {
+            color: var(--text-color);
+        }
+
+        #qrCodeContainer {
+            margin-top: 10px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            background-color: #fff; /* QR কোড সাদা ব্যাকগ্রাউন্ডে ভালো দেখায় */
+            border: 2px solid var(--accent-color);
+        }
+        #qrCodeContainer canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-header">
+        Terminal > RUN: QR_Stylizer.exe
+    </div>
+
+    <div class="container">
+        
+        <div class="panel input-panel">
+            <label for="qrData">QR Data (Link/Text):</label>
+            <input type="text" id="qrData" value="https://github.com" placeholder="Enter your link or text">
+
+            <label for="styleSelect">QR Style:</label>
+            <select id="styleSelect">
+                <option value="classic">Classic (Square)</option>
+                <option value="round">Round Dots</option>
+                <option value="gradient">Gradient Fill</option>
+            </select>
+
+            <label for="logoUpload">Upload Logo (PNG/JPG):</label>
+            <input type="file" id="logoUpload" accept="image/png, image/jpeg">
+            
+            <button onclick="generateQRCode()">GENERATE QR</button>
+            <button onclick="downloadQR()">DOWNLOAD QR (PNG)</button>
+        </div>
+
+        <div class="panel output-panel">
+            <p>Processing Output:</p>
+            <div id="terminalOutput">
+                <span id="status">INIT: Awaiting input...</span>
+            </div>
+            
+            <p style="margin-top: 15px;">QR Code Preview:</p>
+            <div id="qrCodeContainer">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM উপাদান
+        const qrDataInput = document.getElementById('qrData');
+        const styleSelect = document.getElementById('styleSelect');
+        const logoUploadInput = document.getElementById('logoUpload');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+        const statusOutput = document.getElementById('status');
+
+        let generatedLogo = null; // আপলোড করা লোগো ইমেজ অবজেক্ট স্টোর করার জন্য
+
+        // লোগো আপলোডের জন্য ইভেন্ট লিসেনার
+        logoUploadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                generatedLogo = null;
+                updateStatus('LOG: Logo file removed.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    generatedLogo = img;
+                    updateStatus(`LOG: Logo loaded successfully (${img.width}x${img.height}px).`);
+                    // লোগো লোড হওয়ার পর নতুন করে QR জেনারেট করার সাজেশন
+                    generateQRCode(); 
+                };
+                img.onerror = function() {
+                    updateStatus('ERROR: Failed to load logo image.', true);
+                    generatedLogo = null;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // স্ট্যাটাস আপডেট করার ফাংশন
+        function updateStatus(message, isError = false) {
+            statusOutput.innerHTML = `<span style="color: ${isError ? '#ff0000' : '#00ff00'};">${message}</span>`;
+            console.log(message);
+        }
+
+        // QR কোড জেনারেট এবং রেন্ডার করার প্রধান ফাংশন (Global Scope-এ রাখা)
+        function generateQRCode() {
+            const data = qrDataInput.value;
+            const style = styleSelect.value;
+            const size = 300; 
+
+            if (!data) {
+                updateStatus('ERROR: Please enter data for QR code.', true);
+                return;
+            }
+
+            updateStatus('LOG: Generating QR code...');
+            qrCodeContainer.innerHTML = ''; 
+
+            // QR Code জেনারেট করা
+            const qrCanvas = document.createElement('canvas');
+            qrCanvas.id = 'temp-qr-canvas';
+            qrCanvas.width = size;
+            qrCanvas.height = size;
+            qrCodeContainer.appendChild(qrCanvas);
+
+            // qrcode.js লাইব্রেরি ব্যবহার করা (এটি HTML table এ রেন্ডার করে, তাই আমরা ক্যানভাসে ড্র করে নেব)
+            const tempDiv = document.createElement('div');
+            new QRCode(tempDiv, {
+                text: data,
+                width: size,
+                height: size,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H // হাই এরর কারেকশন লেভেল লোগোর জন্য ভালো
+            });
+
+            const qrTable = tempDiv.querySelector('table');
+            if (!qrTable) {
+                updateStatus('ERROR: QR Code generation failed.', true);
+                return;
+            }
+
+            // টেবিল থেকে ক্যানভাসে QR কোড আঁকা এবং স্টাইল যোগ করা
+            drawStyledQR(qrCanvas, qrTable, style, size);
+            
+            // লোগো যুক্ত করা
+            if (generatedLogo) {
+                embedLogo(qrCanvas, generatedLogo, size);
+            }
+        }
+
+        // ক্যানভাসে QR কোড আঁকা এবং স্টাইল দেওয়া
+        function drawStyledQR(canvas, qrTable, style, size) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size); 
+
+            const rows = qrTable.rows;
+            const rowCount = rows.length;
+            const pixelSize = size / rowCount;
+            
+            // Gradient এর জন্য কালার সেট করা
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0099ff'); // Blue
+            gradient.addColorStop(1, '#ff00ff'); // Magenta
+
+            for (let r = 0; r < rowCount; r++) {
+                const cells = rows[r].cells;
+                for (let c = 0; c < cells.length; c++) {
+                    // যদি সেলটি কালো (ডাটা পয়েন্ট) হয়
+                    if (cells[c].style.backgroundColor === 'rgb(0, 0, 0)') {
+                        
+                        // স্টাইল অনুযায়ী কালার এবং শেপ সেট করা
+                        if (style === 'gradient') {
+                            ctx.fillStyle = gradient;
+                        } else {
+                            ctx.fillStyle = '#000000'; // ডিফল্ট কালো
+                        }
+
+                        ctx.beginPath();
+                        const x = c * pixelSize;
+                        const y = r * pixelSize;
+
+                        if (style === 'round') {
+                            // গোলাকার ডট
+                            ctx.arc(x + pixelSize / 2, y + pixelSize / 2, pixelSize / 2, 0, 2 * Math.PI);
+                            ctx.fill();
+                        } else {
+                            // ক্লাসিক বা গ্র্যাডিয়েন্ট (স্কোয়ার)
+                            ctx.fillRect(x, y, pixelSize, pixelSize);
+                        }
+                    }
+                }
+            }
+            updateStatus(`LOG: QR Code generated with style: ${style}.`);
+        }
+
+        // ক্যানভাসে লোগো যুক্ত করা
+        function embedLogo(canvas, logoImg, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // QR কোডের আকারের 20% লোগোর জন্য জায়গা রাখা
+            const logoSize = size * 0.2; 
+            const logoX = (size - logoSize) / 2;
+            const logoY = (size - logoSize) / 2;
+
+            // লোগোটির পিছনে সাদা ব্যাকগ্রাউন্ডের একটি বর্ডার আঁকা
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+            
+            // লোগো আঁকা
+            ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+            updateStatus('LOG: Logo successfully embedded at the center.');
+        }
+
+        // QR কোড PNG হিসেবে ডাউনলোড করা (Global Scope-এ রাখা)
+        function downloadQR() {
+            const canvas = qrCodeContainer.querySelector('canvas');
+            if (!canvas) {
+                updateStatus('ERROR: Generate QR Code first.', true);
+                return;
+            }
+
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'stylish_qr_code.png'; 
+            
+            // ডাউনলোড শুরু করা
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            updateStatus('LOG: QR Code download initiated.');
+        }
+
+        // পেজ লোড হওয়ার সাথে সাথে একটি ডিফল্ট QR কোড তৈরি করা
+        window.onload = function() {
+             generateQRCode();
+        };
+
+    </script>
+
+</body>
+</html>
