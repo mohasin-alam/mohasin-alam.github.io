@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My QR Code Generator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 50px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        input {
+            padding: 10px;
+            width: 250px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+        button:hover { background-color: #218838; }
+        #qrcode {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2>QR Code Generator</h2>
+        <input type="text" id="inputText" placeholder="Enter Link or Text here...">
+        <button onclick="generateQR()">Generate</button>
+        
+        <div id="qrcode"></div>
+    </div>
+
+    <script>
+        function generateQR() {
+            var text = document.getElementById("inputText").value;
+            var qrContainer = document.getElementById("qrcode");
+
+            // আগের QR Code মুছে ফেলার জন্য
+            qrContainer.innerHTML = "";
+
+            if (text) {
+                new QRCode(qrContainer, {
+                    text: text,
+                    width: 200,
+                    height: 200
+                });
+            } else {
+                alert("Please enter some text or link!");
+            }
+        }
+    </script>
+
+</body>
+</html>
