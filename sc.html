@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f2f5;
+            padding: 15px;
+        }
+        .scanner-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        /* ভিডিও ফিড দেখানোর জন্য */
+        #video {
+            width: 100%;
+            border-radius: 8px;
+            background-color: #000;
+        }
+        /* ক্যানভাসটি প্রসেসিং এর জন্য, তাই এটিকে লুকিয়ে রাখা হলো */
+        #canvas {
+            display: none; 
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #outputMessage {
+            color: #555;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        #outputData {
+            background-color: #e6ffe6;
+            color: #008000;
+            padding: 15px;
+            word-wrap: break-word;
+            border: 1px solid #cceeff;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanner-container">
+        <h2>📷 QR Code Scanner</h2>
+        
+        <video id="video" autoplay playsinline></video>
+        
+        <canvas id="canvas"></canvas>
+
+        <div class="output">
+            <div id="outputMessage">ক্যামেরা লোড হচ্ছে...</div>
+            <div id="outputData"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM উপাদানগুলো সিলেক্ট করা
+        var video = document.getElementById("video");
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var outputMessage = document.getElementById("outputMessage");
+        var outputData = document.getElementById("outputData");
+
+        // ক্যামেরা শুরু করার ফাংশন
+        function startCamera() {
+            // ব্রাউজারকে ক্যামেরা অ্যাক্সেস করতে বলা হচ্ছে
+            // facingMode: "environment" মানে পিছনের ক্যামেরা
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(function(stream) {
+                    // ভিডিও স্ট্রিমটি ভিডিও এলিমেন্টে লোড করা
+                    video.srcObject = stream;
+                    video.setAttribute("playsinline", true); // iOS এর জন্য
+                    video.play();
+
+                    // ভিডিও চলতে শুরু করলে স্ক্যানিং লুপ শুরু করা
+                    requestAnimationFrame(tick);
+                })
+                .catch(function(err) {
+                    // ক্যামেরা অ্যাক্সেস ব্যর্থ হলে
+                    outputMessage.innerText = "⚠️ ক্যামেরা অ্যাক্সেস প্রয়োজন। (নিরাপদ কানেকশন/HTTPS আবশ্যক)";
+                    console.error("Camera access failed: ", err);
+                });
+        }
+
+        // স্ক্যানিং লুপ
+        function tick() {
+            // ভিডিও ডাটা লোড না হওয়া পর্যন্ত অপেক্ষা
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                // ক্যানভাসের সাইজ ভিডিওর সাইজ অনুযায়ী সেট করা
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+
+                // ভিডিওর বর্তমান ফ্রেমটি ক্যানভাসে আঁকা
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // ক্যানভাস থেকে ইমেজ ডাটা নেওয়া (QR কোড খোঁজার জন্য)
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                // jsQR লাইব্রেরি ব্যবহার করে QR কোড খোঁজা
+                var qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (qrCode) {
+                    // **যদি QR কোড পাওয়া যায়**
+                    outputMessage.innerText = "✅ কোড সফলভাবে পাওয়া গেছে!";
+                    outputData.innerText = qrCode.data;
+                    
+                    // এখানে আপনি চাইলে অটোমেটিক ওই লিংকে রিডাইরেক্ট করতে পারেন:
+                    // window.location.href = qrCode.data;
+
+                    // স্ক্যানিং বন্ধ করে দেওয়ার জন্য return
+                    return; 
+                } else {
+                    // QR কোড না পাওয়া গেলে
+                    outputMessage.innerText = "🔍 স্ক্যান করার জন্য QR কোডের দিকে ধরুন...";
+                    outputData.innerText = "";
+                }
+            }
+
+            // লুপ চালু রাখা (পরবর্তী ফ্রেমে স্ক্যান করার জন্য)
+            requestAnimationFrame(tick);
+        }
+
+        // ক্যামেরা শুরু করা
+        startCamera();
+    </script>
+
+</body>
+</html>
