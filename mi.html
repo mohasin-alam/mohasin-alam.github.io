@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Markdown Previewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* ফন্ট ও বেসিক স্টাইল */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        body {
+            background-color: #0d0d0d;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* মূল কন্টেইনার - দুটি প্যানেলকে পাশাপাশি রাখার জন্য */
+        .container {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 40px); /* পুরো ভিউপোর্ট হাইট ব্যবহার করা */
+        }
+
+        /* ইনপুট এবং আউটপুট প্যানেলের বেসিক স্টাইল */
+        .panel {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #00ff00; /* উজ্জ্বল সবুজ বর্ডার */
+            border-radius: 5px;
+            box-sizing: border-box;
+            overflow-y: auto; /* স্ক্রোলিং সক্ষম করা */
+            background-color: #1a1a1a;
+        }
+
+        /* টেক্সট এরিয়া স্টাইল */
+        #editor {
+            width: 100%;
+            height: 100%;
+            resize: none;
+            border: none;
+            background-color: #1a1a1a;
+            color: #ff00ff; /* ইনপুটের জন্য ভিন্ন রঙ (যেমন ম্যাজেন্টা) */
+            font-family: 'VT323', monospace;
+            font-size: 1.1em;
+            outline: none;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* প্রিভিউ এরিয়া স্টাইল (টার্মিনাল আউটপুট হিসেবে) */
+        #preview {
+            background-color: #000000;
+            color: #00ff00;
+            text-align: left;
+            font-size: 1.1em;
+            
+        }
+        
+        /* প্রিভিউ এরিয়ার Markdown এলিমেন্টগুলির স্টাইল */
+        #preview h1, #preview h2, #preview h3 {
+            color: #ffff00; /* হেডিংয়ের জন্য হলুদ রঙ */
+            border-bottom: 2px dashed #008000; /* ড্যাশড আন্ডারলাইন */
+            padding-bottom: 5px;
+            margin-top: 15px;
+        }
+        #preview p {
+            margin-bottom: 10px;
+        }
+        #preview ul, #preview ol {
+            margin-left: 20px;
+        }
+        #preview code {
+            background-color: #333333;
+            color: #ff9900; /* কোড ব্লক এর জন্য কমলা */
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        #preview pre {
+            background-color: #222222;
+            padding: 10px;
+            border-left: 3px solid #00ffff; /* কোড ব্লক এর জন্য সায়ান বর্ডার */
+            overflow-x: auto;
+        }
+        #preview blockquote {
+            border-left: 3px solid #ff00ff;
+            color: #00cccc; /* ব্লক কোট এর জন্য সায়ান/ব্লু */
+            padding-left: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="panel">
+            <label style="color: #ff00ff;">> INPUT_MD:</label>
+            <textarea id="editor" onkeyup="updatePreview()"># Terminal Markdown</textarea>
+        </div>
+
+        <div class="panel" id="preview">
+            <label style="color: #ffff00;">> OUTPUT_HTML:</label>
+            </div>
+    </div>
+
+    <script>
+        // ডিফল্ট টেক্সট সেট করা
+        const defaultText = `# Terminal Markdown Preview
+---
+## Hacking Log
+
+1.  **System:** Access Granted
+2.  **Date:** 2025-11-26
+3.  **Status:** COMPLETE
+
+> "The only secure computer is one that's unplugged." - C.J.
+
+\`Code Example: console.log("Hello World");\`
+
+\`\`\`javascript
+function decrypt(data) {
+    if (data.length > 0) {
+        return "Decryption Success!";
+    }
+    return "Error: Data missing";
+}
+\`\`\``;
+
+        document.getElementById('editor').value = defaultText;
+
+        // প্রিভিউ আপডেট করার ফাংশন
+        function updatePreview() {
+            const markdownInput = document.getElementById('editor').value;
+            // marked.js ব্যবহার করে Markdown কে HTML এ রূপান্তর করা
+            const htmlOutput = marked.parse(markdownInput);
+            
+            // আউটপুট লেবেল ঠিক রেখে প্রিভিউ আপডেট করা
+            const previewElement = document.getElementById('preview');
+            // আউটপুট লেবেলটি ধরে রেখে বাকি HTML আপডেট করা হচ্ছে
+            previewElement.innerHTML = '<label style="color: #ffff00;">> OUTPUT_HTML:</label>' + htmlOutput;
+        }
+
+        // পেজ লোড হওয়ার সাথে সাথে একবার প্রিভিউ আপডেট করা
+        updatePreview();
+    </script>
+
+</body>
+</html>
