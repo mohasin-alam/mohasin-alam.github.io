@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Unit Converter | C:/TERMINAL_TOOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Hacker/Terminal স্টাইল CSS */
+        :root {
+            --bg-color: #000;
+            --text-color: #00ff41; /* নিয়ন সবুজ */
+            --glow-color: #00ff41;
+            --border-color: #008800;
+        }
+
+        body {
+            background-color: #080808;
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .terminal-container {
+            width: 90%;
+            max-width: 700px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 0 20px var(--glow-color); /* পুরো কনটেইনারে হালকা গ্লো */
+            background-color: var(--bg-color);
+            padding: 15px;
+        }
+
+        .terminal-header {
+            background-color: var(--border-color);
+            color: #000;
+            padding: 5px 10px;
+            font-weight: bold;
+            margin: -15px -15px 15px -15px; /* বর্ডার পর্যন্ত প্রসারিত */
+            text-align: center;
+        }
+
+        .prompt {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .user-info {
+            color: var(--glow-color);
+            font-weight: bold;
+        }
+
+        .command {
+            color: #fff;
+        }
+
+        /* ইনপুট/সিলেক্ট স্টাইল */
+        .converter-box {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group label {
+            display: block;
+            width: 150px;
+            font-weight: bold;
+            color: #00ffff; /* সাইয়ান কালার */
+        }
+
+        input, select {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            flex-grow: 1;
+            font-family: 'Fira Code', monospace;
+            font-size: 1em;
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.5); /* ইনপুট ফিল্ডে হালকা গ্লো */
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            box-shadow: 0 0 8px var(--glow-color);
+            border-color: #fff;
+        }
+
+        /* আউটপুট স্টাইল */
+        .result-prompt {
+            font-size: 1.2em;
+        }
+
+        .result {
+            color: #ff00ff; /* ম্যাজেন্টা/পিঙ্ক কালার */
+            font-weight: bold;
+            text-shadow: 0 0 8px #ff00ff;
+        }
+
+        .terminal-footer {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+            text-align: right;
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 15px;
+        }
+
+        /* ড্রপডাউন এরো হাইড করা */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300ff41%22%20d%3D%22M287%20184.2L154.6%2046.2c-7.6-7.8-19.8-7.8-27.4%200L5%20184.2c-7.8%207.8-7.8%2020.5%200%2028.3l13.7%2013.7c7.8%207.8%2020.5%207.8%2028.3%200L140%20108.3l92.8%2091.9c7.8%207.8%2020.5%207.8%2028.3%200l13.7-13.7c7.8-7.8%207.8-20.5%200-28.3z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <header class="terminal-header">
+            :: HACKER_TOOL v2.1.0 :: UNIT_CONVERTER.EXE
+        </header>
+
+        <div class="terminal-body">
+            <div class="prompt">
+                <span class="user-info">[ROOT@GITHUB-PAGES]</span>
+                <span class="command">$ LOAD MODULE: LENGTH</span>
+            </div>
+            
+            <div class="converter-box">
+                <div class="input-group">
+                    <label for="conversionType">MODULE SELECT:</label>
+                    <select id="conversionType" onchange="resetInputs()">
+                        <option value="length">LENGTH</option>
+                        <option value="data">DIGITAL DATA</option>
+                        <option value="temperature">TEMPERATURE</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="inputValue">INPUT VALUE:</label>
+                    <input type="number" id="inputValue" value="1" placeholder="Enter number..." oninput="convertUnits()">
+                </div>
+
+                <div class="input-group">
+                    <label for="fromUnit">FROM UNIT:</label>
+                    <select id="fromUnit" onchange="convertUnits()">
+                        </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="toUnit">TO UNIT:</label>
+                    <select id="toUnit" onchange="convertUnits()">
+                        </select>
+                </div>
+            </div>
+            
+            <div class="prompt result-prompt">
+                <span class="user-info">[OUTPUT]</span>
+                <span class="command">RESULT: <span id="outputResult" class="result">0</span></span>
+            </div>
+        </div>
+
+        <footer class="terminal-footer">
+            --- EXECUTION COMPLETE ---
+        </footer>
+    </div>
+
+    <script>
+        // --- JavaScript ইউনিট কনভার্সন লজিক ---
+
+        const units = {
+            length: {
+                'Meter (m)': 1,
+                'Kilometer (km)': 1000,
+                'Mile (mi)': 1609.34,
+                'Foot (ft)': 0.3048,
+                'Inch (in)': 0.0254
+            },
+            data: {
+                'Byte (B)': 1,
+                'Kilobyte (KB)': 1024,
+                'Megabyte (MB)': 1024 * 1024,
+                'Gigabyte (GB)': 1024 * 1024 * 1024,
+                'Terabyte (TB)': 1024 * 1024 * 1024 * 1024
+            },
+            temperature: {
+                // টেম্পারেচার আলাদা লজিক ব্যবহার করে কারণ এটি রৈখিক (linear) নয়
+                'Celsius (°C)': 'C',
+                'Fahrenheit (°F)': 'F',
+                'Kelvin (K)': 'K'
+            }
+        };
+
+        // টেম্পারেচার রূপান্তরের জন্য বিশেষ ফাংশন
+        function convertTemperature(value, from, to) {
+            let baseValue; // কেলভিনে রূপান্তরিত করা হবে
+
+            if (from === 'C') {
+                baseValue = value + 273.15;
+            } else if (from === 'F') {
+                baseValue = (value - 32) * (5/9) + 273.15;
+            } else if (from === 'K') {
+                baseValue = value;
+            }
+
+            if (to === 'C') {
+                return baseValue - 273.15;
+            } else if (to === 'F') {
+                return (baseValue - 273.15) * (9/5) + 32;
+            } else if (to === 'K') {
+                return baseValue;
+            }
+        }
+
+        // ড্রপডাউনগুলো লোড করার ফাংশন
+        function loadUnits(type) {
+            const fromUnitSelect = document.getElementById('fromUnit');
+            const toUnitSelect = document.getElementById('toUnit');
+            
+            // আগের অপশনগুলো সরিয়ে দেওয়া হলো
+            fromUnitSelect.innerHTML = '';
+            toUnitSelect.innerHTML = '';
+
+            const currentUnits = units[type];
+
+            for (const unitName in currentUnits) {
+                // From Unit
+                let optionFrom = document.createElement('option');
+                optionFrom.value = unitName;
+                optionFrom.textContent = unitName;
+                fromUnitSelect.appendChild(optionFrom);
+
+                // To Unit
+                let optionTo = document.createElement('option');
+                optionTo.value = unitName;
+                optionTo.textContent = unitName;
+                toUnitSelect.appendChild(optionTo);
+            }
+            
+            // To Unit-এর ডিফল্ট নির্বাচন পরিবর্তন
+            if (toUnitSelect.options.length > 1) {
+                toUnitSelect.selectedIndex = 1; 
+            }
+        }
+
+        // ইনপুট এবং আউটপুট রিসেট করার ফাংশন
+        function resetInputs() {
+            const type = document.getElementById('conversionType').value;
+            loadUnits(type);
+            document.getElementById('inputValue').value = 1;
+            document.querySelector('.prompt .command').textContent = `$ LOAD MODULE: ${type.toUpperCase()}`;
+            convertUnits();
+        }
+
+
+        // মূল রূপান্তর ফাংশন
+        function convertUnits() {
+            const type = document.getElementById('conversionType').value;
+            const inputValue = parseFloat(document.getElementById('inputValue').value);
+            const fromUnitName = document.getElementById('fromUnit').value;
+            const toUnitName = document.getElementById('toUnit').value;
+            const outputElement = document.getElementById('outputResult');
+
+            if (isNaN(inputValue)) {
+                outputElement.textContent = 'ERROR: INVALID INPUT';
+                return;
+            }
+            
+            let result = 0;
+
+            if (type === 'temperature') {
+                const fromCode = units.temperature[fromUnitName];
+                const toCode = units.temperature[toUnitName];
+                result = convertTemperature(inputValue, fromCode, toCode);
+            } else {
+                const currentUnits = units[type];
+                const fromFactor = currentUnits[fromUnitName];
+                const toFactor = currentUnits[toUnitName];
+                
+                // বেস ইউনিটে রূপান্তর (যেমন মিটারে, বা বাইটে)
+                const baseValue = inputValue * fromFactor;
+                
+                // কাঙ্ক্ষিত ইউনিটে রূপান্তর
+                result = baseValue / toFactor;
+            }
+            
+            // ফলাফলকে সীমিত দশমিক স্থানে দেখানো
+            outputElement.textContent = result.toFixed(6); 
+        }
+
+        // পেজ লোড হওয়ার পর শুরু করা
+        document.addEventListener('DOMContentLoaded', () => {
+            // ইভেন্ট লিসেনার সেট করা
+            document.getElementById('conversionType').addEventListener('change', resetInputs);
+            document.getElementById('inputValue').addEventListener('input', convertUnits);
+            document.getElementById('fromUnit').addEventListener('change', convertUnits);
+            document.getElementById('toUnit').addEventListener('change', convertUnits);
+            
+            // ডিফল্ট মডিউল লোড করা
+            resetInputs();
+        });
+    </script>
+</body>
+</html>
