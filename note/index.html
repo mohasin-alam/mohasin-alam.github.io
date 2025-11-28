@@ -3,36 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Email Notepad (RTDB)</title>
+    <title>Secure Email Notepad</title>
     
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f4; }
-        #auth-container, #notepad-container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
+        /* --- থিম ভেরিয়েবলস --- */
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --primary-color: #007bff; /* নীল */
+            --secondary-color: #2c2c2c; /* সাইডবারের ব্যাকগ্রাউন্ড */
+            --accent-color: #28a745; /* সবুজ (সেভ বাটন) */
+            --danger-color: #dc3545; /* লাল (মুছে ফেলার বাটন) */
+            --border-color: #444;
+            --hover-bg: #333;
         }
-        input, textarea, button {
+
+        /* --- গ্লোবাল স্টাইল --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* --- লগইন কন্টেইনার স্টাইল --- */
+        #auth-container {
+            max-width: 400px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* --- নোটপ্যাড কন্টেইনার স্টাইল --- */
+        #notepad-container {
+            width: 90%;
+            max-width: 1000px; 
+            height: 80vh; 
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- ইনপুট এবং টেক্সটের বেস স্টাইল --- */
+        input[type="email"], input[type="password"], 
+        input[type="text"], textarea {
             width: 100%;
             padding: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: border-color 0.3s;
         }
+
+        input:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
         textarea {
-            height: 200px;
-            resize: vertical;
+            height: calc(100% - 100px); /* এডিটর এরিয়া সেট করা হলো */
+            resize: none; 
+            line-height: 1.5;
         }
+
+        /* --- বাটন স্টাইল --- */
         button {
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
+            padding: 10px 15px;
+            margin-right: 10px;
             border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
-        button:hover {
-            opacity: 0.8;
+
+        /* বাটন কালার */
+        #auth-container button {
+            background-color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        #auth-container button:nth-child(5) { /* রেজিস্টার বাটন */
+            background-color: #555;
+        }
+        #auth-container button:hover {
+            opacity: 0.9;
+        }
+        
+        #notepad-container .top-buttons button {
+            margin-top: 0;
+            width: auto;
+        }
+        
+        #notepad-container button[onclick="saveNote()"] {
+            background-color: var(--accent-color);
+        }
+        #notepad-container button[onclick="deleteNote()"] {
+            background-color: var(--danger-color);
+        }
+        #notepad-container button[onclick="logoutUser()"] {
+            background-color: #555;
+            float: right;
+        }
+        
+        /* --- নোট লিস্ট এবং এডিটর লেআউট --- */
+        #note-app-layout {
+            display: flex;
+            height: calc(100% - 70px); 
+            margin-top: 10px;
+        }
+
+        #notes-list {
+            width: 300px; 
+            min-width: 200px;
+            border-right: 1px solid var(--border-color);
+            padding-right: 15px;
+            overflow-y: auto;
+            padding-top: 5px;
+            background-color: var(--secondary-color);
+            flex-shrink: 0; /* সাইডবার ছোট হবে না */
+        }
+        
+        #note-editor {
+            flex-grow: 1; 
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- নোট আইটেম স্টাইল --- */
+        .note-item {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-left: 3px solid transparent;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
+
+        .note-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .note-item.active { /* সক্রিয় নোট হাইলাইট করা */
+            background-color: var(--hover-bg);
+            border-left: 3px solid var(--primary-color);
+            font-weight: bold;
+        }
+        
+        #save-status {
+            margin-top: 15px;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        /* ছোট স্ক্রিনের জন্য রেসপনসিভ স্টাইল */
+        @media (max-width: 768px) {
+            #notepad-container {
+                height: 90vh;
+            }
+            #note-app-layout {
+                flex-direction: column;
+                height: auto;
+            }
+            #notes-list {
+                width: 100%;
+                height: 120px;
+                max-height: 120px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-right: 0;
+                margin-bottom: 15px;
+            }
+            #note-editor {
+                width: 100%;
+                padding-left: 0;
+            }
+            textarea {
+                height: 200px;
+            }
+            .top-buttons button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            #notepad-container button[onclick="logoutUser()"] {
+                float: none;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -47,11 +228,28 @@
     </div>
 
     <div id="notepad-container" style="display: none;">
-        <h2 id="welcome-message">নোটপ্যাড</h2>
-        <textarea id="note-area" placeholder="আপনার নোট এখানে লিখুন..."></textarea>
-        <button onclick="saveNote()">নোট সেভ করুন</button>
-        <button onclick="logoutUser()">লগআউট</button>
-        <p id="save-status"></p>
+        <div class="top-buttons">
+            <h2 id="welcome-message" style="display: inline-block; margin-right: 20px;">নোটপ্যাড</h2>
+            <button onclick="logoutUser()">লগআউট</button>
+            <button onclick="createNewNote()">+ নতুন নোট</button>
+        </div>
+        
+        <div id="note-app-layout">
+            
+            <div id="notes-list">
+                <p>নোট লোড হচ্ছে...</p>
+            </div>
+            
+            <div id="note-editor">
+                <input type="text" id="note-title" placeholder="নোটের শিরোনাম" value="" required>
+                <textarea id="note-text" placeholder="নোটের মূল অংশ এখানে লিখুন..."></textarea>
+                <button onclick="saveNote()" style="width: 150px;">নোট সেভ করুন</button>
+                <button onclick="deleteNote()" id="delete-btn" style="width: 150px; display: none;">নোটটি মুছে ফেলুন</button>
+                <p id="save-status"></p>
+                
+                <input type="hidden" id="current-note-id" value=""> 
+            </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -59,11 +257,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // আপনার কপি করা কনফিগারেশন এবং সঠিক databaseURL
+        // কনফিগারেশন: আপনার টাস্ক ৪ থেকে নেওয়া মানগুলি
         const firebaseConfig = {
             apiKey: "AIzaSyCyBfxasE2hwuthXu56VuHa7LWpybVFXhc",
             authDomain: "emailnotepad-28faa.firebaseapp.com",
-            databaseURL: "https://emailnotepad-28faa-default-rtdb.firebaseio.com", // <-- নিশ্চিত URL
+            databaseURL: "https://emailnotepad-28faa-default-rtdb.firebaseio.com", 
             projectId: "emailnotepad-28faa",
             storageBucket: "emailnotepad-28faa.firebasestorage.app",
             messagingSenderId: "61372668462",
@@ -75,16 +273,19 @@
         firebase.initializeApp(firebaseConfig);
         
         const auth = firebase.auth();
-        const db = firebase.database(); // Realtime Database এর জন্য
+        const db = firebase.database(); 
 
-        // ইউজার রেজিস্ট্রেশন
+        let currentUserId = null;
+        
+        // --- AUTH লজিক ---
+        
         function signupUser() {
             const email = document.getElementById('email-input').value;
             const password = document.getElementById('password-input').value;
             document.getElementById('auth-error').textContent = '';
             
             auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
+                .then(() => {
                     document.getElementById('auth-error').textContent = 'রেজিস্ট্রেশন সফল! এখন লগইন করুন।';
                 })
                 .catch((error) => {
@@ -92,7 +293,6 @@
                 });
         }
 
-        // ইউজার লগইন
         function loginUser() {
             const email = document.getElementById('email-input').value;
             const password = document.getElementById('password-input').value;
@@ -104,63 +304,152 @@
                 });
         }
 
-        // ইউজার লগআউট
         function logoutUser() {
             auth.signOut();
-            document.getElementById('note-area').value = ''; // লগআউট হলে নোটপ্যাড পরিষ্কার করুন
+        }
+        
+        // --- নোটপ্যাড লজিক ---
+        
+        function createNewNote() {
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-text').value = '';
+            document.getElementById('current-note-id').value = ''; 
+            document.getElementById('delete-btn').style.display = 'none';
+            document.getElementById('save-status').textContent = 'নতুন নোট শুরু হয়েছে...';
+            
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('active');
+            });
         }
 
-        // ডেটা লোড করা (যখন ইউজার লগইন করে)
-        function loadNote(userId) {
-            document.getElementById('save-status').textContent = 'নোট লোড হচ্ছে...';
-            // 'notes' এর মধ্যে ইউজার আইডি এর রেফারেন্স
-            db.ref('notes/' + userId).once('value')
-                .then((snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        document.getElementById('note-area').value = data.content || '';
-                        document.getElementById('save-status').textContent = 'নোট লোড সফল।';
-                    } else {
-                        document.getElementById('note-area').value = '';
-                        document.getElementById('save-status').textContent = 'কোনো পূর্ববর্তী নোট পাওয়া যায়নি।';
-                    }
-                })
-                .catch((error) => {
-                    document.getElementById('save-status').textContent = 'নোট লোড করতে সমস্যা হয়েছে: ' + error.message;
-                });
-        }
-
-        // ডেটা সেভ করা
         function saveNote() {
-            const user = auth.currentUser;
-            if (user) {
-                const noteContent = document.getElementById('note-area').value;
-                document.getElementById('save-status').textContent = 'সেভ হচ্ছে...';
-                
-                // Realtime Database-এ ডেটা সেভ করা
-                db.ref('notes/' + user.uid).set({
-                    content: noteContent,
-                    lastUpdated: new Date().toISOString()
-                }) 
-                .then(() => {
-                    document.getElementById('save-status').textContent = 'নোট সফলভাবে সেভ হয়েছে!';
-                })
-                .catch((error) => {
-                    document.getElementById('save-status').textContent = 'সেভ করতে সমস্যা হয়েছে: ' + error.message;
-                });
+            const title = document.getElementById('note-title').value.trim();
+            const text = document.getElementById('note-text').value;
+            const noteId = document.getElementById('current-note-id').value;
+            
+            if (!title) {
+                document.getElementById('save-status').textContent = 'শিরোনাম ছাড়া সেভ করা যাবে না!';
+                return;
             }
+
+            const noteData = {
+                title: title,
+                text: text,
+                timestamp: new Date().toISOString()
+            };
+
+            document.getElementById('save-status').textContent = 'সেভ হচ্ছে...';
+
+            let noteRef;
+            
+            if (noteId) {
+                // পুরানো নোট আপডেট করা
+                noteRef = db.ref(`notes/${currentUserId}/${noteId}`);
+                noteRef.update(noteData)
+                    .then(() => {
+                        document.getElementById('save-status').textContent = 'নোট সফলভাবে আপডেট হয়েছে!';
+                    })
+                    .catch((error) => {
+                        document.getElementById('save-status').textContent = 'আপডেট করতে সমস্যা হয়েছে: ' + error.message;
+                    });
+
+            } else {
+                // নতুন নোট তৈরি করা
+                noteRef = db.ref(`notes/${currentUserId}`).push();
+                noteRef.set(noteData)
+                    .then(() => {
+                        document.getElementById('current-note-id').value = noteRef.key; 
+                        document.getElementById('delete-btn').style.display = 'inline-block';
+                        document.getElementById('save-status').textContent = 'নতুন নোট সফলভাবে সেভ হয়েছে!';
+                    })
+                    .catch((error) => {
+                        document.getElementById('save-status').textContent = 'সেভ করতে সমস্যা হয়েছে: ' + error.message;
+                    });
+            }
+        }
+
+        function loadNoteForEditing(noteId, title, text) {
+            document.getElementById('current-note-id').value = noteId;
+            document.getElementById('note-title').value = title;
+            document.getElementById('note-text').value = text;
+            document.getElementById('delete-btn').style.display = 'inline-block';
+            document.getElementById('save-status').textContent = `"${title}" লোড হয়েছে।`;
+
+            // সাইডবারে সক্রিয় নোট হাইলাইট করা
+            document.querySelectorAll('.note-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(`item-${noteId}`).classList.add('active');
+        }
+
+        function deleteNote() {
+            const noteId = document.getElementById('current-note-id').value;
+            if (noteId && confirm("আপনি কি নিশ্চিত এই নোটটি মুছে ফেলতে চান?")) {
+                db.ref(`notes/${currentUserId}/${noteId}`).remove()
+                    .then(() => {
+                        // DB থেকে মুছে যাওয়ার পর loadAllNotes ফাংশন স্বয়ংক্রিয়ভাবে UI আপডেট করবে
+                        document.getElementById('save-status').textContent = 'নোটটি সফলভাবে মুছে ফেলা হয়েছে।';
+                    })
+                    .catch((error) => {
+                        document.getElementById('save-status').textContent = 'মুছতে সমস্যা হয়েছে: ' + error.message;
+                    });
+            }
+        }
+
+        function loadAllNotes(userId) {
+            const notesListDiv = document.getElementById('notes-list');
+            notesListDiv.innerHTML = '<p style="padding: 10px;">নোট লোড হচ্ছে...</p>';
+
+            // Realtime DB-এর on() ফাংশন ব্যবহার করে স্বয়ংক্রিয়ভাবে পরিবর্তন ট্র্যাক করা
+            db.ref(`notes/${userId}`).on('value', (snapshot) => {
+                notesListDiv.innerHTML = '';
+                const notes = snapshot.val();
+                let hasNotes = false;
+                let activeNoteId = document.getElementById('current-note-id').value; // বর্তমানে এডিট হওয়া নোট আইডি
+
+                if (notes) {
+                    const sortedNotes = Object.entries(notes).sort(([, a], [, b]) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+                    sortedNotes.forEach(([noteId, note]) => {
+                        hasNotes = true;
+                        const item = document.createElement('div');
+                        item.id = `item-${noteId}`;
+                        item.classList.add('note-item');
+                        item.textContent = note.title;
+                        
+                        item.onclick = () => loadNoteForEditing(noteId, note.title, note.text);
+                        notesListDiv.appendChild(item);
+                        
+                        // যদি এই নোটটি বর্তমানে এডিট করা নোট হয়, তবে এটি সক্রিয় কর
+                        if (noteId === activeNoteId) {
+                            item.classList.add('active');
+                        }
+                    });
+                }
+                
+                if (!hasNotes) {
+                    notesListDiv.innerHTML = '<p style="padding: 10px;">কোনো নোট নেই। নতুন নোট তৈরি করুন।</p>';
+                    createNewNote();
+                } else if (activeNoteId === '') {
+                    // যদি কোনো নোট সক্রিয় না থাকে, তবে প্রথম নোটটি লোড করা
+                    const firstNoteId = sortedNotes[0][0];
+                    const firstNote = sortedNotes[0][1];
+                    loadNoteForEditing(firstNoteId, firstNote.title, firstNote.text);
+                }
+            });
         }
 
         // Auth State Change লিসেনার (লগইন/লগআউট হ্যান্ডেল করার জন্য)
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // ইউজার লগইন করেছে: নোটপ্যাড দেখাও
+                currentUserId = user.uid;
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('notepad-container').style.display = 'block';
                 document.getElementById('welcome-message').textContent = `স্বাগতম, ${user.email}!`;
-                loadNote(user.uid);
+                
+                loadAllNotes(user.uid); 
             } else {
-                // ইউজার লগআউট করেছে: লগইন স্ক্রিন দেখাও
+                currentUserId = null;
                 document.getElementById('auth-container').style.display = 'block';
                 document.getElementById('notepad-container').style.display = 'none';
             }
