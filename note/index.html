@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Email Notepad (RTDB)</title>
+    
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f4; }
+        #auth-container, #notepad-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 200px;
+            resize: vertical;
+        }
+        button {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="auth-container">
+        <h2>লগইন / রেজিস্ট্রেশন</h2>
+        <input type="email" id="email-input" placeholder="ইমেল">
+        <input type="password" id="password-input" placeholder="পাসওয়ার্ড">
+        <button onclick="loginUser()">লগইন</button>
+        <button onclick="signupUser()">রেজিস্টার</button>
+        <p id="auth-error" style="color: red;"></p>
+    </div>
+
+    <div id="notepad-container" style="display: none;">
+        <h2 id="welcome-message">নোটপ্যাড</h2>
+        <textarea id="note-area" placeholder="আপনার নোট এখানে লিখুন..."></textarea>
+        <button onclick="saveNote()">নোট সেভ করুন</button>
+        <button onclick="logoutUser()">লগআউট</button>
+        <p id="save-status"></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // আপনার কপি করা কনফিগারেশন এবং সঠিক databaseURL
+        const firebaseConfig = {
+            apiKey: "AIzaSyCyBfxasE2hwuthXu56VuHa7LWpybVFXhc",
+            authDomain: "emailnotepad-28faa.firebaseapp.com",
+            databaseURL: "https://emailnotepad-28faa-default-rtdb.firebaseio.com", // <-- নিশ্চিত URL
+            projectId: "emailnotepad-28faa",
+            storageBucket: "emailnotepad-28faa.firebasestorage.app",
+            messagingSenderId: "61372668462",
+            appId: "1:61372668462:web:0f4eb4355974b2e2579dbf",
+            measurementId: "G-J73FP94J27"
+        };
+
+        // Firebase ইনিশিয়ালাইজ করুন
+        firebase.initializeApp(firebaseConfig);
+        
+        const auth = firebase.auth();
+        const db = firebase.database(); // Realtime Database এর জন্য
+
+        // ইউজার রেজিস্ট্রেশন
+        function signupUser() {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            document.getElementById('auth-error').textContent = '';
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    document.getElementById('auth-error').textContent = 'রেজিস্ট্রেশন সফল! এখন লগইন করুন।';
+                })
+                .catch((error) => {
+                    document.getElementById('auth-error').textContent = error.message;
+                });
+        }
+
+        // ইউজার লগইন
+        function loginUser() {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            document.getElementById('auth-error').textContent = '';
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    document.getElementById('auth-error').textContent = error.message;
+                });
+        }
+
+        // ইউজার লগআউট
+        function logoutUser() {
+            auth.signOut();
+            document.getElementById('note-area').value = ''; // লগআউট হলে নোটপ্যাড পরিষ্কার করুন
+        }
+
+        // ডেটা লোড করা (যখন ইউজার লগইন করে)
+        function loadNote(userId) {
+            document.getElementById('save-status').textContent = 'নোট লোড হচ্ছে...';
+            // 'notes' এর মধ্যে ইউজার আইডি এর রেফারেন্স
+            db.ref('notes/' + userId).once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        document.getElementById('note-area').value = data.content || '';
+                        document.getElementById('save-status').textContent = 'নোট লোড সফল।';
+                    } else {
+                        document.getElementById('note-area').value = '';
+                        document.getElementById('save-status').textContent = 'কোনো পূর্ববর্তী নোট পাওয়া যায়নি।';
+                    }
+                })
+                .catch((error) => {
+                    document.getElementById('save-status').textContent = 'নোট লোড করতে সমস্যা হয়েছে: ' + error.message;
+                });
+        }
+
+        // ডেটা সেভ করা
+        function saveNote() {
+            const user = auth.currentUser;
+            if (user) {
+                const noteContent = document.getElementById('note-area').value;
+                document.getElementById('save-status').textContent = 'সেভ হচ্ছে...';
+                
+                // Realtime Database-এ ডেটা সেভ করা
+                db.ref('notes/' + user.uid).set({
+                    content: noteContent,
+                    lastUpdated: new Date().toISOString()
+                }) 
+                .then(() => {
+                    document.getElementById('save-status').textContent = 'নোট সফলভাবে সেভ হয়েছে!';
+                })
+                .catch((error) => {
+                    document.getElementById('save-status').textContent = 'সেভ করতে সমস্যা হয়েছে: ' + error.message;
+                });
+            }
+        }
+
+        // Auth State Change লিসেনার (লগইন/লগআউট হ্যান্ডেল করার জন্য)
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // ইউজার লগইন করেছে: নোটপ্যাড দেখাও
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('notepad-container').style.display = 'block';
+                document.getElementById('welcome-message').textContent = `স্বাগতম, ${user.email}!`;
+                loadNote(user.uid);
+            } else {
+                // ইউজার লগআউট করেছে: লগইন স্ক্রিন দেখাও
+                document.getElementById('auth-container').style.display = 'block';
+                document.getElementById('notepad-container').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
