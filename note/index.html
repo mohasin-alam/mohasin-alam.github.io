@@ -171,7 +171,9 @@
             resize: none;
         }
 
-        /* --- বাটন স্টাইল ফিক্সড --- */
+        /* --- বাটন স্টাইল ফিক্সড (নতুন ক্লাস) --- */
+        /* --- কাস্টম বাটন ক্লাস: সমস্ত বাটন ডিজাইন এখানে --- */
+        .custom-button,
         button {
             padding: 10px 12px;
             margin-right: 10px;
@@ -179,46 +181,63 @@
             border-radius: 0;
             cursor: pointer;
             font-weight: bold;
-            
             /* ক্যাশিং ফিক্সের জন্য ব্যাকগ্রাউন্ড যোগ করা হলো */
             background-color: var(--terminal-bg); 
-            
-            text-shadow: 0 0 3px var(--text-color);
+            text-shadow: 0 0 3px var(--text-color); /* ডিফল্ট টেক্সট শ্যাডো */
             transition: background-color 0.2s, color 0.2s, border-color 0.5s;
-            animation: neonGlow var(--animation-duration) infinite alternate; 
+            animation: neonGlow var(--animation-duration) infinite alternate; /* ডিফল্ট অ্যানিমেশন */
+            
+            color: var(--text-color); 
+            text-align: center;
+            display: inline-block; /* DIV কে inline-block করে বাটনের মতো দেখাবে */
         }
 
+        /* কমন হোভার স্টাইল */
+        .custom-button:hover,
         button:hover {
-            background-color: var(--primary-color); /* হোভার কালার পরিবর্তন */
-            color: var(--bg-color); /* টেক্সট কালার পরিবর্তন */
+            background-color: var(--primary-color);
+            color: var(--bg-color);
             text-shadow: 0 0 5px var(--bg-color);
-            animation: none; 
+            animation: none; /* হোভারের সময় অ্যানিমেশন বন্ধ */
         }
-        
-        /* নির্দিষ্ট রঙের বাটনগুলির অ্যানিমেশন ফিক্স */
-        #auth-container button:nth-child(5) { 
-            border-color: #555;
-            color: #555;
-            background-color: transparent;
-            animation: none;
-        }
-        
-        #notepad-container button[onclick="saveNote()"] {
+
+        /* --- নির্দিষ্ট রঙ/স্টাইলের ভেরিয়েন্ট --- */
+
+        /* ১. সেভ (সবুজ) স্টাইল */
+        .btn-save {
             border-color: var(--accent-color);
         }
-        #notepad-container button[onclick="deleteNote()"] {
+
+        /* ২. ডিলিট (লাল) স্টাইল */
+        .btn-delete {
             border-color: var(--danger-color);
             color: var(--danger-color);
-            background-color: transparent; /* ডিলিট বাটন ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট */
-            animation: none;
+            background-color: transparent;
+            animation: none; /* অ্যানিমেশন বন্ধ */
+            text-shadow: none; /* টেক্সট শ্যাডো বন্ধ */
         }
-        #notepad-container button[onclick="logoutUser()"] {
+        .btn-delete:hover {
+            background-color: var(--danger-color);
+            color: var(--bg-color);
+            text-shadow: 0 0 5px var(--bg-color);
+        }
+
+        /* ৩. এক্সিট/লগআউট (ধূসর) স্টাইল - ফিক্সড */
+        .btn-exit {
             border-color: #555;
             color: #555;
             background-color: transparent;
-            animation: none;
+            animation: none; /* অ্যানিমেশন বন্ধ করা হলো */
+            text-shadow: none; /* টেক্সট শ্যাডো বন্ধ করা হলো */
+        }
+        .btn-exit:hover {
+            border-color: #999;
+            color: var(--bg-color);
+            background-color: #999;
+            text-shadow: 0 0 5px var(--bg-color);
         }
 
+        /* ৪. ডার্ক মোড টগল স্টাইল ফিক্সড */
         #toggle-dark-mode-btn {
             background-color: var(--secondary-color);
             border: 1px solid var(--border-color);
@@ -230,10 +249,52 @@
             animation: none;
         }
         body.light-mode #toggle-dark-mode-btn {
-             background-color: var(--secondary-color);
-             color: var(--text-color);
+            background-color: var(--secondary-color);
+            color: var(--text-color);
         }
 
+        /* ৫. শুধুমাত্র auth-container এবং confirm-box এর বাটনগুলিতে ডিফল্ট অ্যানিমেশন অফ */
+        #auth-container button,
+        #custom-confirm-box button {
+            animation: none;
+        }
+        #custom-confirm-box button:hover {
+            animation: none; 
+        }
+        #confirm-ok-btn {
+            background-color: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+        #confirm-ok-btn:hover {
+            background-color: var(--danger-color);
+            color: var(--bg-color);
+        }
+        #confirm-cancel-btn {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        #confirm-cancel-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--primary-color);
+        }
+        body.light-mode #confirm-ok-btn:hover {
+            color: white; 
+        }
+
+        /* ৬. ফুটারের বাটনগুলি সামান্য ছোট করা ফিক্সড */
+        #control-bar .custom-button,
+        #control-bar button {
+            padding: 5px 10px; 
+            font-size: 0.9rem;
+            margin-right: 5px;
+        }
+        .header-controls button {
+            padding: 8px 12px;
+            margin-right: 0;
+        }
+        
         /* --- হেডার এবং কন্ট্রোল বার (ফিক্সড) --- */
         #app-header {
             position: fixed; 
@@ -363,7 +424,7 @@
             font-weight: bold;
         }
         
-        /* --- কাস্টম কনফার্ম বক্স স্টাইল (অপরিবর্তিত) --- */
+        /* --- কাস্টম কনফার্ম বক্স স্টাইল (ক্লাস যুক্ত করা হয়েছে) --- */
         #custom-confirm-overlay {
             display: none; 
             position: fixed;
@@ -405,28 +466,6 @@
             animation: none;
         }
 
-        #confirm-ok-btn {
-            background-color: transparent;
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-        }
-
-        #confirm-cancel-btn {
-            background-color: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        
-        #confirm-ok-btn:hover {
-            background-color: var(--danger-color);
-            color: var(--bg-color);
-        }
-        
-        #confirm-cancel-btn:hover {
-            background-color: var(--hover-bg);
-            color: var(--primary-color);
-        }
-        
         /* লাইট মোডে কাস্টম বক্সের রং ফিক্স */
         body.light-mode #custom-confirm-box {
             background-color: #fff;
@@ -477,8 +516,8 @@
         <h2>:: INITIATING CONNECTION ::</h2>
         <input type="email" id="email-input" placeholder="USERNAME/EMAIL">
         <input type="password" id="password-input" placeholder="PASSWORD">
-        <button onclick="loginUser()">LOGIN [ENTER]</button>
-        <button onclick="signupUser()">REGISTER NEW</button>
+        <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
+        <button class="custom-button" onclick="signupUser()">REGISTER NEW</button>
         <p id="auth-error" style="color: var(--danger-color); text-shadow: none;"></p>
     </div>
 
@@ -487,8 +526,8 @@
         <div id="app-header">
             <h2 id="welcome-message">SECURE_NOTES.TXT</h2>
             <div class="header-controls">
-                <button onclick="createNewNote()">NEW NOTE</button>
-                <button class="butt" onclick="logoutUser()">LOG OUT</button>
+                <button class="custom-button" onclick="createNewNote()">NEW NOTE</button>
+                <button class="custom-button" onclick="logoutUser()">LOG OUT</button>
                 <button id="toggle-dark-mode-btn" onclick="toggleDarkMode()">☀️/🌙</button> 
             </div>
         </div>
@@ -507,19 +546,18 @@
         </div>
         
         <div id="control-bar">
-            <button onclick="saveNote()">SAVE (CTRL+S)</button>
-            <button onclick="deleteNote()" id="delete-btn" style="display: none;">DELETE NOTE!</button>
+            <button class="custom-button btn-save" onclick="saveNote()">SAVE (CTRL+S)</button>
+            <button class="custom-button btn-delete" onclick="deleteNote()" id="delete-btn" style="display: none;">DELETE NOTE!</button>
             <p id="save-status"></p>
         </div>
-        </div>
+    </div>
 
     <div id="custom-confirm-overlay">
         <div id="custom-confirm-box">
             <p>[WARNING!] DELETE SELECTED FILE? (YES/CANCEL) ::</p>
-       <button id="confirm-cancel-btn" onclick="confirmDelete(false)">CANCEL</button>
-       
- <button id="confirm-ok-btn" onclick="confirmDelete(true)">CONFIRM</button>
-         </div>
+        <button id="confirm-cancel-btn" onclick="confirmDelete(false)">CANCEL</button>
+        <button id="confirm-ok-btn" onclick="confirmDelete(true)">CONFIRM</button>
+          </div>
     </div>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
