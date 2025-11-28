@@ -51,7 +51,7 @@
             --neon-text-fixed: #0056b3; 
         }
 
-        /* --- গ্লোবাল স্টাইল --- */
+        /* --- কালার অ্যানিমেশন (ডার্ক মোডের জন্য) --- */
         @keyframes neonGlow {
             0% { 
                 color: var(--neon-lime); 
@@ -72,6 +72,7 @@
             text-shadow: none !important;
         }
 
+        /* --- গ্লোবাল স্টাইল --- */
         body {
             font-family: var(--font-mono);
             padding: 0;
@@ -128,108 +129,7 @@
             flex-direction: column;
         }
 
-        /* --- হেডার এবং কন্ট্রোল বার (টপ নেভিগেশন) --- */
-        #app-header {
-            position: fixed; /* হেডার ফিক্সড */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: var(--header-height);
-            padding: 0 20px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--terminal-bg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        #app-header h2 {
-            border-bottom: none;
-            margin: 0;
-            padding: 0;
-            font-size: 1.2rem;
-        }
-        
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px; /* বাটনগুলির মধ্যে ফাঁকা স্থান */
-        }
-        
-        .header-controls button {
-            padding: 8px 12px;
-            margin-right: 0; /* অতিরিক্ত মার্জিন বাতিল */
-        }
-        
-        /* --- ফুটার (কন্ট্রোল বার ফিক্সড) --- */
-        #control-bar {
-            position: fixed; /* ফুটার ফিক্সড */
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--footer-height);
-            background-color: var(--terminal-bg);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between; /* স্পেস বিতরণের জন্য */
-            align-items: center;
-            padding: 0 10px;
-            flex-shrink: 0; 
-            z-index: 10;
-        }
-        
-        #control-bar button {
-            padding: 5px 10px; /* ফুটার বাটন ছোট করা হলো */
-            margin-right: 5px;
-            font-size: 0.9rem;
-        }
-        
-        /* সেভ স্ট্যাটাস ছোট করা এবং স্টাইল ফিক্স করা */
-        #save-status {
-            flex-grow: 1; 
-            text-align: right;
-            margin-left: 10px;
-            font-size: 0.9rem; /* ফন্টের সাইজ ছোট করা হলো */
-            padding-right: 10px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* --- নোট লিস্ট এবং এডিটর লেআউট (ফিক্সড হেডার ও ফুটার থেকে দূরত্ব) --- */
-        #note-app-layout {
-            display: flex;
-            flex-grow: 1; 
-            overflow: hidden;
-            /* কন্টেন্টের জন্য ফিক্সড হেডার ও ফুটার থেকে দূরত্ব */
-            margin-top: var(--header-height);
-            margin-bottom: var(--footer-height);
-        }
-
-        /* --- নোট লিস্ট (৩০% প্রস্থ) --- */
-        #notes-list {
-            width: 30%; /* নোট লিস্টের প্রস্থ 30% */
-            min-width: 150px;
-            border-right: 1px solid var(--border-color);
-            padding: 15px;
-            overflow-y: auto; 
-            background-color: var(--terminal-bg);
-            flex-shrink: 0;
-        }
-        
-        /* --- নোট এডিটর (৭০% প্রস্থ) --- */
-        #note-editor {
-            width: 70%; /* নোট এডিটরের প্রস্থ 70% */
-            flex-grow: 1; 
-            padding: 15px 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; 
-        }
-        
-        /* ইনপুট এবং টেক্সটের বেস স্টাইল (অপরিবর্তিত) */
+        /* --- ইনপুট এবং টেক্সটের বেস স্টাইল (অপরিবর্তিত) --- */
         input[type="email"], input[type="password"], 
         input[type="text"], textarea {
             width: 100%;
@@ -245,7 +145,6 @@
             animation: none; 
             transition: background-color 0.5s, border-color 0.5s, color 0.5s;
         }
-        /* অন্যান্য স্টাইল... (অপরিবর্তিত) */
         
         body.light-mode input[type="email"], 
         body.light-mode input[type="password"],
@@ -271,6 +170,165 @@
             line-height: 1.6;
             resize: none;
         }
+
+        /* --- বাটন স্টাইল ফিক্সড --- */
+        button {
+            padding: 10px 12px;
+            margin-right: 10px;
+            border: 1px solid var(--primary-color);
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: bold;
+            
+            /* ক্যাশিং ফিক্সের জন্য ব্যাকগ্রাউন্ড যোগ করা হলো */
+            background-color: var(--terminal-bg); 
+            
+            text-shadow: 0 0 3px var(--text-color);
+            transition: background-color 0.2s, color 0.2s, border-color 0.5s;
+            animation: neonGlow var(--animation-duration) infinite alternate; 
+        }
+
+        button:hover {
+            background-color: var(--primary-color); /* হোভার কালার পরিবর্তন */
+            color: var(--bg-color); /* টেক্সট কালার পরিবর্তন */
+            text-shadow: 0 0 5px var(--bg-color);
+            animation: none; 
+        }
+        
+        /* নির্দিষ্ট রঙের বাটনগুলির অ্যানিমেশন ফিক্স */
+        #auth-container button:nth-child(5) { 
+            border-color: #555;
+            color: #555;
+            background-color: transparent;
+            animation: none;
+        }
+        
+        #notepad-container button[onclick="saveNote()"] {
+            border-color: var(--accent-color);
+        }
+        #notepad-container button[onclick="deleteNote()"] {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+            background-color: transparent; /* ডিলিট বাটন ব্যাকগ্রাউন্ড ট্রান্সপারেন্ট */
+            animation: none;
+        }
+        #notepad-container button[onclick="logoutUser()"] {
+            border-color: #555;
+            color: #555;
+            background-color: transparent;
+            animation: none;
+        }
+
+        #toggle-dark-mode-btn {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            margin-left: 15px;
+            text-shadow: none; 
+            font-size: 0.9rem;
+            animation: none;
+        }
+        body.light-mode #toggle-dark-mode-btn {
+             background-color: var(--secondary-color);
+             color: var(--text-color);
+        }
+
+        /* --- হেডার এবং কন্ট্রোল বার (ফিক্সড) --- */
+        #app-header {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--terminal-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        #app-header h2 {
+            border-bottom: none;
+            margin: 0;
+            padding: 0;
+            font-size: 1.2rem;
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px; 
+        }
+        
+        .header-controls button {
+            padding: 8px 12px;
+            margin-right: 0; 
+        }
+        
+        #control-bar {
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--footer-height);
+            background-color: var(--terminal-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            padding: 0 10px;
+            flex-shrink: 0; 
+            z-index: 10;
+        }
+        
+        #control-bar button {
+            padding: 5px 10px; 
+            margin-right: 5px;
+            font-size: 0.9rem;
+        }
+        
+        #save-status {
+            flex-grow: 1; 
+            text-align: right;
+            margin-left: 10px;
+            font-size: 0.9rem; 
+            padding-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* --- নোট লিস্ট এবং এডিটর লেআউট --- */
+        #note-app-layout {
+            display: flex;
+            flex-grow: 1; 
+            overflow: hidden;
+            margin-top: var(--header-height);
+            margin-bottom: var(--footer-height);
+        }
+
+        #notes-list {
+            width: 30%; 
+            min-width: 150px;
+            border-right: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto; 
+            background-color: var(--terminal-bg);
+            flex-shrink: 0;
+        }
+        
+        #note-editor {
+            width: 70%; 
+            flex-grow: 1; 
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
         
         #note-editor input[type="text"] {
             font-size: 1.2rem; 
@@ -282,6 +340,29 @@
             margin-bottom: 10px;
         }
 
+        /* --- নোট আইটেম স্টাইল (অপরিবর্তিত) --- */
+        .note-item {
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            border-radius: 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-left: 3px solid transparent;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
+
+        .note-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .note-item.active { 
+            background-color: var(--hover-bg);
+            border-left: 3px solid var(--primary-color);
+            font-weight: bold;
+        }
+        
         /* --- কাস্টম কনফার্ম বক্স স্টাইল (অপরিবর্তিত) --- */
         #custom-confirm-overlay {
             display: none; 
@@ -364,16 +445,14 @@
 
         /* ছোট স্ক্রিনের জন্য ফিক্সড লেআউট ফিক্স */
         @media (max-width: 600px) {
-            /* ছোট স্ক্রিনে লিস্ট ও এডিটর উভয়ের প্রস্থ 50% করা হলো যেন টেক্সট লেখার জায়গা পাওয়া যায় */
             #notes-list {
                 width: 50%; 
-                min-width: 100px; /* ন্যূনতম প্রস্থ আরও কমিয়ে দেওয়া হলো */
+                min-width: 100px; 
             }
             #note-editor {
                 width: 50%;
                 padding: 10px;
             }
-            /* ছোট স্ক্রিনে বাটনগুলিকে অ্যাডজাস্ট করা হলো */
             .header-controls button {
                 padding: 5px 8px; 
                 font-size: 0.8rem;
@@ -468,7 +547,7 @@
         let autoSaveTimer = null; 
         const AUTO_SAVE_DELAY = 2000; 
 
-        // --- কাস্টম কনফার্ম বক্স লজিক (অপরিবর্তিত) ---
+        // --- কাস্টম কনফার্ম বক্স লজিক ---
         
         function showCustomConfirm() {
             document.getElementById('custom-confirm-overlay').style.display = 'flex';
@@ -500,7 +579,7 @@
             }
         }
         
-        // --- AUTH লজিক (অপরিবর্তিত) ---
+        // --- AUTH লজিক ---
         
         function signupUser() {
             const email = document.getElementById('email-input').value;
@@ -531,7 +610,7 @@
             auth.signOut();
         }
 
-        // --- অটো-সেভ লজিক (অপরিবর্তিত) ---
+        // --- অটো-সেভ লজিক ---
 
         function resetAutoSaveTimer() {
             clearTimeout(autoSaveTimer);
@@ -546,7 +625,7 @@
             }, AUTO_SAVE_DELAY);
         }
         
-        // --- নোটপ্যাড লজিক (অপরিবর্তিত) ---
+        // --- নোটপ্যাড লজিক ---
         
         function createNewNote() {
             document.getElementById('note-title').value = '';
