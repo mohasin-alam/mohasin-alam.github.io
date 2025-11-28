@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacker Age Calculator | C:/AGE_TOOL.EXE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS: টার্মিনাল স্টাইল */
+        :root {
+            --bg-color: #000;
+            --text-color: #00ff41; 
+            --glow-color: #00ff41;
+            --border-color: #008800;
+            --separator-color: #00ffff;
+            --highlight-color: #004400; /* মেনু হোভার কালার */
+        }
+
+        body {
+            background-color: #080808;
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .terminal-container {
+            width: 90%;
+            max-width: 750px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 0 20px var(--glow-color);
+            background-color: var(--bg-color);
+            padding: 15px;
+        }
+
+        .terminal-header {
+            background-color: var(--border-color);
+            color: #000;
+            padding: 5px 10px;
+            font-weight: bold;
+            margin: -15px -15px 15px -15px;
+            text-align: center;
+        }
+
+        .prompt {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .user-info {
+            color: var(--glow-color);
+            font-weight: bold;
+        }
+
+        .command {
+            color: #fff;
+        }
+
+        .input-box {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .input-group label {
+            width: 80px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-right: 5px;
+        }
+        
+        /* কাস্টম ড্রপডাউন স্টাইল */
+        .custom-dropdown-container {
+            position: relative;
+            flex-grow: 1;
+            min-width: 100px;
+        }
+
+        .dropdown-display {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1em;
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dropdown-display:hover {
+            box-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 10;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #111;
+            border: 1px solid var(--glow-color);
+            box-shadow: 0 4px 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-option {
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            color: var(--text-color);
+        }
+
+        .dropdown-option:hover {
+            background-color: var(--highlight-color);
+            color: #fff;
+        }
+
+        /* আউটপুট স্টাইল */
+        .result-section {
+            padding: 10px;
+            border: 1px dashed var(--border-color);
+        }
+        
+        .result-title {
+            color: #ff00ff;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 0 8px #ff00ff;
+        }
+
+        .output-line {
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        
+        .output-line strong {
+            color: var(--separator-color);
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .terminal-footer {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+            text-align: right;
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <header class="terminal-header">
+            :: C:\AGE_CALCULATOR.EXE :: SYSTEM_ONLINE
+        </header>
+
+        <div class="terminal-body">
+            <div class="prompt">
+                <span class="user-info">[ROOT@INPUT-MODULE]</span>
+                <span class="command">$ SET BIRTHDATE</span>
+            </div>
+            
+            <div class="input-box">
+                <div class="input-group">
+                    <label>MONTH:</label>
+                    <div class="custom-dropdown-container" id="monthDropdownContainer">
+                        <div class="dropdown-display" data-value="1" data-type="month">JANUARY</div>
+                        <div class="dropdown-menu" id="monthMenu"></div>
+                    </div>
+
+                    <label>DAY:</label>
+                    <div class="custom-dropdown-container" id="dayDropdownContainer">
+                        <div class="dropdown-display" data-value="1" data-type="day">01</div>
+                        <div class="dropdown-menu" id="dayMenu"></div>
+                    </div>
+
+                    <label>YEAR:</label>
+                    <div class="custom-dropdown-container" id="yearDropdownContainer">
+                        <div class="dropdown-display" data-value="2000" data-type="year">2000</div>
+                        <div class="dropdown-menu" id="yearMenu"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prompt">
+                <span class="user-info">[OUTPUT]</span>
+                <span class="command">$ GENERATING AGE REPORT...</span>
+            </div>
+
+            <div class="result-section">
+                <div class="result-title">--- AGE SINCE BIRTH ---</div>
+                <div id="ageResult" class="output-line">Loading...</div>
+
+                <br>
+                <div class="result-title">--- TIME UNTIL NEXT BIRTHDAY ---</div>
+                <div id="nextBirthdayResult" class="output-line">Loading...</div>
+            </div>
+        </div>
+
+        <footer class="terminal-footer">
+            --- REAL-TIME EXECUTION ACTIVE ---
+        </footer>
+    </div>
+
+    <script>
+        // --- JavaScript: সময় গণনা এবং কাস্টম ড্রপডাউন লজিক ---
+        
+        const $ = (id) => document.getElementById(id);
+        const monthNames = [
+            "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
+            "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
+        ];
+        
+        // --- কাস্টম ড্রপডাউন ফাংশনালিটি ---
+
+        function toggleDropdown(event) {
+            const container = event.currentTarget.closest('.custom-dropdown-container');
+            const menu = container.querySelector('.dropdown-menu');
+            
+            // সব ড্রপডাউন বন্ধ করো
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if (m !== menu) m.classList.remove('show');
+            });
+
+            // বর্তমানটা টগল করো
+            menu.classList.toggle('show');
+        }
+
+        function selectOption(event) {
+            const option = event.currentTarget;
+            const container = option.closest('.custom-dropdown-container');
+            const display = container.querySelector('.dropdown-display');
+            const menu = container.querySelector('.dropdown-menu');
+            
+            display.textContent = option.textContent;
+            display.setAttribute('data-value', option.getAttribute('data-value'));
+            menu.classList.remove('show');
+            
+            updateAge(); // মান পরিবর্তন হলে গণনা আপডেট করো
+        }
+
+        function populateCustomDropdowns() {
+            const currentYear = new Date().getFullYear();
+            const yearMenu = $('yearMenu');
+            const monthMenu = $('monthMenu');
+            const dayMenu = $('dayMenu');
+
+            // বছর (Year) লোড
+            for (let i = currentYear; i >= currentYear - 100; i--) {
+                createOption(yearMenu, i, i, currentYear - 25 === i);
+            }
+            
+            // মাস (Month) লোড
+            monthNames.forEach((name, index) => {
+                createOption(monthMenu, name, index + 1, index + 1 === 1);
+            });
+
+            // দিন (Day) লোড
+            for (let i = 1; i <= 31; i++) {
+                const display = String(i).padStart(2, '0');
+                createOption(dayMenu, display, i, i === 1);
+            }
+            
+            // প্রথম রেন্ডারে ডিফল্ট মান সেট করা
+            updateDefaultDisplay(yearMenu, currentYear - 25);
+            updateDefaultDisplay(monthMenu, 1);
+            updateDefaultDisplay(dayMenu, 1);
+        }
+
+        function createOption(menu, text, value, isDefault) {
+            const option = document.createElement('div');
+            option.classList.add('dropdown-option');
+            option.textContent = text;
+            option.setAttribute('data-value', value);
+            option.addEventListener('click', selectOption);
+            menu.appendChild(option);
+
+            if (isDefault) {
+                // কোনো <select> ট্যাগ না থাকায়, এখানে ডিফল্ট মান সেট করার দরকার নেই।
+            }
+        }
+        
+        // ডিফল্ট ডিসপ্লে আপডেট করা
+        function updateDefaultDisplay(menu, defaultValue) {
+            const display = menu.closest('.custom-dropdown-container').querySelector('.dropdown-display');
+            const defaultOption = menu.querySelector(`.dropdown-option[data-value="${defaultValue}"]`);
+            if (defaultOption) {
+                display.textContent = defaultOption.textContent;
+                display.setAttribute('data-value', defaultValue);
+            }
+        }
+
+        // --- সময় গণনা লজিক ---
+        
+        function getSelectedValue(type) {
+            const container = $(`${type}DropdownContainer`);
+            return container ? parseInt(container.querySelector('.dropdown-display').getAttribute('data-value')) : null;
+        }
+
+        function formatTime(totalSeconds) {
+            const S_IN_YEAR = 31536000;
+            const S_IN_DAY = 86400;
+            const S_IN_HOUR = 3600;
+            const S_IN_MINUTE = 60;
+            
+            const birthYear = getSelectedValue('year');
+            const birthMonth = getSelectedValue('month');
+            const birthDay = getSelectedValue('day');
+            
+            if (!birthYear || !birthMonth || !birthDay) return { ageDisplay: '> ERROR: DATE NOT SET', nextBirthdayDisplay: '> ERROR: DATE NOT SET' };
+            
+            const now = new Date();
+            const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+            
+            if (totalSeconds < 0) return 'ERROR: DATE IN FUTURE';
+
+            // বয়স গণনা
+            let ageYears = now.getFullYear() - birthDate.getFullYear();
+            let ageMonths = now.getMonth() - birthDate.getMonth();
+            let ageDays = now.getDate() - birthDate.getDate();
+
+            if (ageDays < 0) {
+                ageMonths--;
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                ageDays += lastMonth.getDate();
+            }
+            if (ageMonths < 0) {
+                ageYears--;
+                ageMonths += 12;
+            }
+
+            // আউটপুট ফরম্যাট
+            const ageDisplay = `> AGE: ${ageYears} **YEARS** // ${ageMonths} **MONTHS** // ${ageDays} **DAYS**\n` +
+                               `> TOTAL: ${Math.floor(totalSeconds / S_IN_YEAR)} **YEARS** // ${Math.floor(totalSeconds / S_IN_DAY)} **DAYS** // ${totalSeconds.toLocaleString()} **SECONDS**`;
+
+
+            // পরবর্তী জন্মদিন
+            let nextBirthday = new Date(now.getFullYear(), birthMonth - 1, birthDay);
+            if (nextBirthday < now) {
+                nextBirthday.setFullYear(now.getFullYear() + 1);
+            }
+            
+            const timeUntilNextBirthday = nextBirthday.getTime() - now.getTime();
+            let remainingSeconds = Math.floor(timeUntilNextBirthday / 1000);
+
+            const days = Math.floor(remainingSeconds / S_IN_DAY);
+            remainingSeconds %= S_IN_DAY;
+            
+            const hours = Math.floor(remainingSeconds / S_IN_HOUR);
+            remainingSeconds %= S_IN_HOUR;
+            
+            const minutes = Math.floor(remainingSeconds / S_IN_MINUTE);
+            const seconds = remainingSeconds % S_IN_MINUTE;
+            
+            const nextBirthdayDisplay = `> REMAINING: ${String(days).padStart(3, '0')} **DAYS** // ${String(hours).padStart(2, '0')} **HRS** // ${String(minutes).padStart(2, '0')} **MIN** // ${String(seconds).padStart(2, '0')} **SEC**`;
+            
+            return { ageDisplay, nextBirthdayDisplay };
+        }
+
+        // মূল আপডেট ফাংশন যা প্রতি সেকেন্ডে চলে
+        function updateAge() {
+            const birthYear = getSelectedValue('year');
+            const birthMonth = getSelectedValue('month');
+            const birthDay = getSelectedValue('day');
+            
+            if (!birthYear || !birthMonth || !birthDay) return;
+
+            const birthDate = new Date(birthYear, birthMonth - 1, birthDay);
+            const now = new Date();
+            
+            const totalTimeInSeconds = Math.floor((now.getTime() - birthDate.getTime()) / 1000);
+            
+            const formattedTime = formatTime(totalTimeInSeconds);
+            
+            // HTML-এ ** দিয়ে বোল্ড এবং // দিয়ে সেপারেট করার জন্য রেগুলার এক্সপ্রেশন
+            const formatOutput = (text) => {
+                return text
+                    .replace(/\n/g, '<br>') 
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
+                    .replace(/\/\//g, `<span style="color:var(--text-color); margin: 0 5px;">//</span>`); 
+            };
+
+            $('ageResult').innerHTML = formatOutput(formattedTime.ageDisplay);
+            $('nextBirthdayResult').innerHTML = formatOutput(formattedTime.nextBirthdayDisplay);
+        }
+
+        // DOM লোড হওয়ার পর শুরু করা
+        document.addEventListener('DOMContentLoaded', () => {
+            populateCustomDropdowns();
+            
+            // ডিসপ্লেতে ক্লিক ইভেন্ট লিসেনার সেট করা
+            document.querySelectorAll('.dropdown-display').forEach(display => {
+                display.addEventListener('click', toggleDropdown);
+            });
+            
+            // উইন্ডোর বাইরে ক্লিক করলে মেনু বন্ধ
+            window.addEventListener('click', function(e) {
+                document.querySelectorAll('.custom-dropdown-container').forEach(container => {
+                    if (!container.contains(e.target)) {
+                        container.querySelector('.dropdown-menu').classList.remove('show');
+                    }
+                });
+            });
+
+            updateAge();
+            setInterval(updateAge, 1000); 
+        });
+    </script>
+</body>
+</html>
