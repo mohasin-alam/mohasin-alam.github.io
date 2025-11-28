@@ -6,7 +6,7 @@
     <title>Secure Email Notepad (Hacker Terminal)</title>
     
     <style>
-        /* --- থিম ভেরিয়েবলস --- */
+        /* --- থিম ভেরিয়েবলস (ডার্ক মোড) --- */
         :root {
             --bg-color: #000; 
             --terminal-bg: #111; 
@@ -23,9 +23,30 @@
             --neon-lime: #00ff41;
             --neon-pink: #ff007f; 
             --animation-duration: 3s; 
+
+            /* টেক্সটবক্সের ভিতরের ফিক্সড নিয়ন পিঙ্ক */
+            --neon-text-fixed: #ff007f; 
         }
 
-        /* --- কালার অ্যানিমেশন --- */
+        /* --- লাইট মোড থিম ভেরিয়েবলস --- */
+        body.light-mode {
+            --bg-color: #e0e0e0; 
+            --terminal-bg: #f0f0f0; 
+            --text-color: #333; 
+            --primary-color: #007acc; 
+            --secondary-color: #ccc; 
+            --accent-color: #28a745; 
+            --danger-color: #dc3545; 
+            --border-color: #bbb; 
+            --hover-bg: #d0d0d0; 
+            --font-mono: 'Segoe UI', Arial, sans-serif; /* লাইট মোডে নরমাল ফন্ট */
+
+            --neon-lime: #007acc; /* লাইট মোডে প্রাইমারি কালার */
+            --neon-pink: #dc3545; /* লাইট মোডে ডেঞ্জার কালার */
+            --neon-text-fixed: #0056b3; /* লাইট মোডে টেক্সটবক্সের কালার */
+        }
+
+        /* --- কালার অ্যানিমেশন (ডার্ক মোডের জন্য) --- */
         @keyframes neonGlow {
             0% { 
                 color: var(--neon-lime); 
@@ -40,6 +61,12 @@
                 text-shadow: 0 0 5px var(--neon-lime), 0 0 10px var(--neon-lime); 
             }
         }
+        /* লাইট মোডে অ্যানিমেশন বন্ধ */
+        body.light-mode * {
+            animation: none !important;
+            text-shadow: none !important;
+        }
+
 
         /* --- গ্লোবাল স্টাইল: টার্মিনাল লুক এবং অ্যানিমেশন প্রয়োগ --- */
         body {
@@ -52,14 +79,17 @@
             justify-content: center;
             align-items: center;
 
-            /* গ্লোবাল টেক্সট অ্যানিমেশন */
+            /* গ্লোবাল টেক্সট অ্যানিমেশন (ডার্ক মোডের জন্য) */
             animation: neonGlow var(--animation-duration) infinite alternate; 
+            transition: background-color 0.5s, color 0.5s; /* থিম পরিবর্তনের জন্য স্মুথ ট্রানজিশন */
         }
 
         /* সকল ফন্ট এবং বর্ডার ফিক্সিং */
         * {
             font-family: var(--font-mono);
             box-sizing: border-box;
+            color: var(--text-color); /* গ্লোবাল টেক্সট কালার */
+            transition: color 0.5s; /* থিম পরিবর্তনের জন্য */
         }
 
         h2 {
@@ -78,6 +108,11 @@
             border-radius: 0; 
             background-color: var(--terminal-bg);
             box-shadow: 0 0 15px rgba(0, 255, 65, 0.5); 
+            transition: background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
+        }
+        /* লাইট মোডে বক্স শ্যাডো পরিবর্তন */
+        body.light-mode #auth-container {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         
         /* --- নোটপ্যাড কন্টেইনার (অ্যাপের মতো) --- */
@@ -93,6 +128,11 @@
             overflow: hidden; 
             display: flex;
             flex-direction: column;
+            transition: background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
+        }
+        /* লাইট মোডে বক্স শ্যাডো পরিবর্তন */
+        body.light-mode #notepad-container {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         /* --- ইনপুট এবং টেক্সটের বেস স্টাইল --- */
@@ -105,9 +145,11 @@
             border: 1px solid var(--border-color);
             border-radius: 0;
             background-color: var(--bg-color);
-            /* কালার অ্যানিমেশন body থেকে পাবে */
-            text-shadow: 0 0 3px var(--text-color);
-            caret-color: var(--primary-color); 
+            color: var(--neon-text-fixed); /* ফিক্সড নিয়ন পিঙ্ক */
+            text-shadow: 0 0 3px var(--neon-text-fixed); /* ফিক্সড নিয়ন পিঙ্ক শ্যাডো */
+            caret-color: var(--neon-text-fixed); /* কার্সরের রং ফিক্সড নিয়ন পিঙ্ক */
+            animation: none; /* অ্যানিমেশন বন্ধ */
+            transition: background-color 0.5s, border-color 0.5s, color 0.5s;
         }
 
         input:focus, textarea:focus {
@@ -137,21 +179,22 @@
             font-weight: bold;
             background-color: transparent;
             text-shadow: 0 0 3px var(--text-color);
-            transition: background-color 0.2s, color 0.2s;
+            transition: background-color 0.2s, color 0.2s, border-color 0.5s;
             animation: neonGlow var(--animation-duration) infinite alternate; /* বাটন টেক্সট অ্যানিমেশন */
         }
 
         button:hover {
             background-color: var(--hover-bg);
-            color: var(--primary-color); /* হোভারে লাইম ফিক্স */
+            color: var(--primary-color); 
             text-shadow: 0 0 3px var(--primary-color);
-            animation: none; /* হোভারে অ্যানিমেশন বন্ধ */
+            animation: none; 
         }
         
         /* নির্দিষ্ট রঙের বাটনগুলির অ্যানিমেশন বন্ধ */
         #auth-container button:nth-child(5), /* রেজিস্টার */
         #notepad-container button[onclick="logoutUser()"], /* লগআউট */
-        #notepad-container button[onclick="deleteNote()"] /* ডিলিট */
+        #notepad-container button[onclick="deleteNote()"], /* ডিলিট */
+        #toggle-dark-mode-btn /* ডার্ক/লাইট মোড টগল বাটন */
         {
             animation: none;
         }
@@ -175,7 +218,21 @@
             border-color: #555;
             color: #555;
         }
-        
+
+        #toggle-dark-mode-btn {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            margin-left: 15px;
+            text-shadow: none; /* আইকনে শ্যাডো না থাকে */
+            font-size: 0.9rem;
+        }
+        body.light-mode #toggle-dark-mode-btn {
+             background-color: var(--secondary-color);
+             color: var(--text-color);
+        }
+
         /* --- হেডার এবং কন্ট্রোল বার --- */
         #app-header {
             padding: 15px 20px;
@@ -184,6 +241,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.5s, border-color 0.5s;
         }
         
         #control-bar {
@@ -194,6 +252,7 @@
             justify-content: flex-start;
             align-items: center;
             flex-shrink: 0; 
+            transition: background-color 0.5s, border-color 0.5s;
         }
 
         /* --- নোট লিস্ট এবং এডিটর লেআউট --- */
@@ -211,6 +270,7 @@
             overflow-y: auto; 
             background-color: var(--terminal-bg);
             flex-shrink: 0;
+            transition: background-color 0.5s, border-color 0.5s;
         }
         
         #note-editor {
@@ -317,8 +377,7 @@
         }
     </style>
 </head>
-<body>
-    <div id="auth-container">
+<body class="dark-mode"> <div id="auth-container">
         <h2>:: INITIATING CONNECTION ::</h2>
         <input type="email" id="email-input" placeholder="USERNAME/EMAIL">
         <input type="password" id="password-input" placeholder="PASSWORD">
@@ -334,6 +393,7 @@
             <div class="header-controls">
                 <button onclick="createNewNote()">:: NEW NOTE ::</button>
                 <button onclick="logoutUser()">:: EXIT ::</button>
+                <button id="toggle-dark-mode-btn" onclick="toggleDarkMode()">☀️/🌙</button> 
             </div>
         </div>
         
@@ -575,8 +635,22 @@
             }
         });
 
-        // কী-প্রেস ইভেন্ট লিসেনার যোগ করা
+        // --- ডার্ক/লাইট মোড টগল লজিক ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-mode');
+            const isLightMode = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+        }
+
+        // পেজ লোড হওয়ার সময় থিম সেট করা
         document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode'); // ডিফল্ট ডার্ক মোড
+            }
+
             const noteTextarea = document.getElementById('note-text');
             const noteTitle = document.getElementById('note-title');
             
