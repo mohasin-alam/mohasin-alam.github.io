@@ -8,29 +8,58 @@
     <style>
         /* --- থিম ভেরিয়েবলস --- */
         :root {
-            --bg-color: #000; /* খাঁটি কালো */
-            --terminal-bg: #111; /* টার্মিনাল কন্টেইনার ব্যাকগ্রাউন্ড */
-            --text-color: #00ff41; /* নিয়ন সবুজ */
+            --bg-color: #000; 
+            --terminal-bg: #111; 
+            --text-color: #00ff41; 
             --primary-color: #00ff41; 
-            --secondary-color: #222; /* সাইডবারের ব্যাকগ্রাউন্ড */
-            --accent-color: #00c62e; /* উজ্জ্বল সবুজ (সেভ বাটন) */
-            --danger-color: #ff005c; /* নিয়ন লাল (মুছে ফেলার বাটন) */
-            --border-color: #005f15; /* গভীর সবুজ বর্ডার */
-            --hover-bg: #003300; /* ঘোর সবুজ হোভার */
+            --secondary-color: #222; 
+            --accent-color: #00c62e; 
+            --danger-color: #ff005c; 
+            --border-color: #005f15; 
+            --hover-bg: #003300; 
             --font-mono: 'Courier New', Courier, monospace;
+
+            /* নিয়ন কালার ভেরিয়েবল (অ্যানিমেশনের জন্য) */
+            --neon-lime: #00ff41;
+            --neon-pink: #ff007f; 
+            --animation-duration: 3s; 
         }
 
-        /* --- গ্লোবাল স্টাইল: টার্মিনাল লুক --- */
+        /* --- কালার অ্যানিমেশন --- */
+        @keyframes neonGlow {
+            0% { 
+                color: var(--neon-lime); 
+                text-shadow: 0 0 5px var(--neon-lime), 0 0 10px var(--neon-lime); 
+            }
+            50% { 
+                color: var(--neon-pink); 
+                text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink); 
+            }
+            100% { 
+                color: var(--neon-lime); 
+                text-shadow: 0 0 5px var(--neon-lime), 0 0 10px var(--neon-lime); 
+            }
+        }
+
+        /* --- গ্লোবাল স্টাইল: টার্মিনাল লুক এবং অ্যানিমেশন প্রয়োগ --- */
         body {
             font-family: var(--font-mono);
             padding: 0;
             margin: 0;
             background-color: var(--bg-color);
-            color: var(--text-color);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+
+            /* গ্লোবাল টেক্সট অ্যানিমেশন */
+            animation: neonGlow var(--animation-duration) infinite alternate; 
+        }
+
+        /* সকল ফন্ট এবং বর্ডার ফিক্সিং */
+        * {
+            font-family: var(--font-mono);
+            box-sizing: border-box;
         }
 
         h2 {
@@ -39,13 +68,6 @@
             padding-bottom: 10px;
             margin-bottom: 20px;
             font-weight: normal;
-            text-shadow: 0 0 5px var(--primary-color); /* নিয়ন ইফেক্ট */
-        }
-        
-        /* সমস্ত টেক্সটকে টার্মিনাল ফন্ট দেওয়া */
-        * {
-            font-family: var(--font-mono);
-            box-sizing: border-box;
         }
 
         /* --- লগইন কন্টেইনার স্টাইল --- */
@@ -55,7 +77,7 @@
             border: 2px solid var(--border-color);
             border-radius: 0; 
             background-color: var(--terminal-bg);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5); /* উজ্জ্বল বক্স শ্যাডো */
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5); 
         }
         
         /* --- নোটপ্যাড কন্টেইনার (অ্যাপের মতো) --- */
@@ -83,9 +105,9 @@
             border: 1px solid var(--border-color);
             border-radius: 0;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            /* কালার অ্যানিমেশন body থেকে পাবে */
             text-shadow: 0 0 3px var(--text-color);
-            caret-color: var(--primary-color); /* কার্সরের রং */
+            caret-color: var(--primary-color); 
         }
 
         input:focus, textarea:focus {
@@ -105,29 +127,37 @@
             resize: none;
         }
 
-        /* --- বাটন স্টাইল --- */
+        /* --- বাটন স্টাইল এবং অ্যানিমেশন ফিক্স --- */
         button {
             padding: 10px 12px;
             margin-right: 10px;
             border: 1px solid var(--primary-color);
             border-radius: 0;
             cursor: pointer;
-            color: var(--text-color);
             font-weight: bold;
             background-color: transparent;
             text-shadow: 0 0 3px var(--text-color);
             transition: background-color 0.2s, color 0.2s;
+            animation: neonGlow var(--animation-duration) infinite alternate; /* বাটন টেক্সট অ্যানিমেশন */
         }
 
         button:hover {
             background-color: var(--hover-bg);
-            color: var(--primary-color);
+            color: var(--primary-color); /* হোভারে লাইম ফিক্স */
+            text-shadow: 0 0 3px var(--primary-color);
+            animation: none; /* হোভারে অ্যানিমেশন বন্ধ */
         }
         
-        /* বাটন কালার */
+        /* নির্দিষ্ট রঙের বাটনগুলির অ্যানিমেশন বন্ধ */
+        #auth-container button:nth-child(5), /* রেজিস্টার */
+        #notepad-container button[onclick="logoutUser()"], /* লগআউট */
+        #notepad-container button[onclick="deleteNote()"] /* ডিলিট */
+        {
+            animation: none;
+        }
+        
         #auth-container button {
             border-color: var(--primary-color);
-            color: var(--primary-color);
         }
         #auth-container button:nth-child(5) { 
             border-color: #555;
@@ -136,7 +166,6 @@
         
         #notepad-container button[onclick="saveNote()"] {
             border-color: var(--accent-color);
-            color: var(--accent-color);
         }
         #notepad-container button[onclick="deleteNote()"] {
             border-color: var(--danger-color);
@@ -193,7 +222,7 @@
         }
         
         #note-editor input[type="text"] {
-            font-size: 1.2rem; /* শিরোনামের ফন্ট সাইজ সামান্য ছোট */
+            font-size: 1.2rem; 
             font-weight: bold;
             padding: 5px 0;
             border: none;
@@ -227,7 +256,6 @@
         
         #save-status {
             margin-left: 10px;
-            color: var(--primary-color);
             font-weight: bold;
             text-shadow: 0 0 3px var(--primary-color);
         }
@@ -239,13 +267,35 @@
                 height: 100vh;
                 border-radius: 0;
             }
+            /* হেডার অংশ ফিক্সড */
+            #app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px;
+            }
+            #app-header h2 {
+                margin-bottom: 5px;
+            }
+            .header-controls {
+                width: 100%;
+                display: flex; 
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+            .header-controls button {
+                width: 48%; 
+                margin-right: 0;
+                margin-left: 0 !important;
+            }
+            
+            /* মূল লেআউট ফিক্স */
             #note-app-layout {
                 flex-direction: column;
             }
             #notes-list {
                 width: auto;
-                height: 150px;
-                max-height: 150px;
+                height: 120px; 
+                max-height: 120px;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
                 padding: 10px;
@@ -254,18 +304,15 @@
                 width: auto;
                 padding: 10px;
             }
+            /* কন্ট্রোল বার ফিক্স */
             #control-bar {
                 padding: 10px;
                 flex-wrap: wrap;
-                justify-content: center;
+                justify-content: space-between;
             }
             #control-bar button {
-                width: 100%;
+                width: 48%; 
                 margin: 5px 0;
-            }
-            #app-header button {
-                width: 100%;
-                margin-top: 5px;
             }
         }
     </style>
@@ -336,10 +383,10 @@
         const db = firebase.database(); 
 
         let currentUserId = null;
-        let autoSaveTimer = null; // অটো-সেভ টাইমার
-        const AUTO_SAVE_DELAY = 2000; // ২ সেকেন্ড
+        let autoSaveTimer = null; 
+        const AUTO_SAVE_DELAY = 2000; 
 
-        // --- AUTH লজিক (পূর্বের মতোই) ---
+        // --- AUTH লজিক ---
         
         function signupUser() {
             const email = document.getElementById('email-input').value;
@@ -373,18 +420,14 @@
         // --- অটো-সেভ লজিক ---
 
         function resetAutoSaveTimer() {
-            // যদি আগে কোনো টাইমার চালু থাকে, তা বাতিল করা
             clearTimeout(autoSaveTimer);
             
-            // টাইপ করা থামার ২ সেকেন্ড পরে saveNote() কল করা
             autoSaveTimer = setTimeout(() => {
-                const noteId = document.getElementById('current-note-id').value;
                 const title = document.getElementById('note-title').value.trim();
                 const text = document.getElementById('note-text').value.trim();
                 
-                // শুধুমাত্র তখনই অটো-সেভ করা হবে যখন নোটে কিছু লেখা হয়
                 if (title || text) {
-                    saveNote(true); // true মানে এটি অটো-সেভ
+                    saveNote(true); 
                 }
             }, AUTO_SAVE_DELAY);
         }
@@ -408,12 +451,12 @@
             const text = document.getElementById('note-text').value;
             const noteId = document.getElementById('current-note-id').value;
             
-            if (!title && !text) { // যদি পুরো নোট খালি হয়, সেভ করবে না
+            if (!title && !text) { 
                 return; 
             }
 
             const noteData = {
-                title: title || "[UNTITLED NOTE]", // যদি টাইটেল না থাকে
+                title: title || "[UNTITLED NOTE]", 
                 text: text,
                 timestamp: new Date().toISOString()
             };
@@ -516,7 +559,7 @@
             });
         }
 
-        // Auth State Change লিসেনার (লগইন/লগআউট হ্যান্ডেল করার জন্য)
+        // Auth State Change লিসেনার 
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUserId = user.uid;
@@ -532,12 +575,11 @@
             }
         });
 
-        // কী-প্রেস ইভেন্ট লিসেনার যোগ করা (অটো-সেভ টাইমার রিসেট করার জন্য)
+        // কী-প্রেস ইভেন্ট লিসেনার যোগ করা
         document.addEventListener('DOMContentLoaded', () => {
             const noteTextarea = document.getElementById('note-text');
             const noteTitle = document.getElementById('note-title');
             
-            // টাইটেল এবং টেক্সট এরিয়া উভয়ের জন্য লিসেনার যোগ করা
             if (noteTextarea) noteTextarea.addEventListener('keyup', resetAutoSaveTimer);
             if (noteTitle) noteTitle.addEventListener('keyup', resetAutoSaveTimer);
         });
