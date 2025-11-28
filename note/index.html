@@ -478,7 +478,7 @@
         <input type="email" id="email-input" placeholder="USERNAME/EMAIL">
         <input type="password" id="password-input" placeholder="PASSWORD">
         <button onclick="loginUser()">LOGIN [ENTER]</button>
-        <button onclick="signupUser()">REGISTER NEW USER</button>
+        <button onclick="signupUser()">REGISTER NEW</button>
         <p id="auth-error" style="color: var(--danger-color); text-shadow: none;"></p>
     </div>
 
@@ -487,8 +487,8 @@
         <div id="app-header">
             <h2 id="welcome-message">SECURE_NOTES.TXT</h2>
             <div class="header-controls">
-                <button onclick="createNewNote()">:: NEW NOTE ::</button>
-                <button onclick="logoutUser()">:: EXIT ::</button>
+                <button onclick="createNewNote()">NEW NOTE</button>
+                <button onclick="logoutUser()">LOG OUT</button>
                 <button id="toggle-dark-mode-btn" onclick="toggleDarkMode()">☀️/🌙</button> 
             </div>
         </div>
@@ -507,18 +507,19 @@
         </div>
         
         <div id="control-bar">
-            <button onclick="saveNote()">:: SAVE (CTRL+S) ::</button>
-            <button onclick="deleteNote()" id="delete-btn" style="display: none;">:: DELETE ::</button>
+            <button onclick="saveNote()">SAVE (CTRL+S)</button>
+            <button onclick="deleteNote()" id="delete-btn" style="display: none;">DELETE NOTE!</button>
             <p id="save-status"></p>
         </div>
         </div>
 
     <div id="custom-confirm-overlay">
         <div id="custom-confirm-box">
-            <p>:: WARNING: DELETE SELECTED FILE? (Y/N) ::</p>
-            <button id="confirm-ok-btn" onclick="confirmDelete(true)">CONFIRM</button>
-            <button id="confirm-cancel-btn" onclick="confirmDelete(false)">CANCEL</button>
-        </div>
+            <p>[WARNING!] DELETE SELECTED FILE? (YES/CANCEL) ::</p>
+       <button id="confirm-cancel-btn" onclick="confirmDelete(false)">CANCEL</button>
+       
+ <button id="confirm-ok-btn" onclick="confirmDelete(true)">CONFIRM</button>
+         </div>
     </div>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
