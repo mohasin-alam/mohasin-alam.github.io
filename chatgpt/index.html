@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pink Theme AI Assistant - Csm Mohasin Alam</title>
+    <title>Pink Theme AI Assistant - Csm Mohasin Alam (Mobile Fix)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -65,21 +65,24 @@
         }
         
         .chat-header i {
-            /* হেডারে পিঙ্ক আইকন */
             color: var(--primary-color);
             font-size: 1.3em;
         }
 
         .chat-body {
+            /* Input Bar এর জন্য নিচে কিছু জায়গা রাখা হলো */
             flex-grow: 1; 
             padding: 20px;
             overflow-y: auto;
             font-size: 15px;
             line-height: 1.6;
             background-color: var(--main-bg);
+            /* এখানে bottom padding যোগ করা হয়েছে, যা input bar এর উচ্চতার সমান */
+            padding-bottom: 85px; 
+            /* Flexbox এর ব্যবহার ধরে রাখা হয়েছে, তবে overflow-y: auto এটিকে স্ক্রলযোগ্য করে */
         }
         
-        /* --- মেসেজ বাবল স্টাইল --- */
+        /* --- মেসেজ বাবল স্টাইল: কোনো পরিবর্তন নেই --- */
         .chat-body > div {
             display: flex;
             margin-bottom: 15px;
@@ -94,36 +97,27 @@
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        /* ইউজার মেসেজ (ডানদিকে) */
-        .user-message {
-            justify-content: flex-end; 
-        }
+        .user-message { justify-content: flex-end; }
         .user-message .message-bubble {
-            background-color: var(--user-bg); /* হালকা পিঙ্ক ব্যাকগ্রাউন্ড */
+            background-color: var(--user-bg);
             color: var(--text-color);
             border-bottom-right-radius: 4px;
         }
 
-        /* বট রিপ্লাই (বামদিকে) */
-        .bot-reply {
-            justify-content: flex-start; 
-        }
+        .bot-reply { justify-content: flex-start; }
         .bot-reply .message-bubble {
-            background-color: var(--ai-bg); /* হালকা ধূসর/সাদা ব্যাকগ্রাউন্ড */
+            background-color: var(--ai-bg);
             color: var(--text-color);
             border-bottom-left-radius: 4px;
         }
 
         .message-bubble b {
             font-weight: 600;
-            /* বোল্ড টেক্সটকে প্রাইমারি কালার দেওয়া হলো */
             color: var(--primary-color); 
         }
 
-        /* টাইপিং অ্যানিমেশন */
-        .typing-animation {
-            justify-content: flex-start; 
-        }
+        /* টাইপিং অ্যানিমেশন (কোনো পরিবর্তন নেই) */
+        .typing-animation { justify-content: flex-start; }
         .typing-animation .message-bubble {
             background-color: var(--ai-bg);
             padding: 10px 18px 10px 15px;
@@ -134,7 +128,6 @@
         .typing-animation .dot {
             width: 7px;
             height: 7px;
-            /* ডটগুলিকে পিঙ্ক কালার দেওয়া হলো */
             background-color: var(--primary-color); 
             border-radius: 50%;
             margin: 0 4px;
@@ -143,21 +136,36 @@
             animation: bounce 1.4s infinite ease-in-out;
         }
 
-        .typing-animation .dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-animation .dot:nth-child(2) { animation-delay: -0.16s; }
-        
         @keyframes bounce {
             0%, 80%, 100% { opacity: 0; transform: scale(0); }
             40% { opacity: 1; transform: scale(1); }
         }
 
+        /* --- ইনপুট বার পরিবর্তন --- */
         .chat-input {
+            /* Position Fixed করা হলো */
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            width: 100%; /* পুরো স্ক্রিন জুড়তে */
+            
             display: flex;
             flex-shrink: 0;
             background-color: var(--input-area-bg);
             padding: 15px 20px;
             box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box; /* Padding, width এর মধ্যে অন্তর্ভুক্ত হবে */
+            z-index: 1000; /* নিশ্চিত করতে যাতে চ্যাট বডির উপরে থাকে */
         }
+        
+        /* কীবোর্ড উঠলে Android/Chrome এর কিছু বাগ ফিক্স করার জন্য */
+        @media (max-width: 768px) {
+            .chat-input {
+                /* ensure it stays on top of the keyboard */
+                padding-bottom: 15px; 
+            }
+        }
+        
 
         .chat-input input {
             flex: 1;
@@ -170,13 +178,11 @@
             transition: border-color 0.3s, box-shadow 0.3s;
         }
         .chat-input input:focus {
-            /* ইনপুট ফোকাসে পিঙ্ক বর্ডার */
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(255, 20, 147, 0.2); /* হালকা পিঙ্ক শ্যাডো */
+            box-shadow: 0 0 0 2px rgba(255, 20, 147, 0.2);
         }
 
         .chat-input button {
-            /* বাটনে পিঙ্ক ব্যাকগ্রাউন্ড */
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -189,7 +195,6 @@
             transition: background-color 0.3s, transform 0.1s;
         }
         .chat-input button:hover {
-            /* হোভারে ডার্কার পিঙ্ক */
             background-color: #d60b77; 
         }
         .chat-input button:active {
@@ -202,7 +207,7 @@
 <div id="fullScreenChat">
   <div class="chat-header">
     <i class="fas fa-microchip"></i> 
-    <span>AI Assistant by @preview.43</span>
+    <span>AI Assistant by Csm Mohasin Alam</span>
   </div>
   
   <div class="chat-body" id="chatBody">
@@ -283,7 +288,6 @@ function typeReply(element, textWithHtml) {
         if (i < textWithHtml.length) {
             let char = textWithHtml.charAt(i);
 
-            // HTML ট্যাগ (যেমন: <b>, <br>) স্কিপ করার লজিক
             if (char === '<') {
                 const tagEndIndex = textWithHtml.indexOf('>', i);
                 if (tagEndIndex !== -1) {
@@ -354,11 +358,9 @@ async function sendMessage() {
     const message = userInput.value.trim();
     if (message === '') return;
     
-    // ইউজার মেসেজ যোগ করা (ডানদিকে)
     appendMessage('user', message);
     userInput.value = '';
 
-    // "Typing Animation" যোগ করা (বামদিকে)
     const typingMessageId = `typing-${Date.now()}`;
     const typingDiv = appendMessage('typing', typingMessageId);
     
@@ -369,7 +371,6 @@ async function sendMessage() {
     let reply = "দুঃখিত, আমি এই মুহূর্তে আপনার প্রশ্নের উত্তরটি ডেটাবেসে খুঁজে পাচ্ছি না। 😊";
     const userMessageLower = message.toLowerCase();
 
-    // Firebase থেকে লোড হওয়া ডেটা দিয়ে matching করা
     let matched = false;
     for (const query in qaDictionary) {
         if (userMessageLower.includes(query)) { 
@@ -379,16 +380,13 @@ async function sendMessage() {
         }
     }
     
-    // ২ সেকেন্ড (2000 ms) পর রিপ্লাই দেওয়া
     setTimeout(() => {
         const typingBubble = typingDiv.querySelector('.message-bubble');
         
-        // Typing অ্যানিমেশন Div টি Bot Reply-তে রূপান্তর করা হলো
         typingDiv.classList.remove('typing-animation');
         typingDiv.classList.add('bot-reply');
         typingDiv.removeAttribute('id'); 
         
-        // টাইপিং বাবল-এ Typewriter এফেক্ট ব্যবহার করে উত্তর প্রদর্শন
         typeReply(typingBubble, reply);
         
     }, 2000); 
@@ -396,4 +394,4 @@ async function sendMessage() {
 </script>
 
 </body>
-</htAlamm
+</html>
