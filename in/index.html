@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✅ লাইভ ট্র্যাকার (ইউজার সেন্ডার) | CSM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #00ffd5;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+    .status-container {
+      background: #111;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 0 15px rgba(0, 255, 213, 0.4);
+      max-width: 350px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px dashed #333;
+    }
+    .status-item:last-child {
+        border-bottom: none;
+    }
+    .label {
+        color: #00ffd5;
+        font-weight: 600;
+    }
+    .value {
+        color: #fff;
+    }
+    #permission-status {
+        font-weight: 600;
+        color: #f39c12;
+    }
+    .error {
+        color: #e74c3c !important;
+    }
+    .success {
+        color: #2ecc71 !important;
+    }
+    .user-id {
+        font-size: 14px;
+        color: #bbb;
+        margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📍 লাইভ লোকেশন সেন্ডার</h1>
+  <p id="user-id" class="user-id">User ID: <span id="display-user-id">Loading...</span></p>
+  <p id="permission-status">লোকেশন পারমিশন চেক করা হচ্ছে...</p>
+  
+  <div class="status-container">
+    <div class="status-item"><span class="label">Status:</span> <span class="value success" id="status-display">Offline</span></div>
+    <div class="status-item"><span class="label">Latitude:</span> <span class="value" id="lat">-</span></div>
+    <div class="status-item"><span class="label">Longitude:</span> <span class="value" id="lon">-</span></div>
+    <div class="status-item"><span class="label">Speed:</span> <span class="value" id="speed">-</span></div>
+    <div class="status-item"><span class="label">Battery:</span> <span class="value" id="bat">-</span></div>
+    <div class="status-item"><span class="label">Network:</span> <span class="value" id="net">-</span></div>
+    <div class="status-item"><span class="label">Last Updated:</span> <span class="value" id="time">-</span></div>
+  </div>
+
+  <script type="module">
+    // --- 1. DOM Element Caching ---
+    const permissionStatusEl = document.getElementById("permission-status");
+    const statusDisplayEl = document.getElementById("status-display");
+    const latEl = document.getElementById("lat");
+    const lonEl = document.getElementById("lon");
+    const speedEl = document.getElementById("speed");
+    const netEl = document.getElementById("net");
+    const batEl = document.getElementById("bat");
+    const timeEl = document.getElementById("time");
+    const displayUserIdEl = document.getElementById("display-user-id");
+
+    // --- 2. Firebase Setup ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    // **গুরুত্বপূর্ণ: এই কনফিগারেশনটি আপনার অ্যাডমিন প্যানেলের কনফিগারেশনের সাথে একই হতে হবে**
+    const YOUR_FIREBASE_CONFIG = {
+        apiKey:"AIzaSyCsGBSRCHVUhXQZ5DNMEZWgQWk1gxMF1E4", 
+        authDomain:"signup-d32c5.firebaseapp.com",
+        projectId:"signup-d32c5",
+        databaseURL:"https://signup-d32c5-default-rtdb.firebaseio.com/",
+    };
+
+    const app = initializeApp(YOUR_FIREBASE_CONFIG);
+    const db = getDatabase(app);
+
+    // --- 3. Persistent User ID Management (ব্রাউজারে সেভ থাকবে) ---
+    const STORAGE_KEY = 'tracker_user_id';
+    let USER_ID = localStorage.getItem(STORAGE_KEY);
+
+    if (!USER_ID) {
+        // নতুন র্যান্ডম আইডি তৈরি করা
+        USER_ID = 'User-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        localStorage.setItem(STORAGE_KEY, USER_ID);
+    }
+    displayUserIdEl.textContent = USER_ID;
+    
+    // Firebase Reference for the current user
+    const userRef = ref(db, "users/" + USER_ID);
+
+    // --- 4. Helper Functions ---
+    
+    async function getBatteryLevel() {
+      try {
+        if ('getBattery' in navigator) {
+            const battery = await navigator.getBattery();
+            return (battery.level * 100).toFixed(0) + "%";
+        }
+        return "N/A";
+      } catch (e) {
+        return "N/A";
+      }
+    }
+
+    function getNetworkType() {
+      try {
+        const net = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        return net ? net.effectiveType.toUpperCase() : "UNKNOWN";
+      } catch (e) {
+        return "UNKNOWN";
+      }
+    }
+
+    function updateUI(latitude, longitude, speed, battery, network, timestamp, isLive = true) {
+        latEl.textContent = latitude.toFixed(6);
+        lonEl.textContent = longitude.toFixed(6);
+        speedEl.textContent = speed ? speed.toFixed(2) + " m/s" : "0.00 m/s";
+        netEl.textContent = network;
+        batEl.textContent = battery;
+        timeEl.textContent = timestamp;
+        statusDisplayEl.textContent = isLive ? 'LIVE' : 'OFFLINE';
+        statusDisplayEl.className = isLive ? 'value success' : 'value error';
+    }
+
+    // --- 5. Main Location Handler ---
+
+    async function locationSuccess(position) {
+      const { latitude, longitude, speed, accuracy } = position.coords;
+      const battery = await getBatteryLevel();
+      const network = getNetworkType();
+      const timestamp = new Date().toLocaleTimeString();
+
+      updateUI(latitude, longitude, speed, battery, network, timestamp, true);
+      
+      // Data structure for Firebase:
+      const locationData = {
+        // LIVE data (will be null on disconnect)
+        latitude,
+        longitude,
+        speed: speed ? (speed * 3.6).toFixed(2) : "0.00", // m/s to km/h
+        accuracy: accuracy.toFixed(2) + " m",
+        
+        // STATIC/LAST SEEN data
+        battery,
+        network,
+        time: timestamp,
+        timestamp_server: serverTimestamp(),
+        
+        // LAST SEEN backups (used when the user is offline)
+        last_lat: latitude,
+        last_lon: longitude,
+        last_time: timestamp,
+      };
+
+      // Send to Firebase
+      try {
+        await set(userRef, locationData);
+        permissionStatusEl.textContent = `✅ লোকেশন লাইভ পাঠানো হচ্ছে (${timestamp})`;
+        permissionStatusEl.classList.remove('error');
+        permissionStatusEl.classList.add('success');
+      } catch (e) {
+        console.error("Firebase Send Error:", e);
+        permissionStatusEl.textContent = "⚠️ Firebase-এ ডেটা পাঠাতে সমস্যা হচ্ছে। (কনসোল দেখুন)";
+        permissionStatusEl.classList.add('error');
+      }
+    }
+
+    function locationError(error) {
+      console.error("Geolocation Error:", error);
+      let errorMessage = "❌ লোকেশন অ্যাক্সেসের সমস্যা।";
+      if (error.code === error.PERMISSION_DENIED) {
+            errorMessage = "❌ লোকেশন অ্যাক্সেসের অনুমতি দেওয়া হয়নি।";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+            errorMessage = "❌ ডিভাইস থেকে লোকেশন ডেটা পাওয়া যাচ্ছে না।";
+        } else if (error.code === error.TIMEOUT) {
+            errorMessage = "❌ লোকেশন ডেটা পাওয়ার সময় শেষ (Timeout)।";
+        }
+      
+      permissionStatusEl.textContent = errorMessage;
+      permissionStatusEl.classList.add('error');
+      
+      statusDisplayEl.textContent = 'OFFLINE (GPS Failed)';
+      statusDisplayEl.className = 'value error';
+    }
+
+    // --- 6. Online/Offline Handling ---
+    function setupDisconnect() {
+        // যখন অ্যাপটি বন্ধ হবে বা কানেকশন হারাবে, তখন এই ডেটাগুলি সেভ থাকবে।
+        onDisconnect(userRef).set({
+            // Live fields set to null/removed
+            latitude: null,
+            longitude: null,
+            speed: null,
+            
+            // last_seen data is maintained
+            last_lat: latEl.textContent,
+            last_lon: lonEl.textContent,
+            last_time: new Date().toLocaleTimeString(),
+            battery: batEl.textContent,
+            network: netEl.textContent,
+            timestamp_server: serverTimestamp(),
+        });
+    }
+
+
+    // --- 7. Initialization (পারমিশন চাওয়ার লজিক) ---
+    window.onload = () => {
+      if ("geolocation" in navigator) {
+        permissionStatusEl.textContent = "লোকেশন অ্যাক্সেসের জন্য অনুরোধ করা হচ্ছে...";
+        
+        // প্রথমে getCurrentPosition ব্যবহার করে পারমিশন চাওয়া
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            permissionStatusEl.textContent = "✅ অনুমতি দেওয়া হয়েছে! লাইভ ট্র্যাকিং শুরু হচ্ছে...";
+            setupDisconnect(); // ডিসকানেক্ট হ্যান্ডলার সেট করা
+
+            // অনুমতি পেলে watchPosition দিয়ে লাইভ ট্র্যাকিং শুরু করা হলো
+            navigator.geolocation.watchPosition(locationSuccess, locationError, {
+              enableHighAccuracy: true,
+              maximumAge: 0, 
+              timeout: 15000 
+            });
+          },
+          // পারমিশন না পেলে বা প্রথম ডেটা না পেলে error হ্যান্ডেলারে যাবে
+          locationError, 
+          { enableHighAccuracy: true }
+        );
+      } else {
+        permissionStatusEl.textContent = "❌ আপনার ডিভাইসে Geolocation সাপোর্ট করে না।";
+        permissionStatusEl.classList.add('error');
+      }
+    };
+  </script>
+</body>
+</html>
