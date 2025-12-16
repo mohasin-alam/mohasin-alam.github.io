@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+
+
+<script>
+fetch("https://ipapi.co/json/")
+.then(res => res.json())
+.then(data => {
+  if (data.country === "IN") {
+    document.body.innerHTML =
+      "<h2 style='text-align:center;margin-top:50px;'>Access not allowed from India</h2>";
+  }
+});
+</script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ওয়েবসাইট সোর্স কোড ভিউয়ার</title>
