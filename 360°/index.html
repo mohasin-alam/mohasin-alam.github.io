@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacker VR Tunnel</title>
+    <title>Hacker VR Tunnel - Smooth</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
@@ -11,7 +11,7 @@
     <style>
         :root {
             --hacker-green: #00ff41;
-            --dark-bg: #0a0a0a;
+            --dark-bg: #000;
         }
 
         body, html { 
@@ -21,14 +21,10 @@
             overflow: hidden;
         }
 
-        /* Hacker Frame/Tunnel UI */
         .viewer-container {
             position: relative;
             width: 100vw;
             height: 100vh;
-            border: 5px solid #111;
-            box-sizing: border-box;
-            box-shadow: inset 0 0 100px rgba(0, 255, 65, 0.2);
         }
 
         #panorama {
@@ -36,37 +32,29 @@
             height: 100%;
         }
 
-        /* Overlay Elements */
-        .overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* যাতে মাউস ক্লিক কাজ করে */
-            z-index: 10;
-            border: 20px solid transparent;
-            border-image: linear-gradient(to bottom right, var(--hacker-green), transparent) 1;
-            opacity: 0.3;
-        }
-
+        /* Overlay Elements - Hacker Aesthetic */
         .hud-text {
             position: absolute;
             top: 20px;
             left: 20px;
             color: var(--hacker-green);
             text-transform: uppercase;
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px var(--hacker-green);
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
             z-index: 100;
+            pointer-events: none;
         }
 
         .scanning-line {
             position: absolute;
             width: 100%;
-            height: 2px;
-            background: rgba(0, 255, 65, 0.1);
+            height: 1px;
+            background: rgba(0, 255, 65, 0.15);
             top: 0;
             z-index: 100;
-            animation: scan 4s linear infinite;
+            animation: scan 6s linear infinite;
+            pointer-events: none;
         }
 
         @keyframes scan {
@@ -74,21 +62,25 @@
             100% { top: 100%; }
         }
 
-        /* Pannellum Control Styling */
-        .pnlm-control { background: rgba(0, 40, 0, 0.7) !important; border-color: var(--hacker-green) !important; }
-        .pnlm-render-container { filter: sepia(20%) hue-rotate(80deg) brightness(90%); }
+        /* Photo controls styling - keeping it hacker style but photo is original color */
+        .pnlm-control { 
+            background: rgba(0, 0, 0, 0.6) !important; 
+            border: 1px solid var(--hacker-green) !important; 
+        }
+        
+        /* Green Filter Removed */
+        .pnlm-render-container { filter: none !important; }
     </style>
 </head>
 <body>
 
 <div class="viewer-container">
     <div class="hud-text">
-        [ SYSTEM: ONLINE ]<br>
-        [ SCANNING SECTOR 360... ]<br>
-        <span id="coords">COORDS: 0.00, 0.00</span>
+        [ SYSTEM: STABLE ]<br>
+        [ VIEW: ORIGINAL_MODE ]<br>
+        <span id="coords">POS: 0.00° / 0.00°</span>
     </div>
     <div class="scanning-line"></div>
-    <div class="overlay"></div>
     
     <div id="panorama"></div>
 </div>
@@ -96,20 +88,30 @@
 <script>
     const viewer = pannellum.viewer('panorama', {
         "type": "equirectangular",
-        "panorama": "picture.jpg", // এখানে আপনার ছবির ফাইল নাম দিন
+        "panorama": "picture.jpg", // আপনার ছবির ফাইল নাম
         "autoLoad": true,
-        "autoRotate": -1.5,
-        "compass": true,
-        "hfov": 110
+        "autoRotate": -1.2,
+        "compass": false,
+        "hfov": 100,
+        "minHfov": 50,
+        "maxHfov": 120,
+        
+        /* Smoothness Settings */
+        "friction": 0.15,      // এটি মাউস ছাড়ার পর মুভমেন্টকে স্মুথলি থামাবে
+        "animationTimingFunction": "easeInOutQuad",
+        "mouseZoom": true,
+        "draggable": true
     });
 
-    // মাউস মুভমেন্টের সাথে কোঅর্ডিনেট আপডেট (Hacker Feel)
-    viewer.on('mouseup', function(event) {
+    // স্মুথলি কোঅর্ডিনেট আপডেট
+    function updateCoords() {
         let pitch = viewer.getPitch().toFixed(2);
         let yaw = viewer.getYaw().toFixed(2);
-        document.getElementById('coords').innerText = `COORDS: ${pitch}, ${yaw}`;
-    });
+        document.getElementById('coords').innerText = `POS: ${pitch}° / ${yaw}°`;
+        requestAnimationFrame(updateCoords);
+    }
+    updateCoords();
 </script>
 
 </body>
-  </html>
+</html>
