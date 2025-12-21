@@ -2,53 +2,59 @@
 <html lang="bn">
 <head>
 
-<script type="module">
-  // Firebase SDK ইম্পোর্ট করা
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notification Site</title>
+</head>
+<body>
+    <h1>GitHub Pages Notification Test</h1>
+    <p>যদি স্ক্রিনে টোকেন আসে, তবে সেটি কপি করুন।</p>
 
-  // আপনার Firebase কনফিগারেশন
-  const firebaseConfig = {
-    apiKey: "AIzaSyCWIWiPV6AzLMdqAWHsyJGpi1wptaIV9N8",
-    authDomain: "my-github-site.firebaseapp.com",
-    projectId: "my-github-site",
-    storageBucket: "my-github-site.firebasestorage.app",
-    messagingSenderId: "673354768242",
-    appId: "1:673354768242:web:8de902cecba76574cec7eb"
-  };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js";
 
-  // Firebase ইনিশিয়ালাইজ করা
-  const app = initializeApp(firebaseConfig);
-  const messaging = getMessaging(app);
+        // আপনার ফায়ারবেস কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWIWiPV6AzLMdqAWHsyJGpi1wptaIV9N8",
+            authDomain: "my-github-site.firebaseapp.com",
+            projectId: "my-github-site",
+            storageBucket: "my-github-site.firebasestorage.app",
+            messagingSenderId: "673354768242",
+            appId: "1:673354768242:web:8de902cecba76574cec7eb"
+        };
 
-  // নোটিফিকেশন পারমিশন এবং টোকেন পাওয়ার ফাংশন
-  function requestPermission() {
-    console.log('Requesting permission...');
-    Notification.requestPermission().then((permission) => {
-      if (permission === 'granted') {
-        console.log('Notification permission granted.');
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
 
-        // এখানে আপনার নিজের VAPID Key টি বসাবেন
-        getToken(messaging, { vapidKey: 'আপনার_VAPID_KEY_এখানে_দিন' })
-        .then((currentToken) => {
-          if (currentToken) {
-            console.log('আপনার টোকেন (এটি কপি করে রাখুন):', currentToken);
-            // ভবিষ্যতে এই টোকেনটি ডাটাবেসে সেভ করতে হবে
-          } else {
-            console.log('No registration token available. Request permission to generate one.');
-          }
-        }).catch((err) => {
-          console.log('An error occurred while retrieving token. ', err);
-        });
-      } else {
-        console.log('Unable to get permission to notify.');
-      }
-    });
-  }
+        // টোকেন পাওয়ার ফাংশন
+        function requestPermission() {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    // এখানে আপনার VAPID KEY বসান
+                    getToken(messaging, { vapidKey: 'BFPWiuRQv8T7ruPEZO-QmSrCJig7dX-tl6OCzYvKaPoWPYQZOuOu3WWFxau1uNbh40U3glf9jQlEyLXRtPf_I5U' })
+                    .then((currentToken) => {
+                        if (currentToken) {
+                            // মোবাইলে টোকেনটি দেখানোর জন্য অ্যালার্ট
+                            alert("Token Copied নয়, ম্যানুয়ালি কপি করুন:\n\n" + currentToken);
+                            console.log("Token:", currentToken);
+                        } else {
+                            alert("টোকেন পাওয়া যায়নি! পারমিশন চেক করুন।");
+                        }
+                    }).catch((err) => {
+                        console.log('Error:', err);
+                    });
+                }
+            });
+        }
 
-  // পেজ লোড হলে পারমিশন চাওয়া শুরু হবে
-  requestPermission();
-</script>
+        requestPermission();
+    </script>
+</body>
+</html>
 <script>
 fetch("https://ipapi.co/json/")
 .then(res => res.json())
