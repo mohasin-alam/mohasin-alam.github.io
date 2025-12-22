@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>শুভ জন্মদিন প্রিয়তম!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Hind+Siliguri:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typewriter-effect@latest/dist/core.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #0a0a0a;
+            color: white;
+            font-family: 'Hind Siliguri', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Cinematic Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+
+        .content {
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* Neon Logo/Name */
+        .neon-name {
+            font-family: 'Dancing Script', cursive;
+            font-size: 5rem;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 40px #ff0055;
+            opacity: 0;
+        }
+
+        /* Cinematic Typewriter Message */
+        #typewriter {
+            font-size: 1.8rem;
+            min-height: 100px;
+            color: #ccc;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+        /* Professional Button */
+        .reveal-btn {
+            margin-top: 40px;
+            padding: 15px 40px;
+            background: transparent;
+            color: #ff0055;
+            border: 2px solid #ff0055;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0;
+        }
+
+        .reveal-btn:hover {
+            background: #ff0055;
+            color: white;
+            box-shadow: 0 0 20px #ff0055;
+        }
+
+        .floating-heart {
+            position: absolute;
+            color: rgba(255, 0, 85, 0.3);
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="content">
+        <h1 class="neon-name" id="gfName">Jhilik</h1> <div id="typewriter"></div>
+        <button class="reveal-btn" onclick="startCinema()">এখানে দেখো ☺️</button>
+    </div>
+
+    <script>
+        // ১. Background Floating Hearts Animation
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            heart.innerHTML = '💝';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = '110vh';
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+            document.body.appendChild(heart);
+
+            gsap.to(heart, {
+                y: '-120vh',
+                x: (Math.random() - 0.5) * 200,
+                duration: Math.random() * 5 + 5,
+                ease: "power1.out",
+                onComplete: () => heart.remove()
+            });
+        }
+        setInterval(createHeart, 300);
+
+        // ২. Entrance Animation
+        window.onload = () => {
+            gsap.to(".neon-name", { opacity: 1, y: -20, duration: 2, ease: "power4.out" });
+            
+            // ৩. Typewriter Effect
+            const typewriter = new Typewriter('#typewriter', {
+                loop: false,
+                delay: 75,
+            });
+
+            typewriter
+                .pauseFor(1000)
+                .typeString('আজকের দিনটি শুধু তোমার...')
+                .pauseFor(500)
+                .typeString('<br><span style="color: #ff0055;">শুভ জন্মদিন প্রিয়তমা!</span>')
+                .pauseFor(500)
+                .typeString('<br>তুমি আমার জীবনের শ্রেষ্ঠ পাওয়া।  💝')
+                .start();
+
+            gsap.to(".reveal-btn", { opacity: 1, delay: 6, duration: 1.5 });
+        };
+
+        // ৪. Button Click - Wedding Wish & Surprise
+        function startCinema() {
+            gsap.to(".content", { opacity: 0, duration: 1 });
+            setTimeout(() => {
+                document.body.innerHTML = `
+                    <div style="text-align:center; padding: 20px;">
+                        <h2 style="font-size: 3rem; color: #ff0055; text-shadow: 0 0 20px #ff0055;">হয়তো আমাদের গল্পটা এভাবেই শেষ হওয়ার ছিল 😩</h2>
+                        <p style="font-size: 1.5rem; margin-top: 20px;">ভাগ্যের পরিহাসে আজ তুমি অন্য কারো ঘরে, তবুও এই মনটা আজও শুধু তোমার কথা স্মরণে করে। ভালোবাসা মানে শুধু হাত ধরে থাকা নয়, দূরে থেকেও ভালো চাওয়াতেই আসল ভালোবাসা রয়।</p>
+                        <br><br>
+                        <img src="https://i.pinimg.com/originals/7c/a3/cb/7ca3cb26f82dd7b72b07bbf4072239a2.gif" width="300">
+                    </div>
+                `;
+                gsap.from("body div", { opacity: 0, scale: 0.8, duration: 2 });
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
