@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse AI - Final Code</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @property --current-color {
+            syntax: '<color>';
+            initial-value: #00ffcc;
+            inherits: true;
+        }
+
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            --current-color: #00ffcc; 
+            --overlay: rgba(0, 0, 0, .95);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #020205;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #fff;
+            transition: --current-color 0.5s linear; 
+            animation: syncColors 8s infinite alternate ease-in-out;
+            padding: 40px 0;
+            overflow-x: hidden;
+        }
+
+        @keyframes syncColors {
+            0%   { --current-color: #00ffcc; }
+            15%  { --current-color: #0088ff; }
+            30%  { --current-color: #7000ff; }
+            45%  { --current-color: #ff00de; }
+            60%  { --current-color: #ff3c00; }
+            75%  { --current-color: #ffd700; }
+            90%  { --current-color: #adff2f; }
+            100% { --current-color: #00ffcc; }
+        }
+
+        .bg-glow-container {
+            position: fixed;
+            width: 100%; height: 100%;
+            filter: blur(120px);
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .glow-circle {
+            position: absolute;
+            width: 500px; height: 500px;
+            background: var(--current-color);
+            border-radius: 50%;
+            animation: moveGlow 10s infinite alternate;
+            transition: background 0.5s linear;
+        }
+
+        @keyframes moveGlow {
+            0% { top: -10%; left: -10%; }
+            100% { top: 70%; left: 80%; }
+        }
+
+        .main-card {
+            position: relative;
+            width: 400px;
+            padding: 50px 30px 40px;
+            background: var(--glass);
+            backdrop-filter: blur(40px);
+            border-radius: 35px;
+            text-align: center;
+            z-index: 10;
+            border: 1px solid var(--current-color);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            transition: border-color 0.5s linear;
+        }
+
+        .share-btn-top {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 20;
+        }
+
+        .share-btn-top:hover {
+            background: var(--current-color);
+            color: #000;
+            border-color: var(--current-color);
+            box-shadow: 0 0 15px var(--current-color);
+        }
+
+        .app-sphere {
+            width: 85px; 
+            height: 85px;
+            margin: 0 auto 30px;
+            background: #000;
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 25px var(--current-color);
+            transition: box-shadow 0.5s linear;
+            z-index: 1;
+            padding: 2px;
+        }
+
+        .app-sphere img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .app-sphere::after {
+            content: '';
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border: 2px dashed var(--current-color);
+            border-radius: 50%;
+            animation: spin 6s linear infinite;
+            transition: border-color 0.5s linear;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        h1 { font-weight: 800; font-size: 24px; margin-bottom: 5px; }
+        .dev-name { font-size: 12px; color: var(--current-color); margin-bottom: 25px; transition: color 0.5s linear; }
+
+        .app-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+        }
+
+        .info-value { display: block; font-weight: 800; font-size: 14px; }
+        .info-label { display: block; font-size: 10px; opacity: 0.5; text-transform: uppercase; }
+
+        .screenshot-section {
+            width: 100%; overflow: hidden;
+            margin-bottom: 25px; border-radius: 20px;
+        }
+
+        .slider-track {
+            display: flex; gap: 14px;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .slide { min-width: 140px; height: 220px; }
+        .slide img {
+            width: 100%; height: 100%; object-fit: cover;
+            border-radius: 18px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s ease;
+        }
+
+        .viewer {
+            position: fixed; inset: 0;
+            background: var(--overlay);
+            display: none; align-items: center; justify-content: center;
+            z-index: 9999; backdrop-filter: blur(15px);
+            touch-action: none;
+        }
+        .viewer.active { display: flex; }
+
+        .viewer img {
+            max-height: 80vh; max-width: 85%;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid var(--current-color);
+            transition: transform 0.4s var(--transition), opacity 0.4s var(--transition), border-color 0.5s linear;
+        }
+
+        .viewer-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 50px; height: 50px; background: rgba(255,255,255,0.1);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #fff; cursor: pointer; transition: 0.3s;
+            z-index: 10;
+        }
+
+        .viewer-dots span.active {
+            width: 25px; border-radius: 10px; background: var(--current-color);
+        }
+
+        .btn-modern {
+            padding: 16px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03); color: #fff; font-weight: 700;
+            text-decoration: none; cursor: pointer; display: flex; 
+            align-items: center; justify-content: center; gap: 12px;
+            transition: var(--transition); font-size: 13px; width: 100%;
+        }
+        .btn-modern:hover {
+            background: var(--current-color); color: #000;
+            box-shadow: 0 0 20px var(--current-color); transform: translateY(-3px);
+        }
+
+        .share-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center;
+            z-index: 10000; backdrop-filter: blur(10px);
+        }
+        .share-overlay.active { display: flex; }
+
+        .square-modal {
+            background: #0a0a0a; padding: 40px; border: 1px solid var(--current-color);
+            width: 350px; text-align: center; transition: border-color 0.5s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow-container">
+        <div class="glow-circle"></div>
+    </div>
+
+    <div class="main-card">
+        <div class="share-btn-top" onclick="toggleShare(true)">
+            <i class="fas fa-share-nodes"></i>
+        </div>
+
+        <div class="app-sphere">
+            <img src="https://mohasin-alam.github.io/Picsart_25-12-23_09-02-14-346.jpg" alt="App Logo">
+        </div>
+
+        <h1>PULSE AI</h1>
+        <p class="dev-name">Nexus Labs Engineering</p>
+
+        <div class="app-info-grid">
+            <div class="info-item"><span class="info-value">4.8 <i class="fas fa-star"></i></span><span class="info-label">Reviews</span></div>
+            <div class="info-item"><span class="info-value">24 MB</span><span class="info-label">Size</span></div>
+            <div class="info-item"><span class="info-value">1M+</span><span class="info-label">Downloads</span></div>
+        </div>
+
+        <div class="screenshot-section">
+            <div class="slider-track" id="sliderTrack">
+                <div class="slide"><img src="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&w=800"></div>
+                <div class="slide"><img src="https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg?auto=compress&w=800"></div>
+                <div class="slide"><img src="https://images.pexels.com/photos/1092644/pexels-photo-1092644.jpeg?auto=compress&w=800"></div>
+                <div class="slide"><img src="https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&w=800"></div>
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <button class="btn-modern" onclick="triggerDownload()">
+                <i class="fab fa-google-play"></i> INSTALL APP
+            </button>
+        </div>
+    </div>
+
+    <div class="viewer" id="screenshotViewer">
+        <div class="viewer-close" id="viewerClose" style="position:absolute; top:25px; right:25px; font-size:35px; color:#fff; cursor:pointer;">×</div>
+        <div class="viewer-nav prev" id="viewerPrev" style="left:20px;">‹</div>
+        <div class="viewer-container" id="swipeArea" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <img id="viewerImg" src="">
+        </div>
+        <div class="viewer-nav next" id="viewerNext" style="right:20px;">›</div>
+        <div class="viewer-dots" id="viewerDots" style="position:absolute; bottom:40px; display:flex; gap:10px;"></div>
+    </div>
+
+    <div class="share-overlay" id="shareOverlay">
+        <div class="square-modal">
+            <h2 style="font-size: 16px; letter-spacing: 4px; color: var(--current-color);">BROADCAST</h2>
+            <div class="social-grid" style="display:grid; grid-template-columns: repeat(2,1fr); gap:15px; margin-top:25px;">
+                <div onclick="shareTo('fb')" style="padding:20px; background:rgba(255,255,255,0.02); color:#fff; cursor:pointer;"><i class="fab fa-facebook-f"></i></div>
+                <div onclick="shareTo('wa')" style="padding:20px; background:rgba(255,255,255,0.02); color:#fff; cursor:pointer;"><i class="fab fa-whatsapp"></i></div>
+                <div onclick="shareTo('tg')" style="padding:20px; background:rgba(255,255,255,0.02); color:#fff; cursor:pointer;"><i class="fab fa-telegram-plane"></i></div>
+                <div onclick="shareTo('tw')" style="padding:20px; background:rgba(255,255,255,0.02); color:#fff; cursor:pointer;"><i class="fab fa-twitter"></i></div>
+            </div>
+            <p style="margin-top:30px; color:#ff4d4d; cursor:pointer; font-size:10px; font-weight:900;" onclick="toggleShare(false)">[ TERMINATE ]</p>
+        </div>
+    </div>
+
+    <script>
+        const DL_LINK = "https://www.dropbox.com/scl/fi/787qu2n3pc4f069wl5ivf/360-Photo-Sphere-Camera_1.1.1.apk?rlkey=0na4jjm2xx9twkdgvynx8bn4q&st=bm36pzkk&dl=1";
+        
+        function triggerDownload() {
+            window.location.href = DL_LINK;
+        }
+
+        function shareTo(platform) {
+            const url = window.location.href;
+            const text = "Check out Pulse AI!";
+            let shareUrl = "";
+            if(platform === 'fb') shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            if(platform === 'wa') shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`;
+            if(platform === 'tg') shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+            if(platform === 'tw') shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+            window.open(shareUrl, '_blank');
+        }
+
+        const slides = [...document.querySelectorAll('.slide img')];
+        const viewer = document.getElementById('screenshotViewer');
+        const viewerImg = document.getElementById('viewerImg');
+        const dots = document.getElementById('viewerDots');
+        const swipeArea = document.getElementById('swipeArea');
+        let currentIndex = 0;
+        let startX = 0;
+        let isDragging = false;
+
+        function toggleShare(open) {
+            const overlay = document.getElementById('shareOverlay');
+            if(open) { overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+            else { overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 400); }
+        }
+
+        slides.forEach((img, i) => {
+            const d = document.createElement('span');
+            d.style.cssText = "width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.2); transition:0.4s;";
+            d.onclick = (e) => { e.stopPropagation(); openViewer(i); };
+            dots.appendChild(d);
+            img.onclick = () => openViewer(i);
+        });
+
+        function openViewer(i) {
+            currentIndex = i; viewer.style.display = 'flex';
+            setTimeout(() => viewer.classList.add('active'), 10); updateViewer();
+        }
+
+        function updateViewer() {
+            viewerImg.src = slides[currentIndex].src;
+            [...dots.children].forEach((d, i) => {
+                d.style.width = i === currentIndex ? "25px" : "8px";
+                d.style.background = i === currentIndex ? "var(--current-color)" : "rgba(255,255,255,0.2)";
+                d.style.borderRadius = i === currentIndex ? "10px" : "50%";
+            });
+        }
+
+        const navigate = (dir) => {
+            currentIndex = dir === 'next' ? (currentIndex + 1) % slides.length : (currentIndex - 1 + slides.length) % slides.length;
+            updateViewer();
+        };
+
+        document.getElementById('viewerNext').onclick = (e) => { e.stopPropagation(); navigate('next'); };
+        document.getElementById('viewerPrev').onclick = (e) => { e.stopPropagation(); navigate('prev'); };
+        document.getElementById('viewerClose').onclick = () => { viewer.classList.remove('active'); setTimeout(() => viewer.style.display = 'none', 400); };
+
+        swipeArea.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isDragging = true; }, {passive: true});
+        swipeArea.addEventListener('touchend', (e) => {
+            if(!isDragging) return;
+            let diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 60) navigate(diff > 0 ? 'next' : 'prev');
+            isDragging = false;
+        });
+
+        setInterval(() => {
+            const track = document.getElementById('sliderTrack');
+            let trackIndex = (parseInt(track.dataset.index || 0) + 1) % (slides.length - 1);
+            track.dataset.index = trackIndex;
+            track.style.transform = `translateX(-${trackIndex * (slides[0].parentElement.offsetWidth + 14)}px)`;
+        }, 3500);
+
+        window.onclick = (e) => {
+            if (e.target == document.getElementById('shareOverlay')) toggleShare(false);
+            if (e.target == viewer || e.target == swipeArea) document.getElementById('viewerClose').click();
+        }
+    </script>
+</body>
+</html>
