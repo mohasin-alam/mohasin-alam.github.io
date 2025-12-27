@@ -98,6 +98,7 @@
 
         .note-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #222; }
         .note-item.kb-highlight { background-color: var(--primary-color) !important; color: var(--bg-color) !important; }
+        .note-item.active { border-left: 4px solid var(--neon-pink); background: var(--hover-bg); }
 
         #control-bar {
             height: var(--footer-height); border-top: 1px solid var(--border-color);
@@ -112,12 +113,11 @@
         <input type="email" id="email-input" placeholder="EMAIL" style="width:100%; margin-bottom:10px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <input type="password" id="password-input" placeholder="PASSWORD" style="width:100%; margin-bottom:15px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
-        <p id="auth-error" style="color: var(--danger-color); font-size: 0.8rem;"></p>
     </div>
 
     <div id="notepad-container" style="display: none;">
         <div id="app-header">
-            <h3>SECURE_SHELL</h3>
+            <h3>SECURE_SHELL (DEV: MOHASIN)</h3>
             <div>
                 <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
                 <button class="custom-button" onclick="logoutUser()">EXIT</button>
@@ -128,7 +128,7 @@
         <div id="note-app-layout">
             <div id="notes-list"></div>
             <div id="note-editor">
-                <input type="text" id="note-title" placeholder="TITLE (Press Enter for Body)...">
+                <input type="text" id="note-title" placeholder="TITLE (Enter to go Body)...">
                 <textarea id="note-text" placeholder="TYPE DATA..."></textarea>
                 <input type="hidden" id="current-note-id">
             </div>
@@ -137,7 +137,7 @@
         <div id="control-bar">
             <button class="custom-button" onclick="saveNote()">SAVE [CTRL+S]</button>
             <span id="save-status" style="margin-left: 20px;">:: SYSTEM READY ::</span>
-            <span style="margin-left: auto; opacity: 0.5;">F1: Mode | ARROWS: List | CTRL+L: Focus List</span>
+            <span style="margin-left: auto; opacity: 0.7;">F1: Mode | ARROWS: Select | ENTER: Open | <b>CTRL+Q: Focus List</b></span>
         </div>
     </div>
 
@@ -146,7 +146,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Firebase Config (Keep as it was)
         const firebaseConfig = {
             apiKey: "AIzaSyCyBfxasE2hwuthXu56VuHa7LWpybVFXhc",
             authDomain: "emailnotepad-28faa.firebaseapp.com",
@@ -162,29 +161,29 @@
         let currentUserId = null;
         let selectedIndex = -1;
 
-        // --- Keyboard Controls ---
+        // --- Keyboard Logic ---
         document.addEventListener('keydown', (e) => {
-            // F1 for Night Mode
-            if (e.key === 'F1') {
+            const notes = document.querySelectorAll('.note-item');
+
+            // F1: Mode Toggle
+            if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
+
+            // Ctrl + S: Save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
+
+            // Ctrl + M: New Note
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
+
+            // Ctrl + Q: Focus List (Note selecting mode)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'q') {
                 e.preventDefault();
-                toggleDarkMode();
+                document.activeElement.blur(); 
+                selectedIndex = 0;
+                updateVisualSelection();
             }
 
-            // Ctrl + S (Save)
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                saveNote();
-            }
-
-            // Ctrl + M (New)
-            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
-                e.preventDefault();
-                createNewNote();
-            }
-
-            // List Navigation (Arrows)
+            // Arrow Key Navigation (When not typing)
             if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
-                const notes = document.querySelectorAll('.note-item');
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     selectedIndex = (selectedIndex + 1) % notes.length;
@@ -201,7 +200,7 @@
             }
         });
 
-        // Title to Text navigation on Enter
+        // Title field Enter key
         document.getElementById('note-title').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -217,12 +216,12 @@
             });
         }
 
-        // Standard Functions
+        // --- Functions ---
         function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
         function loginUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            auth.signInWithEmailAndPassword(e, p).catch(err => document.getElementById('auth-error').innerText = err.message);
+            auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
         }
         function logoutUser() { auth.signOut(); }
         
@@ -249,6 +248,8 @@
                             document.getElementById('current-note-id').value = id;
                             document.getElementById('note-title').value = note.title;
                             document.getElementById('note-text').value = note.text;
+                            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+                            div.classList.add('active');
                         };
                         list.appendChild(div);
                     });
@@ -281,7 +282,6 @@
             document.getElementById('note-title').focus();
         }
 
-        // Mobile title bar hide trick
         window.onload = () => { window.scrollTo(0, 1); };
     </script>
 </body>
