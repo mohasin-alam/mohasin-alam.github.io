@@ -97,24 +97,31 @@
 
         .note-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #222; }
         .note-item.kb-highlight { background-color: var(--primary-color) !important; color: var(--bg-color) !important; }
-        .note-item.active { border-left: 4px solid var(--neon-pink); background: var(--hover-bg); }
+        .active { border-left: 4px solid var(--neon-pink); background: var(--hover-bg); }
 
         #control-bar {
             height: var(--footer-height); border-top: 1px solid var(--border-color);
             display: flex; align-items: center; padding: 0 10px; font-size: 0.75rem;
         }
 
-        #custom-confirm-overlay {
+        /* --- Custom Popups --- */
+        .modal-overlay {
             display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
             justify-content: center; align-items: center; z-index: 1000;
         }
+        .modal-box {
+            background: var(--terminal-bg); padding: 30px; 
+            border: 2px solid var(--primary-color); text-align:center;
+            min-width: 300px;
+        }
+        .danger-border { border-color: var(--danger-color) !important; }
     </style>
 </head>
 <body>
 
     <div id="auth-container">
-        <h2>:: SECURE LOGIN ::</h2>
+        <h2 style="color: var(--primary-color)">:: SECURE LOGIN ::</h2>
         <input type="email" id="email-input" placeholder="EMAIL" style="width:100%; margin-bottom:10px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <input type="password" id="password-input" placeholder="PASSWORD" style="width:100%; margin-bottom:15px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
@@ -125,7 +132,7 @@
             <h3>SECURE_SHELL (DEV: MOHASIN)</h3>
             <div>
                 <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
-                <button class="custom-button" onclick="logoutUser()">EXIT [ALT+L]</button>
+                <button class="custom-button" onclick="showLogoutModal()">EXIT [ALT+L]</button>
                 <button onclick="toggleDarkMode()">☀️/🌙 [F1]</button>
             </div>
         </div>
@@ -141,17 +148,25 @@
 
         <div id="control-bar">
             <button class="custom-button" onclick="saveNote()">SAVE [CTRL+S]</button>
-            <button class="custom-button" onclick="deleteNote()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [ALT+X]</button>
+            <button class="custom-button" onclick="showDeleteModal()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [ALT+X]</button>
             <span id="save-status" style="margin-left: 10px;">:: READY ::</span>
             <span style="margin-left: auto; opacity: 0.7;">Q:List | S:Save | X:Del | L:Exit | F1:Mode</span>
         </div>
     </div>
 
-    <div id="custom-confirm-overlay">
-        <div style="background: var(--terminal-bg); padding: 30px; border: 2px solid var(--danger-color); text-align:center;">
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal-box danger-border">
             <p>DELETE PERMANENTLY? (Y/N)</p>
             <button class="custom-button" onclick="confirmDelete(true)">YES [ENTER]</button>
-            <button class="custom-button" onclick="confirmDelete(false)">NO [ESC]</button>
+            <button class="custom-button" onclick="closeModals()">NO [ESC]</button>
+        </div>
+    </div>
+
+    <div id="logout-modal" class="modal-overlay">
+        <div class="modal-box">
+            <p>LOGOUT FROM SECURE SHELL?</p>
+            <button class="custom-button" onclick="confirmLogout()">YES [ENTER]</button>
+            <button class="custom-button" onclick="closeModals()">NO [ESC]</button>
         </div>
     </div>
 
@@ -175,34 +190,39 @@
         let currentUserId = null;
         let selectedIndex = -1;
 
-        // --- Fullscreen Logic ---
+        // Fullscreen Logic
         function enableFullscreen() {
             let elem = document.documentElement;
             if (elem.requestFullscreen) { elem.requestFullscreen(); }
             else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-            else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
         }
 
-        // --- Keyboard Logic ---
+        // --- Keyboard Controls ---
         document.addEventListener('keydown', (e) => {
             const notes = document.querySelectorAll('.note-item');
+            const logoutVisible = document.getElementById('logout-modal').style.display === 'flex';
+            const deleteVisible = document.getElementById('delete-modal').style.display === 'flex';
 
-            // Alt + L: Logout
-            if (e.altKey && e.key === 'l') { e.preventDefault(); logoutUser(); }
+            // Modal Controls
+            if (logoutVisible || deleteVisible) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if(logoutVisible) confirmLogout();
+                    if(deleteVisible) confirmDelete(true);
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeModals();
+                }
+                return;
+            }
 
-            // Alt + X: Delete Note
-            if (e.altKey && e.key === 'x') { e.preventDefault(); deleteNote(); }
-
-            // F1: Mode Toggle
+            // Standard Shortcuts
+            if (e.altKey && e.key === 'l') { e.preventDefault(); showLogoutModal(); }
+            if (e.altKey && e.key === 'x') { e.preventDefault(); showDeleteModal(); }
             if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
-
-            // Ctrl + S: Save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
-
-            // Ctrl + M: New Note
             if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
-
-            // Ctrl + Q: Focus List
             if ((e.ctrlKey || e.metaKey) && e.key === 'q') {
                 e.preventDefault();
                 document.activeElement.blur(); 
@@ -210,16 +230,7 @@
                 updateVisualSelection();
             }
 
-            // Enter for Fullscreen (One-time trigger)
-            if (e.key === 'Enter') { enableFullscreen(); }
-
-            // Modal Controls
-            if (document.getElementById('custom-confirm-overlay').style.display === 'flex') {
-                if (e.key === 'Enter') { e.preventDefault(); confirmDelete(true); }
-                if (e.key === 'Escape') { e.preventDefault(); hideCustomConfirm(); }
-            }
-
-            // Arrow Navigation
+            // Arrow Nav
             if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
@@ -233,11 +244,12 @@
                     e.preventDefault();
                     notes[selectedIndex].click();
                     document.getElementById('note-text').focus();
+                    enableFullscreen();
                 }
             }
         });
 
-        // Click anywhere to trigger fullscreen
+        // Auto Fullscreen on first click
         document.addEventListener('click', () => { enableFullscreen(); }, { once: true });
 
         document.getElementById('note-title').addEventListener('keydown', (e) => {
@@ -255,7 +267,7 @@
             });
         }
 
-        // --- Core Functions ---
+        // --- Logic Functions ---
         function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
         
         function loginUser() {
@@ -264,12 +276,30 @@
             auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
         }
 
-        function logoutUser() { 
-            if(confirm("Logout from Secure Shell?")) {
-                auth.signOut(); 
+        // Logout Modals
+        function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
+        function confirmLogout() { auth.signOut(); closeModals(); }
+
+        // Delete Modals
+        function showDeleteModal() { 
+            if (document.getElementById('current-note-id').value) {
+                document.getElementById('delete-modal').style.display = 'flex'; 
             }
         }
-        
+        function confirmDelete(confirm) {
+            const id = document.getElementById('current-note-id').value;
+            if (confirm && id) {
+                db.ref(`notes/${currentUserId}/${id}`).remove();
+                createNewNote();
+            }
+            closeModals();
+        }
+
+        function closeModals() {
+            document.getElementById('logout-modal').style.display = 'none';
+            document.getElementById('delete-modal').style.display = 'none';
+        }
+
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
@@ -279,6 +309,7 @@
             } else { 
                 document.getElementById('auth-container').style.display = 'block';
                 document.getElementById('notepad-container').style.display = 'none';
+                currentUserId = null;
             }
         });
 
@@ -331,23 +362,6 @@
             document.getElementById('delete-btn').style.display = 'none';
             document.getElementById('note-title').focus();
         }
-
-        function deleteNote() {
-            if (document.getElementById('current-note-id').value) {
-                document.getElementById('custom-confirm-overlay').style.display = 'flex';
-            }
-        }
-
-        function confirmDelete(confirm) {
-            const id = document.getElementById('current-note-id').value;
-            if (confirm && id) {
-                db.ref(`notes/${currentUserId}/${id}`).remove();
-                createNewNote();
-            }
-            hideCustomConfirm();
-        }
-
-        function hideCustomConfirm() { document.getElementById('custom-confirm-overlay').style.display = 'none'; }
     </script>
 </body>
 </html>
