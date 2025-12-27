@@ -6,7 +6,7 @@
     <title>Secure Email Notepad (Hacker Terminal)</title>
     
     <style>
-        /* --- থিম ভেরিয়েবলস (ডার্ক মোড) --- */
+        /* --- থিম ভেরিয়েবলস --- */
         :root {
             --bg-color: #000; 
             --terminal-bg: #111; 
@@ -18,811 +18,353 @@
             --border-color: #005f15; 
             --hover-bg: #003300; 
             --font-mono: 'Courier New', Courier, monospace;
-
-            /* নিয়ন কালার ভেরিয়েবল (অ্যানিমেশনের জন্য) */
-            --neon-lime: #00ff41;
             --neon-pink: #ff007f; 
-            --animation-duration: 3s; 
-
-            /* টেক্সটবক্সের ভিতরের ফিক্সড নিয়ন পিঙ্ক */
-            --neon-text-fixed: #ff007f; 
-            
-            /* নতুন ফিক্সড ফুটারের উচ্চতা */
-            --footer-height: 40px; 
-            /* নতুন ফিক্সড হেডারের উচ্চতা */
             --header-height: 60px; 
+            --footer-height: 40px;
         }
 
-        /* --- লাইট মোড থিম ভেরিয়েবলস --- */
         body.light-mode {
             --bg-color: #e0e0e0; 
             --terminal-bg: #f0f0f0; 
             --text-color: #333; 
             --primary-color: #007acc; 
             --secondary-color: #ccc; 
-            --accent-color: #28a745; 
-            --danger-color: #dc3545; 
             --border-color: #bbb; 
-            --hover-bg: #d0d0d0; 
-            --font-mono: 'Segoe UI', Arial, sans-serif; 
-
-            --neon-lime: #007acc; 
-            --neon-pink: #dc3545; 
-            --neon-text-fixed: #0056b3; 
+            --hover-bg: #d0d0d0;
         }
 
-        /* --- কালার অ্যানিমেশন (ডার্ক মোডের জন্য) --- */
         @keyframes neonGlow {
-            0% { 
-                color: var(--neon-lime); 
-                text-shadow: 0 0 5px var(--neon-lime), 0 0 10px var(--neon-lime); 
-            }
-            50% { 
-                color: var(--neon-pink); 
-                text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink); 
-            }
-            100% { 
-                color: var(--neon-lime); 
-                text-shadow: 0 0 5px var(--neon-lime), 0 0 10px var(--neon-lime); 
-            }
-        }
-        
-        body.light-mode * {
-            animation: none !important;
-            text-shadow: none !important;
+            0% { color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color); }
+            50% { color: var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink); }
+            100% { color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color); }
         }
 
-        /* --- গ্লোবাল স্টাইল --- */
         body {
             font-family: var(--font-mono);
-            padding: 0;
-            margin: 0;
             background-color: var(--bg-color);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: neonGlow var(--animation-duration) infinite alternate; 
-            transition: background-color 0.5s, color 0.5s; 
+            margin: 0; padding: 0;
+            height: 100vh; display: flex;
+            justify-content: center; align-items: center;
+            overflow: hidden;
         }
 
-        * {
-            font-family: var(--font-mono);
-            box-sizing: border-box;
-            color: var(--text-color); 
-            transition: color 0.5s; 
-        }
+        * { box-sizing: border-box; color: var(--text-color); }
 
-        h2 {
-            color: var(--primary-color);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-weight: normal;
-        }
-
-        /* --- লগইন কন্টেইনার স্টাইল (অপরিবর্তিত) --- */
+        /* --- লেআউট --- */
         #auth-container {
-            max-width: 400px;
-            padding: 30px;
+            max-width: 400px; padding: 30px;
             border: 2px solid var(--border-color);
-            border-radius: 0; 
             background-color: var(--terminal-bg);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5); 
-            transition: background-color 0.5s, box-shadow 0.5s, border-color 0.5s;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
         }
-        body.light-mode #auth-container {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* --- নোটপ্যাড কন্টেইনার (ফুল স্ক্রিন) --- */
+
         #notepad-container {
-            width: 100vw; 
-            height: 100vh; 
-            padding: 0; 
-            border: none;
-            border-radius: 0;
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column;
             background-color: var(--terminal-bg);
-            box-shadow: none;
-            overflow: hidden; 
-            display: flex;
-            flex-direction: column;
         }
 
-        /* --- ইনপুট এবং টেক্সটের বেস স্টাইল (অপরিবর্তিত) --- */
-        input[type="email"], input[type="password"], 
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-            border: 1px solid var(--border-color);
-            border-radius: 0;
-            background-color: var(--bg-color);
-            color: var(--neon-text-fixed); 
-            text-shadow: 0 0 3px var(--neon-text-fixed); 
-            caret-color: var(--neon-text-fixed); 
-            animation: none; 
-            transition: background-color 0.5s, border-color 0.5s, color 0.5s;
-        }
-        
-        body.light-mode input[type="email"], 
-        body.light-mode input[type="password"],
-        body.light-mode input[type="text"], 
-        body.light-mode textarea {
-            text-shadow: none; 
-            animation: none;
-        }
-
-        input:focus, textarea:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 5px var(--primary-color);
-        }
-
-        textarea {
-            flex-grow: 1; 
-            height: auto;
-            border: none;
-            background-color: transparent;
-            padding: 10px 0;
-            font-size: 1rem;
-            line-height: 1.6;
-            resize: none;
-        }
-
-        /* --- বাটন স্টাইল ফিক্সড (নতুন ক্লাস) --- */
-        /* --- কাস্টম বাটন ক্লাস: সমস্ত বাটন ডিজাইন এখানে --- */
-        .custom-button,
-        button {
-            padding: 10px 12px;
-            margin-right: 10px;
-            border: 1px solid var(--primary-color);
-            border-radius: 0;
-            cursor: pointer;
-            font-weight: bold;
-            /* ক্যাশিং ফিক্সের জন্য ব্যাকগ্রাউন্ড যোগ করা হলো */
-            background-color: var(--terminal-bg); 
-            text-shadow: 0 0 3px var(--text-color); /* ডিফল্ট টেক্সট শ্যাডো */
-            transition: background-color 0.2s, color 0.2s, border-color 0.5s;
-            animation: neonGlow var(--animation-duration) infinite alternate; /* ডিফল্ট অ্যানিমেশন */
-            
-            color: var(--text-color); 
-            text-align: center;
-            display: inline-block; /* DIV কে inline-block করে বাটনের মতো দেখাবে */
-        }
-
-        /* কমন হোভার স্টাইল */
-        .custom-button:hover,
-        button:hover {
-            background-color: var(--primary-color);
-            color: var(--bg-color);
-            text-shadow: 0 0 5px var(--bg-color);
-            animation: none; /* হোভারের সময় অ্যানিমেশন বন্ধ */
-        }
-
-        /* --- নির্দিষ্ট রঙ/স্টাইলের ভেরিয়েন্ট --- */
-
-        /* ১. সেভ (সবুজ) স্টাইল */
-        .btn-save {
-            border-color: var(--accent-color);
-        }
-
-        /* ২. ডিলিট (লাল) স্টাইল */
-        .btn-delete {
-            border-color: var(--danger-color);
-            color: var(--danger-color);
-            background-color: transparent;
-            animation: none; /* অ্যানিমেশন বন্ধ */
-            text-shadow: none; /* টেক্সট শ্যাডো বন্ধ */
-        }
-        .btn-delete:hover {
-            background-color: var(--danger-color);
-            color: var(--bg-color);
-            text-shadow: 0 0 5px var(--bg-color);
-        }
-
-        /* ৩. এক্সিট/লগআউট (ধূসর) স্টাইল - ফিক্সড */
-        .btn-exit {
-            border-color: #555;
-            color: #555;
-            background-color: transparent;
-            animation: none; /* অ্যানিমেশন বন্ধ করা হলো */
-            text-shadow: none; /* টেক্সট শ্যাডো বন্ধ করা হলো */
-        }
-        .btn-exit:hover {
-            border-color: #999;
-            color: var(--bg-color);
-            background-color: #999;
-            text-shadow: 0 0 5px var(--bg-color);
-        }
-
-        /* ৪. ডার্ক মোড টগল স্টাইল ফিক্সড */
-        #toggle-dark-mode-btn {
-            background-color: var(--secondary-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px 12px;
-            margin-left: 15px;
-            text-shadow: none; 
-            font-size: 0.9rem;
-            animation: none;
-        }
-        body.light-mode #toggle-dark-mode-btn {
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-        }
-
-        /* ৫. শুধুমাত্র auth-container এবং confirm-box এর বাটনগুলিতে ডিফল্ট অ্যানিমেশন অফ */
-        #auth-container button,
-        #custom-confirm-box button {
-            animation: none;
-        }
-        #custom-confirm-box button:hover {
-            animation: none; 
-        }
-        #confirm-ok-btn {
-            background-color: transparent;
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-        }
-        #confirm-ok-btn:hover {
-            background-color: var(--danger-color);
-            color: var(--bg-color);
-        }
-        #confirm-cancel-btn {
-            background-color: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        #confirm-cancel-btn:hover {
-            background-color: var(--hover-bg);
-            color: var(--primary-color);
-        }
-        body.light-mode #confirm-ok-btn:hover {
-            color: white; 
-        }
-
-        /* ৬. ফুটারের বাটনগুলি সামান্য ছোট করা ফিক্সড */
-        #control-bar .custom-button,
-        #control-bar button {
-            padding: 5px 10px; 
-            font-size: 0.9rem;
-            margin-right: 5px;
-        }
-        .header-controls button {
-            padding: 8px 12px;
-            margin-right: 0;
-        }
-        
-        /* --- হেডার এবং কন্ট্রোল বার (ফিক্সড) --- */
         #app-header {
-            position: fixed; 
-            top: 0;
-            left: 0;
-            width: 100%;
             height: var(--header-height);
-            padding: 0 20px;
             border-bottom: 1px solid var(--border-color);
-            background-color: var(--terminal-bg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            z-index: 10;
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 0 20px;
         }
 
-        #app-header h2 {
-            border-bottom: none;
-            margin: 0;
-            padding: 0;
-            font-size: 1.2rem;
-        }
-        
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px; 
-        }
-        
-        .header-controls button {
-            padding: 8px 12px;
-            margin-right: 0; 
-        }
-        
-        #control-bar {
-            position: fixed; 
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--footer-height);
-            background-color: var(--terminal-bg);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between; 
-            align-items: center;
-            padding: 0 10px;
-            flex-shrink: 0; 
-            z-index: 10;
-        }
-        
-        #control-bar button {
-            padding: 5px 10px; 
-            margin-right: 5px;
-            font-size: 0.9rem;
-        }
-        
-        #save-status {
-            flex-grow: 1; 
-            text-align: right;
-            margin-left: 10px;
-            font-size: 0.9rem; 
-            padding-right: 10px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* --- নোট লিস্ট এবং এডিটর লেআউট --- */
         #note-app-layout {
-            display: flex;
-            flex-grow: 1; 
-            overflow: hidden;
-            margin-top: var(--header-height);
-            margin-bottom: var(--footer-height);
+            display: flex; flex-grow: 1; overflow: hidden;
         }
 
         #notes-list {
-            width: 30%; 
-            min-width: 150px;
-            border-right: 1px solid var(--border-color);
-            padding: 15px;
-            overflow-y: auto; 
-            background-color: var(--terminal-bg);
-            flex-shrink: 0;
+            width: 30%; border-right: 1px solid var(--border-color);
+            overflow-y: auto; padding: 10px;
         }
-        
+
         #note-editor {
-            width: 70%; 
-            flex-grow: 1; 
-            padding: 15px 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; 
+            width: 70%; padding: 20px;
+            display: flex; flex-direction: column;
         }
-        
-        #note-editor input[type="text"] {
-            font-size: 1.2rem; 
-            font-weight: bold;
-            padding: 5px 0;
-            border: none;
+
+        textarea {
+            flex-grow: 1; background: transparent;
+            border: none; outline: none; resize: none;
+            font-size: 1rem; line-height: 1.6;
+            color: var(--neon-pink);
+        }
+
+        input[type="text"] {
+            background: transparent; border: none;
             border-bottom: 1px solid var(--border-color);
-            background-color: transparent;
-            margin-bottom: 10px;
+            font-size: 1.2rem; margin-bottom: 10px; padding: 5px;
         }
 
-        /* --- নোট আইটেম স্টাইল (অপরিবর্তিত) --- */
+        /* --- বাটন ও ইন্টারঅ্যাকশন --- */
+        .custom-button, button {
+            padding: 8px 15px; border: 1px solid var(--primary-color);
+            background: transparent; cursor: pointer;
+            margin: 5px; font-family: var(--font-mono);
+        }
+
+        .custom-button:hover, .custom-button:focus {
+            background: var(--primary-color); color: var(--bg-color);
+        }
+
         .note-item {
-            padding: 8px 10px;
-            margin-bottom: 5px;
-            border-radius: 0;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            border-left: 3px solid transparent;
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            white-space: nowrap; 
+            padding: 10px; cursor: pointer;
+            border-bottom: 1px solid #222;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        .note-item:hover {
+        .note-item.active {
             background-color: var(--hover-bg);
+            border-left: 4px solid var(--primary-color);
         }
 
-        .note-item.active { 
-            background-color: var(--hover-bg);
-            border-left: 3px solid var(--primary-color);
-            font-weight: bold;
+        .note-item.kb-highlight {
+            background-color: var(--primary-color) !important;
+            color: var(--bg-color) !important;
         }
-        
-        /* --- কাস্টম কনফার্ম বক্স স্টাইল (ক্লাস যুক্ত করা হয়েছে) --- */
+
+        #control-bar {
+            height: var(--footer-height);
+            border-top: 1px solid var(--border-color);
+            display: flex; align-items: center; padding: 0 10px;
+            font-size: 0.8rem;
+        }
+
         #custom-confirm-overlay {
-            display: none; 
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); 
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #custom-confirm-box {
-            background-color: var(--terminal-bg);
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            border: 2px solid var(--danger-color); 
-            border-radius: 0;
-            box-shadow: 0 0 15px var(--danger-color);
-            text-align: center;
-        }
-
-        #custom-confirm-box p {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            color: var(--danger-color); 
-            text-shadow: 0 0 5px var(--danger-color);
-            animation: none !important; 
-        }
-
-        #custom-confirm-box button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            border-radius: 0;
-            font-weight: bold;
-            text-shadow: none; 
-            animation: none;
-        }
-
-        /* লাইট মোডে কাস্টম বক্সের রং ফিক্স */
-        body.light-mode #custom-confirm-box {
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            border-color: var(--danger-color);
-        }
-        body.light-mode #custom-confirm-box p {
-            color: var(--danger-color);
-            text-shadow: none;
-        }
-        body.light-mode #confirm-ok-btn {
-            background-color: transparent;
-            color: var(--danger-color);
-            border-color: var(--danger-color);
-        }
-
-        /* ছোট স্ক্রিনের জন্য ফিক্সড লেআউট ফিক্স */
-        @media (max-width: 600px) {
-            #notes-list {
-                width: 50%; 
-                min-width: 100px; 
-            }
-            #note-editor {
-                width: 50%;
-                padding: 10px;
-            }
-            .header-controls button {
-                padding: 5px 8px; 
-                font-size: 0.8rem;
-            }
-            #app-header h2 {
-                font-size: 1rem;
-            }
-            
-            #control-bar button {
-                padding: 3px 6px;
-                font-size: 0.75rem;
-                margin-right: 5px;
-            }
-            #save-status {
-                font-size: 0.75rem;
-            }
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center; z-index: 1000;
         }
     </style>
 </head>
-<body> 
+<body>
+
     <div id="auth-container">
-        <h2>:: INITIATING CONNECTION ::</h2>
-        <input type="email" id="email-input" placeholder="USERNAME/EMAIL">
-        <input type="password" id="password-input" placeholder="PASSWORD">
+        <h2 style="animation: neonGlow 3s infinite;">:: CONNECTION REQUIRED ::</h2>
+        <input type="email" id="email-input" placeholder="EMAIL" style="width:100%; margin-bottom:10px; background:#000; border:1px solid var(--border-color); padding:10px;">
+        <input type="password" id="password-input" placeholder="PASSWORD" style="width:100%; margin-bottom:15px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
-        <button class="custom-button" onclick="signupUser()">REGISTER NEW</button>
-        <p id="auth-error" style="color: var(--danger-color); text-shadow: none;"></p>
+        <button class="custom-button" onclick="signupUser()">SIGNUP</button>
+        <p id="auth-error" style="color: var(--danger-color); font-size: 0.8rem;"></p>
     </div>
 
     <div id="notepad-container" style="display: none;">
-        
         <div id="app-header">
-            <h2 id="welcome-message">SECURE_NOTES.TXT</h2>
-            <div class="header-controls">
-                <button class="custom-button" onclick="createNewNote()">NEW NOTE</button>
-                <button class="custom-button" onclick="logoutUser()">LOG OUT!</button>
-                <button id="toggle-dark-mode-btn" onclick="toggleDarkMode()">☀️/🌙</button> 
-            </div>
-        </div>
-        <div id="note-app-layout">
-            
-            <div id="notes-list">
-                <p style="padding: 10px;">LOADING NOTES…….</p>
-            </div>
-            
-            <div id="note-editor">
-                <input type="text" id="note-title" placeholder="ENTER NOTE TITLE" value="" required>
-                <textarea id="note-text" placeholder="START TYPING YOUR DATA..." onkeyup="resetAutoSaveTimer()"></textarea>
-                
-                <input type="hidden" id="current-note-id" value=""> 
+            <h3 id="welcome-message">SECURE_SHELL</h3>
+            <div>
+                <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
+                <button class="custom-button" onclick="logoutUser()">EXIT</button>
+                <button onclick="toggleDarkMode()">☀️/🌙</button>
             </div>
         </div>
         
+        <div id="note-app-layout">
+            <div id="notes-list"></div>
+            <div id="note-editor">
+                <input type="text" id="note-title" placeholder="TITLE...">
+                <textarea id="note-text" placeholder="TYPE DATA..."></textarea>
+                <input type="hidden" id="current-note-id">
+            </div>
+        </div>
+
         <div id="control-bar">
-            <button class="custom-button btn-save" onclick="saveNote()">SAVE (CTRL+S)</button>
-            <button class="custom-button btn-delete" onclick="deleteNote()" id="delete-btn" style="display: none;">DELETE NOTE!</button>
-            <p id="save-status"></p>
+            <button class="custom-button" onclick="saveNote()" style="border-color: var(--accent-color);">SAVE [CTRL+S]</button>
+            <button class="custom-button" onclick="deleteNote()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [CTRL+D]</button>
+            <span id="save-status" style="margin-left: 20px; opacity: 0.7;">:: SYSTEM READY ::</span>
+            <span style="margin-left: auto; opacity: 0.5;">ARROWS: Nav | ENTER: Open | CTRL+L: Focus List</span>
         </div>
     </div>
 
     <div id="custom-confirm-overlay">
-        <div id="custom-confirm-box">
-            <p>[WARNING!] DELETE SELECTED FILE? (YES/CANCEL) ::</p>
-        <button id="confirm-cancel-btn" onclick="confirmDelete(false)">CANCEL</button>
-        <button id="confirm-ok-btn" onclick="confirmDelete(true)">CONFIRM</button>
-          </div>
+        <div style="background: var(--terminal-bg); padding: 30px; border: 2px solid var(--danger-color); text-align:center;">
+            <p>DELETE PERMANENTLY? (Y/N)</p>
+            <button class="custom-button" onclick="confirmDelete(true)" id="confirm-yes">YES [ENTER]</button>
+            <button class="custom-button" onclick="confirmDelete(false)">NO [ESC]</button>
+        </div>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // কনফিগারেশন: আপনার টাস্ক ৪ থেকে নেওয়া মানগুলি
         const firebaseConfig = {
             apiKey: "AIzaSyCyBfxasE2hwuthXu56VuHa7LWpybVFXhc",
             authDomain: "emailnotepad-28faa.firebaseapp.com",
-            databaseURL: "https://emailnotepad-28faa-default-rtdb.firebaseio.com", 
+            databaseURL: "https://emailnotepad-28faa-default-rtdb.firebaseio.com",
             projectId: "emailnotepad-28faa",
             storageBucket: "emailnotepad-28faa.firebasestorage.app",
             messagingSenderId: "61372668462",
-            appId: "1:61372668462:web:0f4eb4355974b2e2579dbf",
-            measurementId: "G-J73FP94J27"
+            appId: "1:61372668462:web:0f4eb4355974b2e2579dbf"
         };
 
-        // Firebase ইনিশিয়ালাইজ করুন
         firebase.initializeApp(firebaseConfig);
-        
         const auth = firebase.auth();
-        const db = firebase.database(); 
-
+        const db = firebase.database();
         let currentUserId = null;
-        let autoSaveTimer = null; 
-        
-        // **পরিবর্তিত লাইন:** অটো-সেভ ডিলে 0.3 সেকেন্ড (300 মিলিসেকেন্ড) এ সেট করা হলো।
-        const AUTO_SAVE_DELAY = 300; 
+        let selectedIndex = -1;
+        let autoSaveTimer = null;
 
-        // --- কাস্টম কনফার্ম বক্স লজিক ---
-        
-        function showCustomConfirm() {
-            document.getElementById('custom-confirm-overlay').style.display = 'flex';
-        }
-
-        function hideCustomConfirm() {
-            document.getElementById('custom-confirm-overlay').style.display = 'none';
-        }
-
-        function confirmDelete(isConfirmed) {
-            hideCustomConfirm();
-
-            if (!isConfirmed) {
-                document.getElementById('save-status').textContent = ':: OPERATION CANCELLED ::';
-                return;
+        // --- কিবোর্ড কন্ট্রোল লজিক ---
+        document.addEventListener('keydown', (e) => {
+            // ১. সেভ (Ctrl + S)
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveNote();
             }
-            
-            const noteId = document.getElementById('current-note-id').value;
-            
-            if (noteId) {
-                db.ref(`notes/${currentUserId}/${noteId}`).remove()
-                    .then(() => {
-                        document.getElementById('save-status').textContent = ':: FILE DELETED SUCCESSFULLY ::';
-                        createNewNote(); 
-                    })
-                    .catch((error) => {
-                        document.getElementById('save-status').textContent = ':: ERROR DELETING FILE ::';
-                    });
+            // ২. নিউ নোট (Ctrl + M)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                createNewNote();
+                document.getElementById('note-title').focus();
             }
-        }
-        
-        // --- AUTH লজিক ---
-        
-        function signupUser() {
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            document.getElementById('auth-error').textContent = '';
-            
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(() => {
-                    document.getElementById('auth-error').textContent = '>> REGISTRATION SUCCESS. PLEASE LOGIN.';
-                })
-                .catch((error) => {
-                    document.getElementById('auth-error').textContent = '>> ERROR: ' + error.message;
-                });
+            // ৩. ডিলিট (Ctrl + D)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                deleteNote();
+            }
+            // ৪. নোট লিস্ট ফোকাস (Ctrl + L)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                e.preventDefault();
+                document.activeElement.blur();
+                selectedIndex = 0;
+                updateVisualSelection();
+            }
+            // ৫. অ্যারো কি নেভিগেশন (যখন ইনপুটে নেই)
+            if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+                const notes = document.querySelectorAll('.note-item');
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % notes.length;
+                    updateVisualSelection();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex - 1 + notes.length) % notes.length;
+                    updateVisualSelection();
+                } else if (e.key === 'Enter' && selectedIndex !== -1) {
+                    e.preventDefault();
+                    notes[selectedIndex].click();
+                    document.getElementById('note-text').focus();
+                }
+            }
+            // ৬. কনফার্মেশন বক্স ক্লোজ (Esc)
+            if (e.key === 'Escape') hideCustomConfirm();
+        });
+
+        function updateVisualSelection() {
+            const notes = document.querySelectorAll('.note-item');
+            notes.forEach((n, i) => {
+                n.classList.toggle('kb-highlight', i === selectedIndex);
+                if(i === selectedIndex) n.scrollIntoView({ block: 'nearest' });
+            });
         }
 
+        // --- কোর ফাংশনালিটি ---
         function loginUser() {
-            const email = document.getElementById('email-input').value;
-            const password = document.getElementById('password-input').value;
-            document.getElementById('auth-error').textContent = '';
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .catch((error) => {
-                    document.getElementById('auth-error').textContent = '>> ERROR: ' + error.message;
-                });
+            const e = document.getElementById('email-input').value;
+            const p = document.getElementById('password-input').value;
+            auth.signInWithEmailAndPassword(e, p).catch(err => document.getElementById('auth-error').innerText = err.message);
         }
 
-        function logoutUser() {
-            auth.signOut();
+        function signupUser() {
+            const e = document.getElementById('email-input').value;
+            const p = document.getElementById('password-input').value;
+            auth.createUserWithEmailAndPassword(e, p).then(() => alert("Success! Now Login."));
         }
 
-        // --- অটো-সেভ লজিক ---
+        function logoutUser() { auth.signOut(); }
 
-        function resetAutoSaveTimer() {
-            clearTimeout(autoSaveTimer);
-            
-            autoSaveTimer = setTimeout(() => {
-                const title = document.getElementById('note-title').value.trim();
-                const text = document.getElementById('note-text').value.trim();
-                
-                if (currentUserId && (title || text)) {
-                    saveNote(true); 
-                }
-            }, AUTO_SAVE_DELAY);
-        }
-        
-        // --- নোটপ্যাড লজিক ---
-        
-        function createNewNote() {
-            document.getElementById('note-title').value = '';
-            document.getElementById('note-text').value = '';
-            document.getElementById('current-note-id').value = ''; 
-            document.getElementById('delete-btn').style.display = 'none';
-            document.getElementById('save-status').textContent = ':: NEW_NOTE CREATED. TYPE TO BEGIN ::';
-            
-            document.querySelectorAll('.note-item').forEach(item => {
-                item.classList.remove('active');
-            });
-        }
-
-        function saveNote(isAutoSave = false) {
-            if (!currentUserId) return; 
-
-            const title = document.getElementById('note-title').value.trim();
-            const text = document.getElementById('note-text').value;
-            const noteId = document.getElementById('current-note-id').value;
-            
-            if (!title && !text) { 
-                return; 
-            }
-
-            const noteData = {
-                title: title || "[UNTITLED NOTE]", 
-                text: text,
-                timestamp: new Date().toISOString()
-            };
-
-            const statusElement = document.getElementById('save-status');
-            statusElement.textContent = isAutoSave ? ':: AUTO-SAVING... ::' : ':: MANUAL SAVE INITIATED ::';
-
-            let noteRef;
-            
-            if (noteId) {
-                noteRef = db.ref(`notes/${currentUserId}/${noteId}`);
-                noteRef.update(noteData)
-                    .then(() => {
-                        statusElement.textContent = isAutoSave ? ':: AUTO-SAVE SUCCESSFUL ::' : ':: SAVE SUCCESSFUL ::';
-                    });
-
-            } else {
-                noteRef = db.ref(`notes/${currentUserId}`).push();
-                noteRef.set(noteData)
-                    .then(() => {
-                        document.getElementById('current-note-id').value = noteRef.key; 
-                        document.getElementById('delete-btn').style.display = 'inline-block';
-                        statusElement.textContent = isAutoSave ? ':: AUTO-SAVE SUCCESSFUL ::' : ':: SAVE SUCCESSFUL ::';
-                    });
-            }
-        }
-
-        function loadNoteForEditing(noteId, title, text) {
-            document.getElementById('current-note-id').value = noteId;
-            document.getElementById('note-title').value = title;
-            document.getElementById('note-text').value = text;
-            document.getElementById('delete-btn').style.display = 'inline-block';
-            document.getElementById('save-status').textContent = `:: FILE LOADED: ${title.toUpperCase()} ::`;
-
-            document.querySelectorAll('.note-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            document.getElementById(`item-${noteId}`).classList.add('active');
-        }
-
-        function deleteNote() {
-            const noteId = document.getElementById('current-note-id').value;
-            if (noteId) {
-                showCustomConfirm(); 
-            }
-        }
-
-        function loadAllNotes(userId) {
-            const notesListDiv = document.getElementById('notes-list');
-            notesListDiv.innerHTML = '<p style="padding: 10px; color: #aaa;">:: INITIATING DATA RETRIEVAL ::</p>';
-
-            db.ref(`notes/${userId}`).on('value', (snapshot) => {
-                notesListDiv.innerHTML = '';
-                const notes = snapshot.val();
-                let hasNotes = false;
-                let activeNoteId = document.getElementById('current-note-id').value; 
-
-                if (notes) {
-                    const sortedNotes = Object.entries(notes).sort(([, a], [, b]) => new Date(b.timestamp) - new Date(a.timestamp));
-                    
-                    sortedNotes.forEach(([noteId, note]) => {
-                        hasNotes = true;
-                        const item = document.createElement('div');
-                        item.id = `item-${noteId}`;
-                        item.classList.add('note-item');
-                        item.textContent = `> ${note.title}`;
-                        
-                        item.onclick = () => loadNoteForEditing(noteId, note.title, note.text);
-                        notesListDiv.appendChild(item);
-                    });
-                    
-                    if (!activeNoteId) {
-                        const firstNoteId = sortedNotes[0][0];
-                        const firstNote = sortedNotes[0][1];
-                        loadNoteForEditing(firstNoteId, firstNote.title, firstNote.text);
-                    } else {
-                        const activeItem = document.getElementById(`item-${activeNoteId}`);
-                        if (activeItem) {
-                            activeItem.classList.add('active');
-                        } else {
-                            const firstNoteId = sortedNotes[0][0];
-                            const firstNote = sortedNotes[0][1];
-                            loadNoteForEditing(firstNoteId, firstNote.title, firstNote.text);
-                        }
-                    }
-
-                } else {
-                    notesListDiv.innerHTML = '<p style="padding: 10px; color: #aaa;">:: NO FILES FOUND. CREATE NEW. ::</p>';
-                    createNewNote(); 
-                }
-            });
-        }
-
-        // Auth State Change লিসেনার 
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('notepad-container').style.display = 'flex';
-                document.getElementById('welcome-message').textContent = `ACCESS GRANTED: USER@${user.email.split('@')[0].toUpperCase()}.TXT`;
-                
-                loadAllNotes(user.uid); 
+                loadAllNotes(user.uid);
             } else {
-                currentUserId = null;
-                document.getElementById('auth-container').style.display = 'block';
-                document.getElementById('notepad-container').style.display = 'none';
+                location.reload();
             }
         });
 
-        // --- ডার্ক/লাইট মোড টগল লজিক ---
-        function toggleDarkMode() {
-            document.body.classList.toggle('light-mode');
-            const isLightMode = document.body.classList.contains('light-mode');
-            localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+        function loadAllNotes(uid) {
+            db.ref(`notes/${uid}`).on('value', snap => {
+                const list = document.getElementById('notes-list');
+                list.innerHTML = '';
+                const data = snap.val();
+                if (data) {
+                    Object.entries(data).reverse().forEach(([id, note]) => {
+                        const div = document.createElement('div');
+                        div.className = 'note-item';
+                        div.id = `item-${id}`;
+                        div.innerText = `> ${note.title || 'Untitled'}`;
+                        div.onclick = () => {
+                            document.getElementById('current-note-id').value = id;
+                            document.getElementById('note-title').value = note.title;
+                            document.getElementById('note-text').value = note.text;
+                            document.getElementById('delete-btn').style.display = 'inline-block';
+                            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+                            div.classList.add('active');
+                        };
+                        list.appendChild(div);
+                    });
+                }
+            });
         }
 
-        // পেজ লোড হওয়ার সময় থিম সেট করা
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-mode');
-            } else {
-                // ডিফল্ট ডার্ক মোড
-            }
+        function saveNote() {
+            if (!currentUserId) return;
+            const id = document.getElementById('current-note-id').value;
+            const title = document.getElementById('note-title').value;
+            const text = document.getElementById('note-text').value;
+            const status = document.getElementById('save-status');
 
-            const noteTextarea = document.getElementById('note-text');
-            const noteTitle = document.getElementById('note-title');
-            
-            if (noteTextarea) noteTextarea.addEventListener('keyup', resetAutoSaveTimer);
-            if (noteTitle) noteTitle.addEventListener('keyup', resetAutoSaveTimer);
+            const noteData = { title, text, timestamp: firebase.database.ServerValue.TIMESTAMP };
+            status.innerText = ":: SAVING... ::";
+
+            if (id) {
+                db.ref(`notes/${currentUserId}/${id}`).update(noteData);
+            } else {
+                const newRef = db.ref(`notes/${currentUserId}`).push();
+                newRef.set(noteData);
+                document.getElementById('current-note-id').value = newRef.key;
+            }
+            status.innerText = ":: SUCCESS ::";
+            setTimeout(() => status.innerText = ":: SYSTEM READY ::", 2000);
+        }
+
+        function createNewNote() {
+            document.getElementById('current-note-id').value = '';
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-text').value = '';
+            document.getElementById('delete-btn').style.display = 'none';
+            document.getElementById('note-title').focus();
+        }
+
+        function deleteNote() {
+            if (document.getElementById('current-note-id').value) {
+                document.getElementById('custom-confirm-overlay').style.display = 'flex';
+                document.getElementById('confirm-yes').focus();
+            }
+        }
+
+        function confirmDelete(confirm) {
+            const id = document.getElementById('current-note-id').value;
+            if (confirm && id) {
+                db.ref(`notes/${currentUserId}/${id}`).remove();
+                createNewNote();
+            }
+            hideCustomConfirm();
+        }
+
+        function hideCustomConfirm() { document.getElementById('custom-confirm-overlay').style.display = 'none'; }
+        
+        function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
+
+        // অটো-সেভ লজিক
+        document.getElementById('note-text').addEventListener('input', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveNote, 1000);
         });
     </script>
 </body>
