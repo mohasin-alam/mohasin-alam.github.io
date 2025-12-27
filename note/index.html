@@ -6,7 +6,6 @@
     <title>Secure Notepad (CSM_MOHASIN_ALAM)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
 
@@ -102,10 +101,9 @@
 
         #control-bar {
             height: var(--footer-height); border-top: 1px solid var(--border-color);
-            display: flex; align-items: center; padding: 0 10px; font-size: 0.8rem;
+            display: flex; align-items: center; padding: 0 10px; font-size: 0.75rem;
         }
 
-        /* --- Custom Confirm Modal --- */
         #custom-confirm-overlay {
             display: none; position: fixed; top: 0; left: 0;
             width: 100%; height: 100%; background: rgba(0,0,0,0.8);
@@ -116,7 +114,7 @@
 <body>
 
     <div id="auth-container">
-        <h2>:: CONNECTION REQUIRED ::</h2>
+        <h2>:: SECURE LOGIN ::</h2>
         <input type="email" id="email-input" placeholder="EMAIL" style="width:100%; margin-bottom:10px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <input type="password" id="password-input" placeholder="PASSWORD" style="width:100%; margin-bottom:15px; background:#000; border:1px solid var(--border-color); padding:10px;">
         <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
@@ -127,7 +125,7 @@
             <h3>SECURE_SHELL (DEV: MOHASIN)</h3>
             <div>
                 <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
-                <button class="custom-button" onclick="logoutUser()">EXIT</button>
+                <button class="custom-button" onclick="logoutUser()">EXIT [ALT+L]</button>
                 <button onclick="toggleDarkMode()">☀️/🌙 [F1]</button>
             </div>
         </div>
@@ -144,15 +142,15 @@
         <div id="control-bar">
             <button class="custom-button" onclick="saveNote()">SAVE [CTRL+S]</button>
             <button class="custom-button" onclick="deleteNote()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [ALT+X]</button>
-            <span id="save-status" style="margin-left: 20px;">:: SYSTEM READY ::</span>
-            <span style="margin-left: auto; opacity: 0.7;">CTRL+Q: List | ALT+X: Delete | ENTER: Open</span>
+            <span id="save-status" style="margin-left: 10px;">:: READY ::</span>
+            <span style="margin-left: auto; opacity: 0.7;">Q:List | S:Save | X:Del | L:Exit | F1:Mode</span>
         </div>
     </div>
 
     <div id="custom-confirm-overlay">
         <div style="background: var(--terminal-bg); padding: 30px; border: 2px solid var(--danger-color); text-align:center;">
             <p>DELETE PERMANENTLY? (Y/N)</p>
-            <button class="custom-button" onclick="confirmDelete(true)" id="confirm-yes">YES [ENTER]</button>
+            <button class="custom-button" onclick="confirmDelete(true)">YES [ENTER]</button>
             <button class="custom-button" onclick="confirmDelete(false)">NO [ESC]</button>
         </div>
     </div>
@@ -177,9 +175,23 @@
         let currentUserId = null;
         let selectedIndex = -1;
 
+        // --- Fullscreen Logic ---
+        function enableFullscreen() {
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+            else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        }
+
         // --- Keyboard Logic ---
         document.addEventListener('keydown', (e) => {
             const notes = document.querySelectorAll('.note-item');
+
+            // Alt + L: Logout
+            if (e.altKey && e.key === 'l') { e.preventDefault(); logoutUser(); }
+
+            // Alt + X: Delete Note
+            if (e.altKey && e.key === 'x') { e.preventDefault(); deleteNote(); }
 
             // F1: Mode Toggle
             if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
@@ -190,9 +202,6 @@
             // Ctrl + M: New Note
             if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
 
-            // Alt + X: Delete Note
-            if (e.altKey && e.key === 'x') { e.preventDefault(); deleteNote(); }
-
             // Ctrl + Q: Focus List
             if ((e.ctrlKey || e.metaKey) && e.key === 'q') {
                 e.preventDefault();
@@ -201,13 +210,16 @@
                 updateVisualSelection();
             }
 
-            // Confirm Modal Controls
+            // Enter for Fullscreen (One-time trigger)
+            if (e.key === 'Enter') { enableFullscreen(); }
+
+            // Modal Controls
             if (document.getElementById('custom-confirm-overlay').style.display === 'flex') {
                 if (e.key === 'Enter') { e.preventDefault(); confirmDelete(true); }
                 if (e.key === 'Escape') { e.preventDefault(); hideCustomConfirm(); }
             }
 
-            // Arrow Key Navigation
+            // Arrow Navigation
             if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
@@ -224,6 +236,9 @@
                 }
             }
         });
+
+        // Click anywhere to trigger fullscreen
+        document.addEventListener('click', () => { enableFullscreen(); }, { once: true });
 
         document.getElementById('note-title').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -242,12 +257,18 @@
 
         // --- Core Functions ---
         function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
+        
         function loginUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
             auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
         }
-        function logoutUser() { auth.signOut(); }
+
+        function logoutUser() { 
+            if(confirm("Logout from Secure Shell?")) {
+                auth.signOut(); 
+            }
+        }
         
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -255,7 +276,10 @@
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('notepad-container').style.display = 'flex';
                 loadAllNotes(user.uid);
-            } else { location.reload(); }
+            } else { 
+                document.getElementById('auth-container').style.display = 'block';
+                document.getElementById('notepad-container').style.display = 'none';
+            }
         });
 
         function loadAllNotes(uid) {
@@ -289,7 +313,7 @@
             const text = document.getElementById('note-text').value;
             const status = document.getElementById('save-status');
             const noteData = { title, text, timestamp: Date.now() };
-            status.innerText = ":: SAVING... ::";
+            status.innerText = ":: SAVING ::";
             if (id) {
                 db.ref(`notes/${currentUserId}/${id}`).update(noteData);
             } else {
@@ -297,7 +321,7 @@
                 newRef.set(noteData);
                 document.getElementById('current-note-id').value = newRef.key;
             }
-            setTimeout(() => status.innerText = ":: SYSTEM READY ::", 1000);
+            setTimeout(() => status.innerText = ":: READY ::", 1000);
         }
 
         function createNewNote() {
@@ -311,7 +335,6 @@
         function deleteNote() {
             if (document.getElementById('current-note-id').value) {
                 document.getElementById('custom-confirm-overlay').style.display = 'flex';
-                document.getElementById('confirm-yes').focus();
             }
         }
 
@@ -325,8 +348,6 @@
         }
 
         function hideCustomConfirm() { document.getElementById('custom-confirm-overlay').style.display = 'none'; }
-
-        window.onload = () => { window.scrollTo(0, 1); };
     </script>
 </body>
 </html>
