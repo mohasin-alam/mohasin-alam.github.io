@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Web Source Code Hacker – Csm Mohasin Alam</title>
+
+    <!-- India Block -->
+    <script>
+        fetch("https://ipapi.co/json/")
+            .then(res => res.json())
+            .then(data => {
+                if (data.country === "IN") {
+                    document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;font-family:monospace;background:#000;color:#0f0;'>Access not allowed from India</h2>";
+                }
+            });
+    </script>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #02040a;
+            --color-bg-panel: #050815;
+            --color-text: #39ff14;
+            --color-accent: #00ff9d;
+            --color-border: #00b56d;
+            --color-border-soft: rgba(0, 181, 109, 0.5);
+            --color-error: #ff4b6e;
+            --shadow-neon: 0 0 8px rgba(0, 255, 157, 0.8), 0 0 25px rgba(0, 255, 157, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--color-text);
+            background:
+                radial-gradient(circle at 0 0, rgba(0, 255, 153, 0.18), transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(0, 187, 255, 0.14), transparent 60%),
+                #02040a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Global overlay – grid + scanlines for hacking vibe */
+        .global-grid {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 255, 130, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 130, 0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.65;
+            mix-blend-mode: soft-light;
+            z-index: 0;
+        }
+
+        .scanlines {
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.45) 50%);
+            background-size: 100% 3px;
+            opacity: 0.35;
+            mix-blend-mode: multiply;
+            z-index: 1;
+        }
+
+        .noise {
+            pointer-events: none;
+            position: fixed;
+            inset: -50px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+            opacity: 0.35;
+            mix-blend-mode: soft-light;
+            animation: noise-move 9s steps(4, end) infinite;
+            z-index: 2;
+        }
+
+        @keyframes noise-move {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-80px, 80px, 0); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            max-width: 1000px;
+            padding: 28px 32px 24px;
+            background: radial-gradient(circle at 20% 0, rgba(0, 255, 157, 0.15), transparent 60%),
+                        radial-gradient(circle at 100% 100%, rgba(0, 140, 255, 0.18), transparent 55%),
+                        rgba(3, 8, 18, 0.98);
+            border-radius: 14px;
+            border: 1px solid var(--color-border-soft);
+            box-shadow:
+                0 0 30px rgba(0, 0, 0, 0.9),
+                0 0 40px rgba(0, 255, 157, 0.4);
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            opacity: 0.6;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        /* Terminal header / HUD */
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(185, 255, 217, 0.9);
+            border-bottom: 1px solid rgba(0, 255, 157, 0.35);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .terminal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-logo {
+            font-weight: 700;
+            color: var(--color-accent);
+            text-shadow: var(--shadow-neon);
+        }
+
+        .terminal-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hud-leds {
+            display: flex;
+            gap: 4px;
+        }
+
+        .hud-led {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .hud-led.red { color: #ff3b5c; background: #ff3b5c; }
+        .hud-led.yellow { color: #ffdd57; background: #ffdd57; }
+        .hud-led.green { color: #00ff9d; background: #00ff9d; }
+
+        .header-status-label {
+            opacity: 0.7;
+        }
+
+        .header-status-value {
+            color: var(--color-accent);
+            animation: status-pulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes status-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        h1 {
+            margin: 12px 0 4px;
+            text-align: center;
+            font-size: 22px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+            text-shadow:
+                2px 0 #ff004c,
+                -2px 0 #00fff2,
+                0 0 16px rgba(0, 255, 157, 0.9);
+            animation: glitch 3.5s infinite alternate-reverse;
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0, 0);
+                text-shadow: 2px 0 #ff004c, -2px 0 #00fff2;
+            }
+            15% {
+                transform: translate(-1px, -1px);
+                text-shadow: -2px 0 #ff004c, 2px 0 #00fff2;
+            }
+            16% {
+                transform: translate(2px, 1px);
+            }
+            17% {
+                transform: translate(-2px, 1px);
+            }
+            18% {
+                transform: translate(1px, -1px);
+            }
+            40% {
+                transform: translate(0, 0);
+            }
+            60% {
+                transform: translate(1px, 0);
+            }
+            100% {
+                transform: translate(0, 0);
+                text-shadow: 2px 0 #ff004c, -2px 0 #00fff2;
+            }
+        }
+
+        .session-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(180, 255, 214, 0.8);
+            padding: 6px 8px;
+            border: 1px solid rgba(0, 255, 157, 0.35);
+            border-radius: 8px;
+            background: radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.18), transparent 60%);
+            margin-bottom: 18px;
+        }
+
+        .session-bar span {
+            white-space: nowrap;
+        }
+
+        .session-id {
+            color: var(--color-accent);
+        }
+
+        .mono {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Input / Button Area */
+        .input-label {
+            display: block;
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(197, 255, 214, 0.86);
+            margin-bottom: 6px;
+        }
+
+        #websiteUrl {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 157, 0.4);
+            background: rgba(5, 10, 20, 0.94);
+            color: var(--color-text);
+            font-size: 14px;
+            outline: none;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+        }
+
+        #websiteUrl::placeholder {
+            color: rgba(134, 255, 191, 0.45);
+        }
+
+        #websiteUrl:focus {
+            border-color: var(--color-accent);
+            box-shadow:
+                0 0 14px rgba(0, 255, 157, 0.9),
+                inset 0 0 10px rgba(0, 0, 0, 0.9);
+        }
+
+        #viewSourceBtn {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--color-accent);
+            background: linear-gradient(120deg, rgba(0, 255, 157, 0.15), rgba(0, 255, 157, 0.02));
+            color: var(--color-accent);
+            font-size: 13px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: var(--shadow-neon);
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
+        }
+
+        #viewSourceBtn:hover:not(:disabled) {
+            background: linear-gradient(120deg, rgba(0, 255, 157, 0.3), rgba(0, 255, 157, 0.08));
+            box-shadow:
+                0 0 18px rgba(0, 255, 157, 0.95),
+                0 0 35px rgba(0, 255, 157, 0.8);
+            transform: translateY(-1px);
+        }
+
+        #viewSourceBtn:active:not(:disabled) {
+            transform: translateY(1px) scale(0.99);
+            box-shadow: 0 0 8px rgba(0, 255, 157, 0.6);
+        }
+
+        #viewSourceBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Status Message */
+        #statusMessage {
+            margin: 10px 4px 4px;
+            font-size: 12px;
+            color: var(--color-text);
+            font-weight: 700;
+            display: none;
+        }
+
+        #statusMessage::before {
+            content: "[ACCESS-ATTEMPT]>";
+            color: var(--color-error);
+            margin-right: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* CODE AREA */
+        .code-area {
+            position: relative;
+            margin-top: 14px;
+            background:
+                radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.15), transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(0, 140, 255, 0.15), transparent 60%),
+                #020308;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 157, 0.4);
+            padding: 18px 14px 16px;
+            max-height: 460px;
+            overflow: auto;
+            font-size: 13px;
+            line-height: 1.45;
+            box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.95);
+        }
+
+        .code-area::before {
+            content: "[SOURCE-DUMP::READ-ONLY]";
+            position: sticky;
+            top: 0;
+            left: 0;
+            display: block;
+            padding-bottom: 6px;
+            margin: -6px 0 10px;
+            font-size: 10px;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: rgba(165, 255, 210, 0.9);
+            background: linear-gradient(to bottom, rgba(2, 3, 8, 0.9), transparent);
+            z-index: 1;
+        }
+
+        .code-area code {
+            display: block;
+            color: var(--color-text) !important;
+            white-space: pre;
+        }
+
+        /* Loading caret animation */
+        @keyframes blink-caret {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .code-area.loading code::after {
+            content: "_";
+            display: inline-block;
+            margin-left: 2px;
+            animation: blink-caret 0.7s steps(2, end) infinite;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .action-buttons button {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--color-accent);
+            background: radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.2), transparent 65%);
+            color: var(--color-accent);
+            font-size: 11px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 255, 157, 0.6);
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.08s ease;
+        }
+
+        .action-buttons button:hover {
+            background: radiaL-gradient(circle at 0 0, rgba(0, 255, 157, 0.3), transparent 65%);
+            box-shadow: 0 0 14px rgba(0, 255, 157, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .action-buttons button:active {
+            transform: translateY(1px) scale(0.99);
+            box-shadow: 0 0 6px rgba(0, 255, 157, 0.6);
+        }
+
+        /* Syntax highlight overrides (Prism) */
+        .token.tag,
+        .token.attr-name,
+        .token.selector {
+            color: #00fff2 !important;
+            text-shadow: 0 0 6px rgba(0, 255, 255, 0.8);
+        }
+
+        .token.punctuation,
+        .token.operator {
+            color: #ff00ff !important;
+        }
+
+        .token.attr-value,
+        .token.string {
+            color: #39ff14 !important;
+        }
+
+        .token.comment {
+            color: #008000 !important;
+        }
+
+        .token.doctype,
+        .token.prolog {
+            color: #ffa500 !important;
+        }
+
+        /* Footer log line */
+        .footer-log {
+            margin-top: 10px;
+            font-size: 11px;
+            color: rgba(160, 255, 201, 0.8);
+            opacity: 0.85;
+        }
+
+        .footer-log span::before {
+            content: ">_ ";
+            color: var(--color-accent);
+        }
+
+        /* Scrollbar (WebKit) */
+        .code-area::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .code-area::-webkit-scrollbar-track {
+            background: #020308;
+        }
+
+        .code-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 157, 0.55);
+            border-radius: 6px;
+        }
+
+        .code-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 157, 0.85);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                padding: 14px;
+            }
+
+            .container {
+                padding: 18px 16px 16px;
+            }
+
+            h1 {
+                font-size: 18px;
+                letter-spacing: 0.16em;
+            }
+
+            .session-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .terminal-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .terminal-header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="global-grid"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+
+<div class="container">
+    <div class="terminal-header">
+        <div class="terminal-header-left">
+            <span class="terminal-logo">[CSM]</span>
+            <span>DEEP-WEB // SOURCE-SCANNER</span>
+        </div>
+        <div class="terminal-header-right">
+            <div class="hud-leds">
+                <span class="hud-led red"></span>
+                <span class="hud-led yellow"></span>
+                <span class="hud-led green"></span>
+            </div>
+            <div>
+                <span class="header-status-label">STATUS:</span>
+                <span class="header-status-value" id="statusIndicator">INITIALIZING</span>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="glitch-text">Website Source Code Hacker by Csm Mohasin Alam</h1>
+
+    <div class="session-bar">
+        <span>SESSION-ID: <span class="session-id">0xC5M-7A-F3</span></span>
+        <span>MODE: <span class="mono">PASSIVE-SOURCE-EXTRACTION</span></span>
+        <span>CHANNEL: <span class="mono">HTTPS::TUNNEL</span></span>
+    </div>
+
+    <label for="websiteUrl" class="input-label">TARGET URL ::</label>
+    <input type="url" id="websiteUrl" placeholder="এখানে ওয়েবসাইটের URL দিন (যেমন: https://google.com)" required>
+    <button id="viewSourceBtn">সোর্স কোড দেখুন</button>
+
+    <p id="statusMessage" class="hidden"></p>
+
+    <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
+
+    <div class="action-buttons hidden" id="actionButtons">
+        <button id="copyCodeBtn">কোড কপি করুন</button>
+        <button id="downloadCodeBtn">HTML ডাউনলোড করুন</button>
+    </div>
+
+    <div class="footer-log">
+        <span id="footerLog">LOG CHANNEL OPEN :: Awaiting target input...</span>
+    </div>
+</div>
+
+<!-- Prism.js CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" id="prism-css" />
+
+<!-- Prism.js Scripts - Load with defer to ensure proper order -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+
+<!-- Main Logic Script - Loads after Prism -->
+<script>
+    // Global Prism availability flag
+    let prismLoaded = false;
+    
+    // Check if Prism is loaded
+    function isPrismReady() {
+        return typeof Prism !== 'undefined' && Prism.highlight;
+    }
+
+    // Wait for Prism to load
+    function waitForPrism(callback, attempts = 0) {
+        const maxAttempts = 50; // Wait up to 5 seconds (50 * 100ms)
+        
+        if (isPrismReady()) {
+            prismLoaded = true;
+            document.getElementById('statusIndicator').textContent = 'READY';
+            document.getElementById('statusIndicator').style.color = '#00ff9d';
+            console.log('✓ Prism.js loaded successfully');
+            callback();
+            return;
+        }
+        
+        if (attempts >= maxAttempts) {
+            console.warn('✗ Prism.js failed to load, using fallback highlighting');
+            document.getElementById('statusIndicator').textContent = 'NO HIGHLIGHT';
+            document.getElementById('statusIndicator').style.color = '#ffdd57';
+            callback();
+            return;
+        }
+        
+        setTimeout(() => waitForPrism(callback, attempts + 1), 100);
+    }
+
+    // Manual highlight function as fallback
+    function manualHighlight(code) {
+        // Basic syntax highlighting without Prism
+        let highlighted = code
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        
+        // Highlight tags
+        highlighted = highlighted.replace(/(&lt;\/?[\w-]+)/g, '<span class="token tag">$1</span>');
+        
+        // Highlight attributes
+        highlighted = highlighted.replace(/([\w-]+)=/g, '<span class="token attr-name">$1</span>=');
+        
+        // Highlight attribute values
+        highlighted = highlighted.replace(/"([^"]*)"/g, '"<span class="token attr-value">$1</span>"');
+        
+        // Highlight comments
+        highlighted = highlighted.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="token comment">$1</span>');
+        
+        return highlighted;
+    }
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        waitForPrism(function() {
+            // Setup event listeners after Prism is ready
+            const viewSourceBtn = document.getElementById('viewSourceBtn');
+            const copyCodeBtn = document.getElementById('copyCodeBtn');
+            const downloadCodeBtn = document.getElementById('downloadCodeBtn');
+
+            if (viewSourceBtn) {
+                viewSourceBtn.addEventListener('click', fetchSourceCode);
+            }
+            if (copyCodeBtn) {
+                copyCodeBtn.addEventListener('click', copyCode);
+            }
+            if (downloadCodeBtn) {
+                downloadCodeBtn.addEventListener('click', downloadCode);
+            }
+            
+            document.getElementById('footerLog').textContent = 'LOG CHANNEL OPEN :: System ready for target input...';
+        });
+    });
+
+    const workerUrl = "https://delicate-tree-21a6.csmmohasinalam.workers.dev/";
+
+    function fetchSourceCode() {
+        const websiteInput = document.getElementById('websiteUrl').value;
+        const outputElement = document.getElementById('sourceCodeOutput');
+        const outputArea = document.querySelector('.code-area');
+        const statusMessage = document.getElementById('statusMessage');
+        const viewButton = document.getElementById('viewSourceBtn');
+        const actionButtons = document.getElementById('actionButtons');
+        const statusIndicator = document.getElementById('statusIndicator');
+
+        const myBlockedDomains = [
+            'mohasin.github.io',
+            'husneurb.vom',
+            'mohasin-alam.github.io',
+            'PLACEHOLDER_4_YOUR_DOMAIN.com',
+            'PLACEHOLDER_5_YOUR_DOMAIN.net'
+        ];
+
+        try {
+            const inputUrl = new URL(websiteInput.startsWith('http') ? websiteInput : `https://${websiteInput}`);
+            const inputHostname = inputUrl.hostname;
+
+            const isBlocked = myBlockedDomains.some(domain => {
+                if (domain.includes('PLACEHOLDER') || domain.length === 0) return false;
+                return inputHostname.includes(domain);
+            });
+
+            if (isBlocked) {
+                viewButton.disabled = false;
+                actionButtons.classList.add('hidden');
+                statusMessage.classList.add('hidden');
+                outputArea.classList.remove('loading');
+
+                outputElement.textContent = "শালা আমাকে দিয়ে আমারই কাপড় খোলাতে চাইছির! পারবি না 😡";
+                outputElement.classList.remove('language-html');
+                return;
+            }
+        } catch (e) {
+            // invalid URL হলে সাধারণ প্রসেসই চলবে
+        }
+
+        if (!websiteInput) {
+            alert("অনুগ্রহ করে একটি URL দিন।");
+            return;
+        }
+
+        // Loading শুরু
+        viewButton.disabled = true;
+        actionButtons.classList.add('hidden');
+        outputElement.textContent = '';
+        outputArea.classList.add('loading');
+        statusMessage.textContent = 'ওয়েবসাইটের সোর্স কোড আনা হচ্ছে... এনক্রিপশন প্রসেস শুরু হচ্ছে...';
+        statusMessage.classList.remove('hidden');
+        statusIndicator.textContent = 'SCANNING...';
+        statusIndicator.style.color = '#ffdd57';
+
+        const fetchWorkerUrl = `${workerUrl}?url=${encodeURIComponent(websiteInput)}`;
+
+        fetch(fetchWorkerUrl)
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        try {
+                            const data = JSON.parse(text);
+                            throw new Error(data.error || `Worker ত্রুটি: HTTP ${response.status}`);
+                        } catch (e) {
+                            throw new Error(`নেটওয়ার্ক ত্রুটি: HTTP ${response.status}.`);
+                        }
+                    });
+                }
+                return response.text();
+            })
+            .then(htmlCode => {
+                statusMessage.classList.add('hidden');
+                outputArea.classList.remove('loading');
+                viewButton.disabled = false;
+                actionButtons.classList.remove('hidden');
+                statusIndicator.textContent = 'ACCESS GRANTED';
+                statusIndicator.style.color = '#00ff9d';
+
+                outputElement.textContent = htmlCode;
+
+                if (isPrismReady()) {
+                    outputElement.classList.add('language-html');
+                    try {
+                        Prism.highlightElement(outputElement);
+                    } catch (e) {
+                        console.warn('Prism highlight failed, using fallback:', e);
+                        outputElement.innerHTML = manualHighlight(htmlCode);
+                    }
+                } else {
+                    // Use fallback highlighting
+                    console.log('Using fallback highlighting');
+                    outputElement.innerHTML = manualHighlight(htmlCode);
+                }
+            })
+            .catch(error => {
+                statusMessage.classList.add('hidden');
+                outputArea.classList.remove('loading');
+                viewButton.disabled = false;
+                actionButtons.classList.add('hidden');
+                statusIndicator.textContent = 'ACCESS DENIED';
+                statusIndicator.style.color = '#ff3b5c';
+
+                outputElement.textContent = `[ACCESS DENIED]>> কোড লোড করা যায়নি। ত্রুটি: ${error.message}`;
+                console.error('Fetching error:', error);
+            });
+    }
+
+    function copyCode() {
+        const code = document.getElementById('sourceCodeOutput').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert('কোড সফলভাবে কপি করা হয়েছে!');
+        }).catch(err => {
+            alert('কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।');
+            console.error('Copy failed:', err);
+        });
+    }
+
+    function downloadCode() {
+        const code = document.getElementById('sourceCodeOutput').textContent;
+        const urlInput = document.getElementById('websiteUrl').value || 'untitled';
+
+        let filename;
+        try {
+            const urlObj = new URL(urlInput.startsWith('http') ? urlInput : `https://${urlInput}`);
+            filename = urlObj.hostname.replace('www.', '').replace(/\./g, '_');
+        } catch (e) {
+            filename = 'source_code';
+        }
+
+        const blob = new Blob([code], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${filename}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        alert(`'${filename}.html' ডাউনলোড করা হচ্ছে...`);
+    }
+</script>
+</body>
+</html>
