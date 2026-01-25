@@ -1,189 +1,269 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Notepad (CSM_MOHASIN_ALAM)</title>
+    <title>Secure Terminal v2.0</title>
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#000000">
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         :root {
-            --bg-color: #000; 
-            --terminal-bg: #111; 
-            --text-color: #00ff41; 
-            --primary-color: #00ff41; 
-            --secondary-color: #222; 
-            --accent-color: #00c62e; 
-            --danger-color: #ff005c; 
-            --border-color: #005f15; 
-            --hover-bg: #003300; 
-            --font-mono: 'Courier New', Courier, monospace;
-            --neon-pink: #ff007f; 
-            --header-height: 60px; 
-            --footer-height: 40px;
+            --bg-color: #050505;
+            --panel-bg: #0a0a0a;
+            --text-main: #00ff41;
+            --text-dim: #008f11;
+            --accent: #00ff41;
+            --border: #1a1a1a;
+            --highlight: rgba(0, 255, 65, 0.1);
+            --danger: #ff0055;
+            --font-main: 'JetBrains Mono', monospace;
+            --glass: rgba(10, 10, 10, 0.8);
         }
 
         body.light-mode {
-            --bg-color: #e0e0e0; 
-            --terminal-bg: #f0f0f0; 
-            --text-color: #333; 
-            --primary-color: #007acc; 
-            --secondary-color: #ccc; 
-            --border-color: #bbb; 
-            --hover-bg: #d0d0d0;
+            --bg-color: #e6e6e6;
+            --panel-bg: #ffffff;
+            --text-main: #222222;
+            --text-dim: #666666;
+            --accent: #0051ff;
+            --border: #cccccc;
+            --highlight: rgba(0, 81, 255, 0.1);
+            --danger: #d60000;
         }
+
+        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; }
 
         body {
-            font-family: var(--font-mono);
+            font-family: var(--font-main);
             background-color: var(--bg-color);
-            margin: 0; padding: 0;
-            height: 100dvh; display: flex;
-            justify-content: center; align-items: center;
-            overflow: hidden;
+            color: var(--text-main);
+            margin: 0; height: 100vh; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        * { box-sizing: border-box; color: var(--text-color); }
+        /* CRT Scanline Effect Overlay */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 9999; opacity: 0.3;
+        }
 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* Auth Screen */
         #auth-container {
-            max-width: 400px; width: 90%; padding: 30px;
-            border: 2px solid var(--border-color);
-            background-color: var(--terminal-bg);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
-            text-align: center;
+            width: 350px; padding: 40px;
+            background: var(--panel-bg);
+            border: 1px solid var(--text-dim);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            text-align: center; position: relative; z-index: 10;
         }
 
+        h2, h3 { margin: 0 0 20px 0; letter-spacing: 1px; text-transform: uppercase; }
+        
+        input {
+            width: 100%; background: transparent; border: none;
+            border-bottom: 1px solid var(--text-dim);
+            color: var(--text-main); font-family: inherit;
+            padding: 10px; margin-bottom: 15px; font-size: 1rem;
+        }
+        input:focus { outline: none; border-bottom: 2px solid var(--accent); box-shadow: 0 5px 10px -5px var(--highlight); }
+
+        button {
+            background: transparent; border: 1px solid var(--text-dim);
+            color: var(--text-main); padding: 10px 20px;
+            font-family: inherit; cursor: pointer; margin: 5px;
+            font-size: 0.9rem; text-transform: uppercase;
+        }
+        button:hover { background: var(--accent); color: var(--bg-color); box-shadow: 0 0 10px var(--accent); }
+        button.danger:hover { background: var(--danger); box-shadow: 0 0 10px var(--danger); border-color: var(--danger); }
+
+        /* Main App Layout */
         #notepad-container {
-            width: 100vw; height: 100dvh;
-            display: flex; flex-direction: column;
-            background-color: var(--terminal-bg);
+            width: 100vw; height: 100vh; display: none;
+            flex-direction: column; background: var(--bg-color);
         }
 
-        #app-header {
-            height: var(--header-height);
-            border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between;
-            align-items: center; padding: 0 20px;
+        header {
+            height: 60px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; border-bottom: 1px solid var(--border); background: var(--panel-bg);
         }
 
-        #note-app-layout { display: flex; flex-grow: 1; overflow: hidden; }
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
 
-        #notes-list {
-            width: 30%; border-right: 1px solid var(--border-color);
-            overflow-y: auto; padding: 10px;
-        }
-
-        #note-editor { width: 70%; padding: 20px; display: flex; flex-direction: column; }
-
-        textarea {
-            flex-grow: 1; background: transparent;
-            border: none; outline: none; resize: none;
-            font-size: 1rem; line-height: 1.6;
-            color: var(--neon-pink);
-        }
-
-        input[type="text"], input[type="email"], input[type="password"] {
-            background: transparent; border: none;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 1.2rem; margin-bottom: 10px; padding: 10px;
-            width: 100%;
-        }
-
-        .custom-button, button {
-            padding: 8px 15px; border: 1px solid var(--primary-color);
-            background: transparent; cursor: pointer;
-            margin: 5px; font-family: var(--font-mono);
-            transition: 0.3s;
+        /* Sidebar */
+        aside {
+            width: 300px; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; background: rgba(0,0,0,0.2);
         }
         
-        .custom-button:hover { background: var(--hover-bg); }
-
-        .note-item { 
-            padding: 10px; cursor: pointer; border-bottom: 1px solid #222;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .search-box { padding: 15px; border-bottom: 1px solid var(--border); }
+        
+        #notes-list { flex: 1; overflow-y: auto; }
+        
+        .note-item {
+            padding: 15px; border-bottom: 1px solid var(--border);
+            cursor: pointer; position: relative; opacity: 0.7;
         }
-        .active { border-left: 4px solid var(--neon-pink); background: var(--hover-bg); }
+        .note-item:hover { opacity: 1; background: var(--highlight); }
+        .note-item.active { 
+            opacity: 1; border-left: 4px solid var(--accent); 
+            background: linear-gradient(90deg, var(--highlight), transparent);
+        }
+        .note-item h4 { margin: 0; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .note-item span { font-size: 0.7rem; color: var(--text-dim); display: block; margin-top: 5px; }
 
-        #control-bar {
-            height: var(--footer-height); border-top: 1px solid var(--border-color);
-            display: flex; align-items: center; padding: 0 10px; font-size: 0.75rem;
+        /* Editor */
+        main { flex: 1; display: flex; flex-direction: column; padding: 20px; position: relative; }
+        
+        .editor-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; font-size: 0.8rem; color: var(--text-dim);
         }
 
+        #note-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; border-bottom: 1px dashed var(--border); }
+        
+        #note-text {
+            flex: 1; background: transparent; border: none; resize: none;
+            color: var(--text-main); font-family: inherit; font-size: 1rem; line-height: 1.6;
+            outline: none;
+        }
+
+        /* Footer / Status Bar */
+        footer {
+            height: 30px; border-top: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 10px;
+            font-size: 0.75rem; background: var(--panel-bg); color: var(--text-dim);
+            justify-content: space-between;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed; bottom: 50px; right: 20px;
+            background: var(--panel-bg); border: 1px solid var(--accent);
+            color: var(--accent); padding: 10px 20px;
+            transform: translateY(100px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2000; box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .toast.show { transform: translateY(0); }
+
+        /* Modals */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
-            justify-content: center; align-items: center; z-index: 1000;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            justify-content: center; align-items: center; z-index: 1001;
+            backdrop-filter: blur(2px);
         }
         .modal-box {
-            background: var(--terminal-bg); padding: 30px; 
-            border: 2px solid var(--primary-color); text-align:center;
-            min-width: 300px;
+            background: var(--bg-color); padding: 30px; border: 1px solid var(--accent);
+            text-align: center; box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            aside { display: none; width: 100%; position: absolute; height: 100%; z-index: 100; background: var(--bg-color); }
+            aside.mobile-open { display: flex; }
+            .mobile-menu-btn { display: block !important; }
         }
     </style>
 </head>
-<body onclick="requestFullScreen()"> <div id="auth-container">
-        <h2 style="color: var(--primary-color)">:: SECURE ACCESS ::</h2>
-        <input type="email" id="email-input" placeholder="EMAIL">
-        <input type="password" id="password-input" placeholder="PASSWORD">
+<body>
+
+    <div class="scanlines"></div>
+
+    <!-- AUTHENTICATION -->
+    <div id="auth-container">
+        <h2 style="color: var(--accent)"><i class="fas fa-terminal"></i> SECURE LOGIN</h2>
+        <input type="email" id="email-input" placeholder="ACCESS ID (EMAIL)">
+        <input type="password" id="password-input" placeholder="ACCESS KEY (PASSWORD)">
         
-        <div style="margin-top: 10px;">
-            <button class="custom-button" onclick="loginUser()">LOGIN</button>
-            <button class="custom-button" onclick="signupUser()" style="border-color: #007acc; color: #007acc;">SIGNUP</button>
+        <div style="margin-top: 20px;">
+            <button onclick="loginUser()">ENTER SYSTEM</button>
+            <button onclick="signupUser()" style="border-color: #007acc; color: #007acc;">REGISTER</button>
         </div>
-        
-        <button onclick="forgotPassword()" style="background:none; border:none; color:#888; text-decoration:underline; font-size:0.8rem; cursor:pointer; margin-top:15px;">Forgot Password?</button>
+        <p onclick="forgotPassword()" style="font-size: 0.7rem; color: #666; cursor: pointer; margin-top: 15px; text-decoration: underline;">FORGOT CREDENTIALS?</p>
     </div>
 
-    <div id="notepad-container" style="display: none;">
-        <div id="app-header">
-            <h3 ondblclick="toggleFullScreen()" style="cursor:pointer">SECURE_SHELL (MOHASIN) [F11]</h3>
+    <!-- MAIN APP -->
+    <div id="notepad-container">
+        <header>
+            <div style="display: flex; align-items: center;">
+                <button class="mobile-menu-btn" style="display: none; border:none; padding: 0 10px;" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h3 style="margin:0; font-size: 1.1rem;"><i class="fas fa-shield-alt"></i> SHELL_NOTES</h3>
+            </div>
             <div>
-                <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
-                <button class="custom-button" onclick="showLogoutModal()">EXIT [ALT+L]</button>
-                <button onclick="toggleDarkMode()">☀️/🌙 [F1]</button>
+                <button onclick="createNewNote()" title="New Note (Ctrl+M)"><i class="fas fa-plus"></i> NEW</button>
+                <button onclick="toggleDarkMode()" title="Toggle Theme"><i class="fas fa-adjust"></i></button>
+                <button onclick="showLogoutModal()" title="Logout" style="border-color: var(--danger); color: var(--danger);"><i class="fas fa-power-off"></i></button>
             </div>
-        </div>
-        
-        <div id="note-app-layout">
-            <div id="notes-list"></div>
-            <div id="note-editor">
-                <input type="text" id="note-title" placeholder="TITLE (Enter to go Body)...">
-                <textarea id="note-text" placeholder="TYPE DATA..."></textarea>
+        </header>
+
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside id="sidebar">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="SEARCH DATABASE..." style="margin:0; font-size: 0.9rem;">
+                </div>
+                <div id="notes-list">
+                    <!-- Notes will appear here -->
+                </div>
+            </aside>
+
+            <!-- Editor -->
+            <main>
+                <div class="editor-meta">
+                    <span id="last-edited"><i class="far fa-clock"></i> New Session</span>
+                    <span id="word-count">0 Words</span>
+                </div>
+                <input type="text" id="note-title" placeholder="UNTITLED_FILE...">
+                <textarea id="note-text" placeholder="INITIALIZE DATA STREAM..."></textarea>
                 <input type="hidden" id="current-note-id">
-            </div>
+            </main>
         </div>
 
-        <div id="control-bar">
-            <button class="custom-button" onclick="saveNote()">SAVE [CTRL+S]</button>
-            <button class="custom-button" onclick="showDeleteModal()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [ALT+X]</button>
-            <span id="save-status" style="margin-left: 10px;">:: READY ::</span>
-            <span style="margin-left: auto; opacity: 0.7;">Double Click Header for Fullscreen</span>
-        </div>
+        <footer>
+            <div id="status-bar">:: SYSTEM READY ::</div>
+            <div>
+                <button style="border:none; padding: 2px 10px; margin:0;" onclick="saveNote()">SAVE [CTRL+S]</button>
+                <button id="delete-btn" style="border:none; padding: 2px 10px; margin:0; color: var(--danger); display:none;" onclick="showDeleteModal()">DELETE</button>
+            </div>
+        </footer>
     </div>
 
+    <!-- TOAST -->
+    <div id="toast" class="toast"><i class="fas fa-check-circle"></i> DATA SAVED SUCCESSFULLY</div>
+
+    <!-- MODALS -->
     <div id="delete-modal" class="modal-overlay">
-        <div class="modal-box" style="border-color: var(--danger-color);">
-            <p>DELETE PERMANENTLY? (Y/N)</p>
-            <button class="custom-button" onclick="confirmDelete(true)">YES</button>
-            <button class="custom-button" onclick="closeModals()">NO</button>
+        <div class="modal-box" style="border-color: var(--danger);">
+            <h3 style="color: var(--danger)">WARNING: PERMANENT DELETION</h3>
+            <p>Are you sure you want to purge this data?</p>
+            <button class="danger" onclick="confirmDelete(true)">YES, PURGE</button>
+            <button onclick="closeModals()">CANCEL</button>
         </div>
     </div>
 
     <div id="logout-modal" class="modal-overlay">
         <div class="modal-box">
-            <p>LOGOUT FROM SECURE SHELL?</p>
-            <button class="custom-button" onclick="confirmLogout()">YES</button>
-            <button class="custom-button" onclick="closeModals()">NO</button>
+            <h3>TERMINATE SESSION?</h3>
+            <button onclick="confirmLogout()">CONFIRM</button>
+            <button onclick="closeModals()">STAY</button>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // --- Firebase Config ---
         const firebaseConfig = {
             apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
             authDomain: "notepad-c5b98.firebaseapp.com",
@@ -200,40 +280,57 @@
 
         let currentUserId = null;
         let autoSaveTimer;
+        let allNotesCache = {};
 
-        // --- Fullscreen Logic ---
-        function requestFullScreen() {
-            const doc = document.documentElement;
-            if (doc.requestFullscreen) doc.requestFullscreen();
-            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-            else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
-        }
+        // --- Helper: Format Date ---
+        function formatSmartDate(timestamp) {
+            if (!timestamp) return "Unsaved";
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
 
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                requestFullScreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
+            // If less than 24 hours
+            if (diff < 86400000 && now.getDate() === date.getDate()) {
+                return "Today, " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
 
-        // --- Auth Functions ---
+        // --- Helper: Word Count ---
+        function updateWordCount() {
+            const text = document.getElementById('note-text').value;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const chars = text.length;
+            document.getElementById('word-count').innerText = `${words} Words | ${chars} Chars`;
+        }
+
+        // --- Helper: Toast ---
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = type === 'error' ? `<i class="fas fa-exclamation-triangle"></i> ${msg}` : `<i class="fas fa-check-circle"></i> ${msg}`;
+            toast.style.borderColor = type === 'error' ? 'var(--danger)' : 'var(--accent)';
+            toast.style.color = type === 'error' ? 'var(--danger)' : 'var(--accent)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // --- Auth Logic ---
         function loginUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            auth.signInWithEmailAndPassword(e, p).then(() => requestFullScreen()).catch(err => alert(err.message));
+            auth.signInWithEmailAndPassword(e, p).catch(err => showToast(err.message, 'error'));
         }
 
         function signupUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            auth.createUserWithEmailAndPassword(e, p).then(() => requestFullScreen()).catch(err => alert(err.message));
+            auth.createUserWithEmailAndPassword(e, p).then(() => showToast("Account Created")).catch(err => showToast(err.message, 'error'));
         }
 
         function forgotPassword() {
             const email = document.getElementById('email-input').value;
-            if (!email) return alert("ইমেইল লিখুন");
-            auth.sendPasswordResetEmail(email).then(() => alert("ইমেইল চেক করুন")).catch(err => alert(err.message));
+            if (!email) return showToast("Enter Email first", 'error');
+            auth.sendPasswordResetEmail(email).then(() => showToast("Check your email")).catch(err => showToast(err.message, 'error'));
         }
 
         auth.onAuthStateChanged(user => {
@@ -249,28 +346,58 @@
             }
         });
 
+        // --- Notes Logic ---
         function loadAllNotes(uid) {
             db.ref(`notes/${uid}`).on('value', snap => {
                 const list = document.getElementById('notes-list');
                 list.innerHTML = '';
-                const data = snap.val();
-                if (data) {
-                    Object.entries(data).reverse().forEach(([id, note]) => {
-                        const div = document.createElement('div');
-                        div.className = 'note-item';
-                        div.innerText = `> ${note.title || 'Untitled'}`;
-                        div.onclick = () => {
-                            document.getElementById('current-note-id').value = id;
-                            document.getElementById('note-title').value = note.title;
-                            document.getElementById('note-text').value = note.text;
-                            document.getElementById('delete-btn').style.display = 'inline-block';
-                            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
-                            div.classList.add('active');
-                        };
-                        list.appendChild(div);
-                    });
-                }
+                allNotesCache = snap.val() || {};
+                
+                renderNotesList(allNotesCache);
             });
+        }
+
+        function renderNotesList(notesData) {
+            const list = document.getElementById('notes-list');
+            list.innerHTML = '';
+            
+            // Sort by timestamp desc
+            const sortedNotes = Object.entries(notesData).sort((a, b) => b[1].timestamp - a[1].timestamp);
+
+            if (sortedNotes.length === 0) {
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-dim)">:: NO DATA ::</div>';
+                return;
+            }
+
+            sortedNotes.forEach(([id, note]) => {
+                const div = document.createElement('div');
+                div.className = 'note-item';
+                div.id = `item-${id}`;
+                div.innerHTML = `
+                    <h4>${note.title || 'Untitled_File'}</h4>
+                    <span><i class="fas fa-history"></i> ${formatSmartDate(note.timestamp)}</span>
+                `;
+                div.onclick = () => selectNote(id, note);
+                list.appendChild(div);
+            });
+        }
+
+        function selectNote(id, note) {
+            document.getElementById('current-note-id').value = id;
+            document.getElementById('note-title').value = note.title;
+            document.getElementById('note-text').value = note.text;
+            document.getElementById('last-edited').innerHTML = `<i class="fas fa-save"></i> Last Saved: ${formatSmartDate(note.timestamp)}`;
+            document.getElementById('delete-btn').style.display = 'inline-block';
+            
+            updateWordCount();
+            
+            // UI Toggle active class
+            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+            const activeItem = document.getElementById(`item-${id}`);
+            if(activeItem) activeItem.classList.add('active');
+
+            // Mobile view close sidebar
+            document.getElementById('sidebar').classList.remove('mobile-open');
         }
 
         function saveNote() {
@@ -278,65 +405,92 @@
             const id = document.getElementById('current-note-id').value;
             const title = document.getElementById('note-title').value;
             const text = document.getElementById('note-text').value;
+
+            // Don't save empty empty notes
             if(!title && !text) return;
 
-            const status = document.getElementById('save-status');
             const noteData = { title, text, timestamp: Date.now() };
-            status.innerText = ":: SAVING ::";
+            const status = document.getElementById('status-bar');
+            status.innerText = ":: UPLOADING... ::";
 
             if (id) {
-                db.ref(`notes/${currentUserId}/${id}`).update(noteData);
+                db.ref(`notes/${currentUserId}/${id}`).update(noteData).then(() => {
+                    status.innerText = ":: SYNCED ::";
+                    document.getElementById('last-edited').innerHTML = `<i class="fas fa-check"></i> Just Now`;
+                    showToast("Note Updated");
+                });
             } else {
                 const newRef = db.ref(`notes/${currentUserId}`).push();
-                newRef.set(noteData);
-                document.getElementById('current-note-id').value = newRef.key;
+                newRef.set(noteData).then(() => {
+                    document.getElementById('current-note-id').value = newRef.key;
+                    status.innerText = ":: SYNCED ::";
+                    showToast("New Note Created");
+                    document.getElementById('delete-btn').style.display = 'inline-block';
+                });
             }
-            setTimeout(() => status.innerText = ":: READY ::", 800);
         }
 
         function createNewNote() {
             document.getElementById('current-note-id').value = '';
             document.getElementById('note-title').value = '';
             document.getElementById('note-text').value = '';
+            document.getElementById('word-count').innerText = "0 Words | 0 Chars";
+            document.getElementById('last-edited').innerText = "New Session";
             document.getElementById('delete-btn').style.display = 'none';
             document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
             document.getElementById('note-title').focus();
         }
 
+        // --- Search Feature ---
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filteredNotes = {};
+            
+            Object.entries(allNotesCache).forEach(([id, note]) => {
+                if ((note.title && note.title.toLowerCase().includes(term)) || 
+                    (note.text && note.text.toLowerCase().includes(term))) {
+                    filteredNotes[id] = note;
+                }
+            });
+            renderNotesList(filteredNotes);
+        });
+
+        // --- Modals & UI ---
         function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
         function confirmLogout() { auth.signOut(); closeModals(); }
-        function showDeleteModal() { document.getElementById('delete-modal').style.display = 'flex'; }
         
+        function showDeleteModal() { document.getElementById('delete-modal').style.display = 'flex'; }
         function confirmDelete(confirm) {
             const id = document.getElementById('current-note-id').value;
             if (confirm && id) {
                 db.ref(`notes/${currentUserId}/${id}`).remove();
                 createNewNote();
+                showToast("Data Purged", 'error');
             }
             closeModals();
         }
 
-        function closeModals() {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-        }
-
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
         function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('mobile-open'); }
 
-        document.getElementById('note-title').addEventListener('input', () => {
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(saveNote, 1000);
-        });
-        document.getElementById('note-text').addEventListener('input', () => {
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(saveNote, 1000);
+        // --- Auto Save & Input Listeners ---
+        const inputs = [document.getElementById('note-title'), document.getElementById('note-text')];
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                updateWordCount();
+                document.getElementById('status-bar').innerText = ":: TYPING... ::";
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(saveNote, 1500); // Autosave after 1.5s
+            });
         });
 
+        // Shortcuts
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
-            if (e.altKey && e.key === 'l') { e.preventDefault(); showLogoutModal(); }
-            if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
         });
+
     </script>
 </body>
 </html>
