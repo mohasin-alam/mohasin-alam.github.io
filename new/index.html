@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -49,7 +48,7 @@
         * { box-sizing: border-box; color: var(--text-color); }
 
         #auth-container {
-            max-width: 400px; padding: 30px;
+            max-width: 400px; width: 90%; padding: 30px;
             border: 2px solid var(--border-color);
             background-color: var(--terminal-bg);
             box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
@@ -123,7 +122,6 @@
             border: 2px solid var(--primary-color); text-align:center;
             min-width: 300px;
         }
-        .danger-border { border-color: var(--danger-color) !important; }
     </style>
 </head>
 <body>
@@ -132,10 +130,13 @@
         <h2 style="color: var(--primary-color)">:: SECURE ACCESS ::</h2>
         <input type="email" id="email-input" placeholder="EMAIL">
         <input type="password" id="password-input" placeholder="PASSWORD">
+        
         <div style="margin-top: 10px;">
-            <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
+            <button class="custom-button" onclick="loginUser()">LOGIN</button>
             <button class="custom-button" onclick="signupUser()" style="border-color: #007acc; color: #007acc;">SIGNUP</button>
         </div>
+        
+        <button onclick="forgotPassword()" style="background:none; border:none; color:#888; text-decoration:underline; font-size:0.8rem; cursor:pointer; margin-top:15px;">Forgot Password?</button>
     </div>
 
     <div id="notepad-container" style="display: none;">
@@ -166,18 +167,18 @@
     </div>
 
     <div id="delete-modal" class="modal-overlay">
-        <div class="modal-box danger-border">
+        <div class="modal-box" style="border-color: var(--danger-color);">
             <p>DELETE PERMANENTLY? (Y/N)</p>
-            <button class="custom-button" onclick="confirmDelete(true)">YES [ENTER]</button>
-            <button class="custom-button" onclick="closeModals()">NO [ESC]</button>
+            <button class="custom-button" onclick="confirmDelete(true)">YES</button>
+            <button class="custom-button" onclick="closeModals()">NO</button>
         </div>
     </div>
 
     <div id="logout-modal" class="modal-overlay">
         <div class="modal-box">
             <p>LOGOUT FROM SECURE SHELL?</p>
-            <button class="custom-button" onclick="confirmLogout()">YES [ENTER]</button>
-            <button class="custom-button" onclick="closeModals()">NO [ESC]</button>
+            <button class="custom-button" onclick="confirmLogout()">YES</button>
+            <button class="custom-button" onclick="closeModals()">NO</button>
         </div>
     </div>
 
@@ -186,7 +187,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // --- নতুন কনফিগারেশন আপডেট করা হয়েছে ---
+        // --- আপনার নতুন কনফিগ ---
         const firebaseConfig = {
             apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
             authDomain: "notepad-c5b98.firebaseapp.com",
@@ -200,132 +201,43 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+
         let currentUserId = null;
         let selectedIndex = -1;
         let autoSaveTimer;
 
-        // Fullscreen Logic
-        function enableFullscreen() {
-            let elem = document.documentElement;
-            if (elem.requestFullscreen) { elem.requestFullscreen(); }
-            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-        }
-
-        // --- Keyboard Controls ---
-        document.addEventListener('keydown', (e) => {
-            const notes = document.querySelectorAll('.note-item');
-            const logoutVisible = document.getElementById('logout-modal').style.display === 'flex';
-            const deleteVisible = document.getElementById('delete-modal').style.display === 'flex';
-
-            if (logoutVisible || deleteVisible) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if(logoutVisible) confirmLogout();
-                    if(deleteVisible) confirmDelete(true);
-                }
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    closeModals();
-                }
-                return;
-            }
-
-            if (e.altKey && e.key === 'l') { e.preventDefault(); showLogoutModal(); }
-            if (e.altKey && e.key === 'x') { e.preventDefault(); showDeleteModal(); }
-            if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
-            
-            if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex + 1) % notes.length;
-                    updateVisualSelection();
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = (selectedIndex - 1 + notes.length) % notes.length;
-                    updateVisualSelection();
-                } else if (e.key === 'Enter' && selectedIndex !== -1) {
-                    e.preventDefault();
-                    notes[selectedIndex].click();
-                    document.getElementById('note-text').focus();
-                }
-            }
-        });
-
-        document.getElementById('note-title').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('note-text').focus();
-            }
-        });
-
-        // Auto Save
-        function triggerAutoSave() {
-            clearTimeout(autoSaveTimer);
-            document.getElementById('save-status').innerText = ":: TYPING... ::";
-            autoSaveTimer = setTimeout(saveNote, 800);
-        }
-
-        document.getElementById('note-title').addEventListener('input', triggerAutoSave);
-        document.getElementById('note-text').addEventListener('input', triggerAutoSave);
-
-        function updateVisualSelection() {
-            const notes = document.querySelectorAll('.note-item');
-            notes.forEach((n, i) => {
-                n.classList.toggle('kb-highlight', i === selectedIndex);
-                if(i === selectedIndex) n.scrollIntoView({ block: 'nearest' });
-            });
-        }
-
-        function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
-        
         // --- Authentication Functions ---
         function loginUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            if(!e || !p) return alert("পাসওয়ার্ড এবং ইমেইল দিন");
-            auth.signInWithEmailAndPassword(e, p).catch(err => alert("Login Error: " + err.message));
+            if(!e || !p) return alert("Please enter email and password");
+            auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
         }
 
         function signupUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            if(!e || !p) return alert("সব ঘর পূরণ করুন");
+            if(!e || !p) return alert("Please fill all fields");
             auth.createUserWithEmailAndPassword(e, p)
-                .then(() => alert("অ্যাকাউন্ট তৈরি হয়েছে! অটো লগইন হচ্ছে..."))
-                .catch(err => alert("Signup Error: " + err.message));
+                .then(() => alert("Account Created! Welcome."))
+                .catch(err => alert(err.message));
         }
 
-        function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
-        function confirmLogout() { auth.signOut(); closeModals(); }
-
-        function showDeleteModal() { 
-            if (document.getElementById('current-note-id').value) {
-                document.getElementById('delete-modal').style.display = 'flex'; 
-            }
-        }
-        function confirmDelete(confirm) {
-            const id = document.getElementById('current-note-id').value;
-            if (confirm && id) {
-                db.ref(`notes/${currentUserId}/${id}`).remove();
-                createNewNote();
-            }
-            closeModals();
+        function forgotPassword() {
+            const email = document.getElementById('email-input').value;
+            if (!email) return alert("Please enter your email first.");
+            auth.sendPasswordResetEmail(email)
+                .then(() => alert("Reset link sent to your email!"))
+                .catch(err => alert(err.message));
         }
 
-        function closeModals() {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-        }
-
-        // Auth Listener
+        // --- Auth Observer ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('notepad-container').style.display = 'flex';
                 loadAllNotes(user.uid);
-                enableFullscreen();
             } else { 
                 document.getElementById('auth-container').style.display = 'block';
                 document.getElementById('notepad-container').style.display = 'none';
@@ -333,6 +245,7 @@
             }
         });
 
+        // --- Note Logic ---
         function loadAllNotes(uid) {
             db.ref(`notes/${uid}`).on('value', snap => {
                 const list = document.getElementById('notes-list');
@@ -386,6 +299,44 @@
             document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
             document.getElementById('note-title').focus();
         }
+
+        // --- Modals & UI ---
+        function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
+        function confirmLogout() { auth.signOut(); closeModals(); }
+        function showDeleteModal() { document.getElementById('delete-modal').style.display = 'flex'; }
+        
+        function confirmDelete(confirm) {
+            const id = document.getElementById('current-note-id').value;
+            if (confirm && id) {
+                db.ref(`notes/${currentUserId}/${id}`).remove();
+                createNewNote();
+            }
+            closeModals();
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        }
+
+        function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
+
+        // Auto Save Trigger
+        document.getElementById('note-title').addEventListener('input', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveNote, 1000);
+        });
+        document.getElementById('note-text').addEventListener('input', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveNote, 1000);
+        });
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
+            if (e.altKey && e.key === 'l') { e.preventDefault(); showLogoutModal(); }
+            if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
+        });
     </script>
 </body>
 </html>
