@@ -104,7 +104,6 @@
             padding: 10px; cursor: pointer; border-bottom: 1px solid #222;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .note-item.kb-highlight { background-color: var(--primary-color) !important; color: var(--bg-color) !important; }
         .active { border-left: 4px solid var(--neon-pink); background: var(--hover-bg); }
 
         #control-bar {
@@ -124,9 +123,7 @@
         }
     </style>
 </head>
-<body>
-
-    <div id="auth-container">
+<body onclick="requestFullScreen()"> <div id="auth-container">
         <h2 style="color: var(--primary-color)">:: SECURE ACCESS ::</h2>
         <input type="email" id="email-input" placeholder="EMAIL">
         <input type="password" id="password-input" placeholder="PASSWORD">
@@ -141,7 +138,7 @@
 
     <div id="notepad-container" style="display: none;">
         <div id="app-header">
-            <h3>SECURE_SHELL (DEV: MOHASIN)</h3>
+            <h3 ondblclick="toggleFullScreen()" style="cursor:pointer">SECURE_SHELL (MOHASIN) [F11]</h3>
             <div>
                 <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
                 <button class="custom-button" onclick="showLogoutModal()">EXIT [ALT+L]</button>
@@ -162,7 +159,7 @@
             <button class="custom-button" onclick="saveNote()">SAVE [CTRL+S]</button>
             <button class="custom-button" onclick="showDeleteModal()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [ALT+X]</button>
             <span id="save-status" style="margin-left: 10px;">:: READY ::</span>
-            <span style="margin-left: auto; opacity: 0.7;">Q:List | S:Save | X:Del | L:Exit | F1:Mode</span>
+            <span style="margin-left: auto; opacity: 0.7;">Double Click Header for Fullscreen</span>
         </div>
     </div>
 
@@ -187,7 +184,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // --- আপনার নতুন কনফিগ ---
         const firebaseConfig = {
             apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
             authDomain: "notepad-c5b98.firebaseapp.com",
@@ -203,35 +199,43 @@
         const db = firebase.database();
 
         let currentUserId = null;
-        let selectedIndex = -1;
         let autoSaveTimer;
 
-        // --- Authentication Functions ---
+        // --- Fullscreen Logic ---
+        function requestFullScreen() {
+            const doc = document.documentElement;
+            if (doc.requestFullscreen) doc.requestFullscreen();
+            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+            else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                requestFullScreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // --- Auth Functions ---
         function loginUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            if(!e || !p) return alert("Please enter email and password");
-            auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
+            auth.signInWithEmailAndPassword(e, p).then(() => requestFullScreen()).catch(err => alert(err.message));
         }
 
         function signupUser() {
             const e = document.getElementById('email-input').value;
             const p = document.getElementById('password-input').value;
-            if(!e || !p) return alert("Please fill all fields");
-            auth.createUserWithEmailAndPassword(e, p)
-                .then(() => alert("Account Created! Welcome."))
-                .catch(err => alert(err.message));
+            auth.createUserWithEmailAndPassword(e, p).then(() => requestFullScreen()).catch(err => alert(err.message));
         }
 
         function forgotPassword() {
             const email = document.getElementById('email-input').value;
-            if (!email) return alert("Please enter your email first.");
-            auth.sendPasswordResetEmail(email)
-                .then(() => alert("Reset link sent to your email!"))
-                .catch(err => alert(err.message));
+            if (!email) return alert("ইমেইল লিখুন");
+            auth.sendPasswordResetEmail(email).then(() => alert("ইমেইল চেক করুন")).catch(err => alert(err.message));
         }
 
-        // --- Auth Observer ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUserId = user.uid;
@@ -245,7 +249,6 @@
             }
         });
 
-        // --- Note Logic ---
         function loadAllNotes(uid) {
             db.ref(`notes/${uid}`).on('value', snap => {
                 const list = document.getElementById('notes-list');
@@ -300,7 +303,6 @@
             document.getElementById('note-title').focus();
         }
 
-        // --- Modals & UI ---
         function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
         function confirmLogout() { auth.signOut(); closeModals(); }
         function showDeleteModal() { document.getElementById('delete-modal').style.display = 'flex'; }
@@ -320,7 +322,6 @@
 
         function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
 
-        // Auto Save Trigger
         document.getElementById('note-title').addEventListener('input', () => {
             clearTimeout(autoSaveTimer);
             autoSaveTimer = setTimeout(saveNote, 1000);
@@ -330,7 +331,6 @@
             autoSaveTimer = setTimeout(saveNote, 1000);
         });
 
-        // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
