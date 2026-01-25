@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GHOST_SHELL v3.0</title>
     
-    <!-- Hacker Font -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020202">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -20,7 +23,7 @@
             --neon-blue: #00f3ff;
             --border-color: #333;
             --font-stack: 'Fira Code', monospace;
-            --sidebar-width: 380px; /* Wider Sidebar */
+            --sidebar-width: 380px; 
         }
 
         /* Base Reset */
@@ -39,7 +42,7 @@
             display: flex; flex-direction: column;
         }
 
-        /* --- CRT Effect Overlay --- */
+        /* CRT Effect Overlay */
         .crt::before {
             content: " "; display: block; position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
@@ -47,7 +50,7 @@
             z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
 
-        /* --- Animations --- */
+        /* Animations */
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes glitch { 
@@ -57,7 +60,7 @@
             100% { text-shadow: none; }
         }
 
-        /* --- Auth Screen --- */
+        /* Auth Screen */
         #auth-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-deep); z-index: 1000;
@@ -70,152 +73,61 @@
             background: rgba(0, 20, 0, 0.9);
             text-align: center; position: relative;
         }
-        .login-box::after {
-            content: ''; position: absolute; top: -5px; left: -5px; right: -5px; bottom: -5px;
-            border: 1px solid var(--neon-dim); z-index: -1;
-        }
         .login-input {
             width: 100%; padding: 12px; margin: 10px 0;
             background: black; border: 1px solid var(--neon-dim);
             color: var(--neon-green); font-family: var(--font-stack);
             font-size: 1rem; transition: 0.3s;
         }
-        .login-input:focus { border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-dim); }
 
-        /* --- Main App Layout --- */
+        /* Main App Layout */
         #app-layer { display: none; width: 100%; height: 100%; flex-direction: column; }
-
-        /* Header */
         header {
             height: 50px; border-bottom: 2px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 20px; background: var(--bg-panel);
-            user-select: none;
         }
-        .brand { font-weight: 600; font-size: 1.2rem; letter-spacing: 2px; }
-        .brand:hover { animation: glitch 0.3s infinite; cursor: default; }
-
-        /* Toolbar Buttons */
+        .brand { font-weight: 600; font-size: 1.2rem; letter-spacing: 2px; cursor: pointer; }
         .btn {
             background: transparent; border: 1px solid var(--neon-dim);
             color: var(--neon-green); padding: 5px 15px; margin-left: 5px;
             cursor: pointer; font-family: var(--font-stack); text-transform: uppercase;
-            font-size: 0.8rem; transition: 0.2s; position: relative; overflow: hidden;
+            font-size: 0.8rem; transition: 0.2s;
         }
         .btn:hover { background: var(--neon-green); color: black; box-shadow: 0 0 15px var(--neon-green); }
-        .btn-danger { color: var(--neon-red); border-color: #500; }
-        .btn-danger:hover { background: var(--neon-red); color: white; box-shadow: 0 0 15px var(--neon-red); }
-
-        /* Workspace */
+        
         .workspace { display: flex; flex: 1; overflow: hidden; }
+        aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s; }
+        .notes-list { flex: 1; overflow-y: auto; }
+        .note-item { padding: 15px 20px; border-bottom: 1px solid #111; cursor: pointer; transition: 0.2s; }
+        .note-item.active { background: rgba(0, 255, 0, 0.05); border-right: 4px solid var(--neon-green); }
 
-        /* --- Smart Sidebar --- */
-        aside {
-            width: var(--sidebar-width); 
-            background: var(--bg-panel);
-            border-right: 2px solid var(--border-color);
-            display: flex; flex-direction: column;
-            transition: transform 0.3s ease;
-        }
-        .user-info {
-            padding: 15px; border-bottom: 1px dashed var(--border-color);
-            font-size: 0.8rem; color: #888;
-        }
-        .search-container { padding: 15px; position: relative; }
-        .search-bar {
-            width: 100%; padding: 10px 10px 10px 35px;
-            background: black; border: 1px solid var(--border-color);
-            color: white; font-family: var(--font-stack);
-        }
-        .search-icon { position: absolute; left: 25px; top: 25px; color: #555; }
-
-        .notes-list { 
-            flex: 1; overflow-y: auto; 
-            padding-bottom: 20px;
-        }
-        .note-item {
-            padding: 15px 20px; border-bottom: 1px solid #111;
-            cursor: pointer; transition: 0.2s; position: relative;
-        }
-        .note-item:hover { background: var(--bg-hover); padding-left: 25px; }
-        .note-item.active {
-            background: rgba(0, 255, 0, 0.05);
-            border-right: 4px solid var(--neon-green);
-        }
-        .note-item.active::before {
-            content: ">"; position: absolute; left: 8px; 
-            color: var(--neon-green); font-weight: bold;
-            animation: blink 1s infinite;
-        }
-        .note-title { font-weight: 600; color: #ddd; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .note-meta { font-size: 0.7rem; color: #555; display: flex; justify-content: space-between; }
-
-        /* --- Editor Area --- */
-        main { flex: 1; display: flex; flex-direction: column; position: relative; background: var(--bg-deep); }
+        main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); }
+        #doc-title { width: 100%; padding: 15px 30px; background: transparent; border: none; color: var(--neon-green); font-family: var(--font-stack); font-size: 1.4rem; border-bottom: 1px dashed #333; }
+        #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; line-height: 1.6; resize: none; }
         
-        .editor-header {
-            padding: 15px 30px; display: flex; align-items: center;
-            border-bottom: 1px dashed #333;
-        }
-        #doc-title {
-            flex: 1; background: transparent; border: none;
-            color: var(--neon-green); font-family: var(--font-stack);
-            font-size: 1.4rem; font-weight: bold;
-        }
-        #doc-title::placeholder { color: #333; }
+        .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; }
 
-        #doc-body {
-            flex: 1; padding: 30px; background: transparent; border: none;
-            color: #ccc; font-family: var(--font-stack); font-size: 1rem;
-            line-height: 1.6; resize: none;
-        }
-        
-        /* Stats Footer */
-        .status-bar {
-            height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 15px; font-size: 0.75rem; color: #666; user-select: none;
-        }
-
-        /* --- Custom Terminal Alerts (Hacker Style) --- */
-        #alert-system {
-            position: fixed; top: 20px; right: 20px; z-index: 2000;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .terminal-alert {
-            min-width: 300px; padding: 15px;
-            background: rgba(0,0,0,0.95); border: 1px solid;
-            font-family: var(--font-stack); font-size: 0.9rem;
-            box-shadow: 5px 5px 0px rgba(0,0,0,0.5);
-            animation: slideIn 0.3s ease-out; display: flex; align-items: center;
-        }
+        /* Alert System */
+        #alert-system { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .terminal-alert { min-width: 300px; padding: 15px; background: rgba(0,0,0,0.95); border: 1px solid; font-family: var(--font-stack); animation: slideIn 0.3s ease-out; display: flex; align-items: center; }
         .alert-error { border-color: var(--neon-red); color: var(--neon-red); }
         .alert-success { border-color: var(--neon-green); color: var(--neon-green); }
-        .alert-info { border-color: var(--neon-blue); color: var(--neon-blue); }
-        .alert-icon { font-size: 1.2rem; margin-right: 15px; }
 
-        /* --- Mobile Responsive --- */
         @media (max-width: 768px) {
-            :root { --sidebar-width: 100%; }
-            aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); }
+            aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; }
             aside.open { transform: translateX(0); }
-            .mobile-only { display: block !important; }
         }
-        .mobile-only { display: none; }
-
     </style>
 </head>
 <body class="crt">
 
-    <!-- LOGIN SYSTEM -->
     <div id="auth-layer">
         <div class="login-box">
             <h2 style="color: var(--neon-green); margin-bottom: 5px;">:: SYSTEM ACCESS ::</h2>
             <p style="color: #666; font-size: 0.8rem; margin-bottom: 20px;">AUTHENTICATION REQUIRED</p>
-            
             <input type="email" id="email" class="login-input" placeholder="USER_ID">
             <input type="password" id="pass" class="login-input" placeholder="ACCESS_KEY">
-            
             <div style="margin-top: 20px; display: flex; gap: 10px;">
                 <button class="btn" onclick="authAction('login')" style="flex:1">LOGIN</button>
                 <button class="btn" onclick="authAction('signup')" style="flex:1; border-color: var(--neon-blue); color: var(--neon-blue)">INIT NEW</button>
@@ -224,45 +136,28 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
     <div id="app-layer">
-        <header ondblclick="toggleFullScreen()">
+        <header>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <button class="btn mobile-only" onclick="toggleSidebar()" style="border:none; font-size:1.2rem;">≡</button>
-                <div class="brand"><i class="fas fa-terminal"></i> GHOST_SHELL</div>
+                <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none; border:none; font-size:1.2rem;">≡</button>
+                <div class="brand" onclick="toggleFullScreen()"><i class="fas fa-terminal"></i> GHOST_SHELL</div>
             </div>
-            <div style="display: flex;">
-                <button class="btn" onclick="createNewNote()"><i class="fas fa-plus"></i> NEW_FILE</button>
-                <button class="btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i> FULL</button>
+            <div>
+                <button class="btn" onclick="createNewNote()"><i class="fas fa-plus"></i> NEW</button>
                 <button class="btn btn-danger" onclick="logout()"><i class="fas fa-power-off"></i> EXIT</button>
             </div>
         </header>
 
         <div class="workspace">
-            <!-- Sidebar -->
             <aside id="sidebar">
-                <div class="user-info">
-                    LOGGED IN AS: <span id="user-display" style="color: var(--neon-blue)">GUEST</span><br>
-                    IP: PROTECTED
+                <div style="padding:15px; font-size:0.7rem; border-bottom:1px solid #222;">
+                    STATUS: <span id="sync-status" style="color:var(--neon-blue)">SYNCING...</span>
                 </div>
-                <div class="search-container">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="search-bar" class="search-bar" placeholder="QUERY DATABASE...">
-                </div>
-                <div id="notes-list" class="notes-list">
-                    <!-- Note items injected here -->
-                </div>
-                <div style="padding: 10px; border-top: 1px solid #222; text-align: center; font-size: 0.7rem; color: #444;">
-                    ENCRYPTED DATABASE v3.0
-                </div>
+                <div class="notes-list" id="notes-list"></div>
             </aside>
 
-            <!-- Editor -->
             <main>
-                <div class="editor-header">
-                    <input type="text" id="doc-title" placeholder="UNTITLED_DOCUMENT">
-                    <div id="save-indicator" style="font-size: 0.8rem; color: #555;">[READY]</div>
-                </div>
+                <input type="text" id="doc-title" placeholder="UNTITLED_DOCUMENT">
                 <textarea id="doc-body" placeholder="Begin secure data entry..."></textarea>
                 <input type="hidden" id="current-id">
             </main>
@@ -270,24 +165,18 @@
 
         <div class="status-bar">
             <span id="word-count">WORDS: 0</span>
+            <span id="save-indicator">[READY]</span>
             <span id="clock-display">00:00:00</span>
-            <span>
-                <button class="btn" style="padding: 0 10px; font-size: 0.7rem; height: 20px;" onclick="saveNote()">SAVE [CTRL+S]</button>
-                <button class="btn btn-danger" style="padding: 0 10px; font-size: 0.7rem; height: 20px; display: none;" id="del-btn" onclick="deleteNote()">DEL</button>
-            </span>
         </div>
     </div>
 
-    <!-- Custom Alert Container -->
     <div id="alert-system"></div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
             authDomain: "notepad-c5b98.firebaseapp.com",
@@ -298,246 +187,123 @@
             appId: "1:737040022800:web:5e5eb1971ccadf6d753995"
         };
         firebase.initializeApp(firebaseConfig);
-
         const auth = firebase.auth();
         const db = firebase.database();
+        
+        // Offline Persistence Enabled
+        db.ref().keepSynced(true);
+
         let currentUser = null;
-        let notesCache = {};
         let autoSaveTimer;
 
-        // --- Custom Terminal Alert System ---
+        // Service Worker Register
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
+
         function terminalAlert(msg, type = 'success') {
             const container = document.getElementById('alert-system');
             const alertBox = document.createElement('div');
-            
-            let iconClass = type === 'error' ? 'fa-exclamation-triangle' : 
-                            type === 'info' ? 'fa-info-circle' : 'fa-check-square';
-            
             alertBox.className = `terminal-alert alert-${type}`;
-            alertBox.innerHTML = `<i class="fas ${iconClass} alert-icon"></i> <div><strong>:: SYSTEM MESSAGE ::</strong><br>${msg.toUpperCase()}</div>`;
-            
+            alertBox.innerHTML = `<div><strong>:: MSG ::</strong> ${msg.toUpperCase()}</div>`;
             container.appendChild(alertBox);
-            
-            // Sound Effect (Optional Beep)
-            // const audio = new Audio('beep.mp3'); audio.play().catch(e=>{});
-
-            setTimeout(() => {
-                alertBox.style.opacity = '0';
-                setTimeout(() => alertBox.remove(), 300);
-            }, 3000);
+            setTimeout(() => { alertBox.style.opacity = '0'; setTimeout(() => alertBox.remove(), 300); }, 3000);
         }
 
-        // --- Fullscreen Logic ---
         function toggleFullScreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    terminalAlert(`Error enabling fullscreen: ${err.message}`, 'error');
-                });
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
         }
 
-        // --- Auth Functions ---
         function authAction(action) {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if(!e || !p) return terminalAlert("Credentials Missing", 'error');
-
-            if (action === 'login') {
-                auth.signInWithEmailAndPassword(e, p)
-                    .then(() => {
-                        terminalAlert("Access Granted");
-                        toggleFullScreen(); // Auto fullscreen on login
-                    })
-                    .catch(err => terminalAlert(err.message, 'error'));
-            } else {
-                auth.createUserWithEmailAndPassword(e, p)
-                    .then(() => terminalAlert("User Database Updated"))
-                    .catch(err => terminalAlert(err.message, 'error'));
-            }
+            if (action === 'login') auth.signInWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, 'error'));
+            else auth.createUserWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, 'error'));
         }
 
         function resetPass() {
             const e = document.getElementById('email').value;
-            if(!e) return terminalAlert("Enter Email ID", 'error');
-            auth.sendPasswordResetEmail(e)
-                .then(() => terminalAlert("Recovery Protocol Initiated (Check Email)", 'info'))
-                .catch(err => terminalAlert(err.message, 'error'));
+            if(!e) return terminalAlert("Email Required", 'error');
+            auth.sendPasswordResetEmail(e).then(() => terminalAlert("Reset Link Sent", 'success'));
         }
 
-        function logout() {
-            auth.signOut();
-            terminalAlert("Session Terminated", 'info');
-        }
+        function logout() { auth.signOut(); }
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user.uid;
                 document.getElementById('auth-layer').style.display = 'none';
                 document.getElementById('app-layer').style.display = 'flex';
-                document.getElementById('user-display').innerText = user.email.split('@')[0].toUpperCase();
                 loadNotes();
             } else {
                 document.getElementById('auth-layer').style.display = 'flex';
                 document.getElementById('app-layer').style.display = 'none';
-                currentUser = null;
             }
         });
 
-        // --- Core App Logic ---
         function loadNotes() {
             db.ref(`notes/${currentUser}`).on('value', snap => {
                 const list = document.getElementById('notes-list');
                 list.innerHTML = '';
-                notesCache = snap.val() || {};
-                
-                // Sort by date desc
-                const sorted = Object.entries(notesCache).sort((a,b) => b[1].timestamp - a[1].timestamp);
-                
-                if(sorted.length === 0) {
-                    list.innerHTML = `<div style="padding:20px; color:#444; text-align:center;">[EMPTY DATABASE]</div>`;
-                    return;
-                }
-
-                sorted.forEach(([id, note]) => {
-                    const el = document.createElement('div');
-                    el.className = 'note-item';
-                    el.id = `note-${id}`;
-                    
-                    const dateObj = new Date(note.timestamp);
-                    const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-                    el.innerHTML = `
-                        <div class="note-title">${note.title || 'UNTITLED_FILE'}</div>
-                        <div class="note-meta">
-                            <span>ID: ${id.substring(1, 6)}...</span>
-                            <span>${dateStr}</span>
-                        </div>
-                    `;
-                    el.onclick = () => openNote(id, note);
-                    list.appendChild(el);
-                });
-                
-                // Keep current selection active if exists
-                const currentId = document.getElementById('current-id').value;
-                if(currentId && document.getElementById(`note-${currentId}`)) {
-                    document.getElementById(`note-${currentId}`).classList.add('active');
+                const data = snap.val();
+                if (data) {
+                    Object.entries(data).reverse().forEach(([id, note]) => {
+                        const div = document.createElement('div');
+                        div.className = 'note-item';
+                        div.innerHTML = `<div class="note-title">${note.title || 'UNTITLED'}</div>`;
+                        div.onclick = () => {
+                            document.getElementById('current-id').value = id;
+                            document.getElementById('doc-title').value = note.title;
+                            document.getElementById('doc-body').value = note.text;
+                        };
+                        list.appendChild(div);
+                    });
                 }
             });
         }
 
-        function openNote(id, note) {
-            document.getElementById('current-id').value = id;
-            document.getElementById('doc-title').value = note.title;
-            document.getElementById('doc-body').value = note.text;
-            document.getElementById('del-btn').style.display = 'inline-block';
-            
-            // UI Updates
-            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
-            const activeItem = document.getElementById(`note-${id}`);
-            if(activeItem) activeItem.classList.add('active');
-            
-            updateWordCount();
-            
-            // Mobile close sidebar
-            document.getElementById('sidebar').classList.remove('open');
+        function saveNote() {
+            if (!currentUser) return;
+            const id = document.getElementById('current-id').value;
+            const title = document.getElementById('doc-title').value;
+            const text = document.getElementById('doc-body').value;
+            if(!title && !text) return;
+
+            const payload = { title, text, timestamp: Date.now() };
+            if (id) db.ref(`notes/${currentUser}/${id}`).update(payload);
+            else {
+                const newRef = db.ref(`notes/${currentUser}`).push();
+                newRef.set(payload);
+                document.getElementById('current-id').value = newRef.key;
+            }
+            document.getElementById('save-indicator').innerText = "[SAVED]";
+        }
+
+        document.getElementById('doc-title').oninput = triggerSave;
+        document.getElementById('doc-body').oninput = triggerSave;
+
+        function triggerSave() {
+            document.getElementById('save-indicator').innerText = "[TYPING...]";
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(saveNote, 1500);
         }
 
         function createNewNote() {
             document.getElementById('current-id').value = '';
             document.getElementById('doc-title').value = '';
             document.getElementById('doc-body').value = '';
-            document.getElementById('del-btn').style.display = 'none';
-            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
             document.getElementById('doc-title').focus();
-            terminalAlert("New File Initialized", 'info');
         }
 
-        function saveNote() {
-            const id = document.getElementById('current-id').value;
-            const title = document.getElementById('doc-title').value;
-            const text = document.getElementById('doc-body').value;
-            
-            if(!title && !text) return;
-
-            const payload = { title, text, timestamp: Date.now() };
-            const indicator = document.getElementById('save-indicator');
-            indicator.innerText = "[UPLOADING...]";
-            indicator.style.color = "var(--neon-blue)";
-
-            if (id) {
-                db.ref(`notes/${currentUser}/${id}`).update(payload).then(() => {
-                    terminalAlert("Data Synced Successfully");
-                    indicator.innerText = "[SAVED]";
-                    indicator.style.color = "var(--neon-green)";
-                });
-            } else {
-                const newRef = db.ref(`notes/${currentUser}`).push();
-                newRef.set(payload).then(() => {
-                    document.getElementById('current-id').value = newRef.key;
-                    document.getElementById('del-btn').style.display = 'inline-block';
-                    terminalAlert("New Entry Encrypted");
-                    indicator.innerText = "[SAVED]";
-                    indicator.style.color = "var(--neon-green)";
-                });
-            }
-        }
-
-        function deleteNote() {
-            const id = document.getElementById('current-id').value;
-            if(!id) return;
-            
-            // Custom confirmation logic (simple browser confirm for speed, could be modal)
-            if(confirm(":: WARNING ::\nPERMANENTLY DELETE THIS FILE?")) {
-                db.ref(`notes/${currentUser}/${id}`).remove();
-                createNewNote();
-                terminalAlert("File Purged", 'error');
-            }
-        }
-
-        // --- Utilities ---
-        function updateWordCount() {
-            const text = document.getElementById('doc-body').value;
-            const count = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-            document.getElementById('word-count').innerText = `WORDS: ${count} | CHARS: ${text.length}`;
-        }
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock-display').innerText = now.toLocaleTimeString();
-        }
-        setInterval(updateClock, 1000);
-
-        // --- Event Listeners ---
-        const inputs = [document.getElementById('doc-title'), document.getElementById('doc-body')];
-        inputs.forEach(el => {
-            el.addEventListener('input', () => {
-                updateWordCount();
-                document.getElementById('save-indicator').innerText = "[UNSAVED]";
-                document.getElementById('save-indicator').style.color = "var(--neon-red)";
-                clearTimeout(autoSaveTimer);
-                autoSaveTimer = setTimeout(saveNote, 2000);
-            });
-        });
-
-        // Search
-        document.getElementById('search-bar').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.note-item').forEach(item => {
-                const text = item.innerText.toLowerCase();
-                item.style.display = text.includes(term) ? 'block' : 'none';
-            });
-        });
-
-        // Shortcuts
-        document.addEventListener('keydown', (e) => {
-            if((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
-        });
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        
+        setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);
+        
+        // Shortcut Ctrl+S
+        document.addEventListener('keydown', e => { if((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); } });
     </script>
 </body>
 </html>
