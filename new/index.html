@@ -26,12 +26,10 @@
             --sidebar-width: 380px; 
         }
 
-        /* Base Reset */
         * { box-sizing: border-box; outline: none; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg-deep); }
         ::-webkit-scrollbar-thumb { background: var(--neon-dim); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
 
         body {
             margin: 0; padding: 0;
@@ -42,7 +40,6 @@
             display: flex; flex-direction: column;
         }
 
-        /* CRT Effect Overlay */
         .crt::before {
             content: " "; display: block; position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
@@ -50,73 +47,59 @@
             z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
 
-        /* Animations */
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes glitch { 
-            0% { text-shadow: 2px 0 var(--neon-red), -2px 0 var(--neon-blue); } 
-            25% { text-shadow: -2px 0 var(--neon-red), 2px 0 var(--neon-blue); } 
-            50% { text-shadow: 2px 0 var(--neon-red), -2px 0 var(--neon-blue); } 
-            100% { text-shadow: none; }
-        }
-
         /* Auth Screen */
         #auth-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-deep); z-index: 1000;
             display: flex; justify-content: center; align-items: center;
         }
         .login-box {
-            width: 400px; padding: 40px;
+            width: 90%; max-width: 400px; padding: 40px;
             border: 2px solid var(--neon-green);
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
             background: rgba(0, 20, 0, 0.9);
-            text-align: center; position: relative;
+            text-align: center;
         }
         .login-input {
             width: 100%; padding: 12px; margin: 10px 0;
             background: black; border: 1px solid var(--neon-dim);
             color: var(--neon-green); font-family: var(--font-stack);
-            font-size: 1rem; transition: 0.3s;
         }
 
-        /* Main App Layout */
+        /* App Layout */
         #app-layer { display: none; width: 100%; height: 100%; flex-direction: column; }
         header {
             height: 50px; border-bottom: 2px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 20px; background: var(--bg-panel);
         }
-        .brand { font-weight: 600; font-size: 1.2rem; letter-spacing: 2px; cursor: pointer; }
         .btn {
             background: transparent; border: 1px solid var(--neon-dim);
-            color: var(--neon-green); padding: 5px 15px; margin-left: 5px;
-            cursor: pointer; font-family: var(--font-stack); text-transform: uppercase;
-            font-size: 0.8rem; transition: 0.2s;
+            color: var(--neon-green); padding: 5px 15px; cursor: pointer;
+            font-family: var(--font-stack); font-size: 0.8rem;
         }
-        .btn:hover { background: var(--neon-green); color: black; box-shadow: 0 0 15px var(--neon-green); }
+        .btn:hover { background: var(--neon-green); color: black; }
         
         .workspace { display: flex; flex: 1; overflow: hidden; }
-        aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; transition: 0.3s; }
+        aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
         .notes-list { flex: 1; overflow-y: auto; }
-        .note-item { padding: 15px 20px; border-bottom: 1px solid #111; cursor: pointer; transition: 0.2s; }
-        .note-item.active { background: rgba(0, 255, 0, 0.05); border-right: 4px solid var(--neon-green); }
+        .note-item { padding: 15px 20px; border-bottom: 1px solid #111; cursor: pointer; }
+        .note-item:hover { background: var(--bg-hover); }
 
         main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); }
         #doc-title { width: 100%; padding: 15px 30px; background: transparent; border: none; color: var(--neon-green); font-family: var(--font-stack); font-size: 1.4rem; border-bottom: 1px dashed #333; }
-        #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; line-height: 1.6; resize: none; }
+        #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; }
         
         .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; }
 
-        /* Alert System */
-        #alert-system { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
-        .terminal-alert { min-width: 300px; padding: 15px; background: rgba(0,0,0,0.95); border: 1px solid; font-family: var(--font-stack); animation: slideIn 0.3s ease-out; display: flex; align-items: center; }
+        #alert-system { position: fixed; top: 20px; right: 20px; z-index: 2000; }
+        .terminal-alert { min-width: 250px; padding: 15px; background: black; border: 1px solid; margin-bottom: 10px; }
         .alert-error { border-color: var(--neon-red); color: var(--neon-red); }
         .alert-success { border-color: var(--neon-green); color: var(--neon-green); }
 
         @media (max-width: 768px) {
-            aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; }
+            aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; transition: 0.3s; }
             aside.open { transform: translateX(0); }
+            #menu-btn { display: block !important; }
         }
     </style>
 </head>
@@ -124,47 +107,41 @@
 
     <div id="auth-layer">
         <div class="login-box">
-            <h2 style="color: var(--neon-green); margin-bottom: 5px;">:: SYSTEM ACCESS ::</h2>
-            <p style="color: #666; font-size: 0.8rem; margin-bottom: 20px;">AUTHENTICATION REQUIRED</p>
-            <input type="email" id="email" class="login-input" placeholder="USER_ID">
+            <h2 style="color: var(--neon-green);">:: SYSTEM ACCESS ::</h2>
+            <input type="email" id="email" class="login-input" placeholder="USER_EMAIL">
             <input type="password" id="pass" class="login-input" placeholder="ACCESS_KEY">
             <div style="margin-top: 20px; display: flex; gap: 10px;">
                 <button class="btn" onclick="authAction('login')" style="flex:1">LOGIN</button>
-                <button class="btn" onclick="authAction('signup')" style="flex:1; border-color: var(--neon-blue); color: var(--neon-blue)">INIT NEW</button>
+                <button class="btn" onclick="authAction('signup')" style="flex:1; color: var(--neon-blue);">INIT NEW</button>
             </div>
-            <p onclick="resetPass()" style="margin-top:15px; font-size:0.7rem; cursor:pointer; text-decoration:underline; opacity: 0.6;">LOST CREDENTIALS?</p>
         </div>
     </div>
 
     <div id="app-layer">
         <header>
             <div style="display: flex; align-items: center; gap: 15px;">
-                <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none; border:none; font-size:1.2rem;">≡</button>
-                <div class="brand" onclick="toggleFullScreen()"><i class="fas fa-terminal"></i> GHOST_SHELL</div>
+                <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>
+                <div style="font-weight:600;">GHOST_SHELL v3.0</div>
             </div>
             <div>
-                <button class="btn" onclick="createNewNote()"><i class="fas fa-plus"></i> NEW</button>
-                <button class="btn btn-danger" onclick="logout()"><i class="fas fa-power-off"></i> EXIT</button>
+                <button class="btn" onclick="createNewNote()">+ NEW</button>
+                <button class="btn" onclick="logout()">EXIT</button>
             </div>
         </header>
 
         <div class="workspace">
             <aside id="sidebar">
-                <div style="padding:15px; font-size:0.7rem; border-bottom:1px solid #222;">
-                    STATUS: <span id="sync-status" style="color:var(--neon-blue)">SYNCING...</span>
-                </div>
+                <div style="padding:15px; font-size:0.7rem; border-bottom:1px solid #222;">STATUS: ONLINE</div>
                 <div class="notes-list" id="notes-list"></div>
             </aside>
-
             <main>
-                <input type="text" id="doc-title" placeholder="UNTITLED_DOCUMENT">
-                <textarea id="doc-body" placeholder="Begin secure data entry..."></textarea>
+                <input type="text" id="doc-title" placeholder="UNTITLED_DOC">
+                <textarea id="doc-body" placeholder="Start typing..."></textarea>
                 <input type="hidden" id="current-id">
             </main>
         </div>
 
         <div class="status-bar">
-            <span id="word-count">WORDS: 0</span>
             <span id="save-indicator">[READY]</span>
             <span id="clock-display">00:00:00</span>
         </div>
@@ -189,61 +166,40 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        
-        // Offline Persistence Enabled
-        db.ref().keepSynced(true);
 
         let currentUser = null;
         let autoSaveTimer;
 
-        // Service Worker Register
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
-        }
-
-        function terminalAlert(msg, type = 'success') {
-            const container = document.getElementById('alert-system');
-            const alertBox = document.createElement('div');
-            alertBox.className = `terminal-alert alert-${type}`;
-            alertBox.innerHTML = `<div><strong>:: MSG ::</strong> ${msg.toUpperCase()}</div>`;
-            container.appendChild(alertBox);
-            setTimeout(() => { alertBox.style.opacity = '0'; setTimeout(() => alertBox.remove(), 300); }, 3000);
-        }
-
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-            else document.exitFullscreen();
-        }
-
-        function authAction(action) {
+        // AUTH Logic - Fxied
+        function authAction(type) {
             const e = document.getElementById('email').value;
             const p = document.getElementById('pass').value;
-            if (action === 'login') auth.signInWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, 'error'));
-            else auth.createUserWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, 'error'));
-        }
+            if(!e || !p) return terminalAlert("Fill all fields", "error");
 
-        function resetPass() {
-            const e = document.getElementById('email').value;
-            if(!e) return terminalAlert("Email Required", 'error');
-            auth.sendPasswordResetEmail(e).then(() => terminalAlert("Reset Link Sent", 'success'));
+            if(type === 'login') {
+                auth.signInWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));
+            } else {
+                auth.createUserWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));
+            }
         }
-
-        function logout() { auth.signOut(); }
 
         auth.onAuthStateChanged(user => {
+            const authLayer = document.getElementById('auth-layer');
+            const appLayer = document.getElementById('app-layer');
             if (user) {
                 currentUser = user.uid;
-                document.getElementById('auth-layer').style.display = 'none';
-                document.getElementById('app-layer').style.display = 'flex';
+                authLayer.style.display = 'none'; // Fixed: Hide login
+                appLayer.style.display = 'flex';  // Fixed: Show App
                 loadNotes();
             } else {
-                document.getElementById('auth-layer').style.display = 'flex';
-                document.getElementById('app-layer').style.display = 'none';
+                authLayer.style.display = 'flex';
+                appLayer.style.display = 'none';
             }
         });
 
+        function logout() { auth.signOut(); }
+
+        // Database Logic
         function loadNotes() {
             db.ref(`notes/${currentUser}`).on('value', snap => {
                 const list = document.getElementById('notes-list');
@@ -253,11 +209,12 @@
                     Object.entries(data).reverse().forEach(([id, note]) => {
                         const div = document.createElement('div');
                         div.className = 'note-item';
-                        div.innerHTML = `<div class="note-title">${note.title || 'UNTITLED'}</div>`;
+                        div.innerHTML = `<div>${note.title || 'UNTITLED'}</div>`;
                         div.onclick = () => {
                             document.getElementById('current-id').value = id;
                             document.getElementById('doc-title').value = note.title;
                             document.getElementById('doc-body').value = note.text;
+                            if(window.innerWidth <= 768) toggleSidebar();
                         };
                         list.appendChild(div);
                     });
@@ -282,14 +239,14 @@
             document.getElementById('save-indicator').innerText = "[SAVED]";
         }
 
-        document.getElementById('doc-title').oninput = triggerSave;
-        document.getElementById('doc-body').oninput = triggerSave;
-
         function triggerSave() {
             document.getElementById('save-indicator').innerText = "[TYPING...]";
             clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(saveNote, 1500);
+            autoSaveTimer = setTimeout(saveNote, 1000);
         }
+
+        document.getElementById('doc-title').oninput = triggerSave;
+        document.getElementById('doc-body').oninput = triggerSave;
 
         function createNewNote() {
             document.getElementById('current-id').value = '';
@@ -299,11 +256,20 @@
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        
+        function terminalAlert(msg, type) {
+            const container = document.getElementById('alert-system');
+            const box = document.createElement('div');
+            box.className = `terminal-alert alert-${type}`;
+            box.innerText = msg;
+            container.appendChild(box);
+            setTimeout(() => box.remove(), 3000);
+        }
         setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);
-        
-        // Shortcut Ctrl+S
-        document.addEventListener('keydown', e => { if((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); } });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
     </script>
 </body>
 </html>
