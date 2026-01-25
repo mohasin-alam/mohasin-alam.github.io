@@ -1,1 +1,391 @@
 
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Notepad (CSM_MOHASIN_ALAM)</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+
+    <style>
+        :root {
+            --bg-color: #000; 
+            --terminal-bg: #111; 
+            --text-color: #00ff41; 
+            --primary-color: #00ff41; 
+            --secondary-color: #222; 
+            --accent-color: #00c62e; 
+            --danger-color: #ff005c; 
+            --border-color: #005f15; 
+            --hover-bg: #003300; 
+            --font-mono: 'Courier New', Courier, monospace;
+            --neon-pink: #ff007f; 
+            --header-height: 60px; 
+            --footer-height: 40px;
+        }
+
+        body.light-mode {
+            --bg-color: #e0e0e0; 
+            --terminal-bg: #f0f0f0; 
+            --text-color: #333; 
+            --primary-color: #007acc; 
+            --secondary-color: #ccc; 
+            --border-color: #bbb; 
+            --hover-bg: #d0d0d0;
+        }
+
+        body {
+            font-family: var(--font-mono);
+            background-color: var(--bg-color);
+            margin: 0; padding: 0;
+            height: 100dvh; display: flex;
+            justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        * { box-sizing: border-box; color: var(--text-color); }
+
+        #auth-container {
+            max-width: 400px; padding: 30px;
+            border: 2px solid var(--border-color);
+            background-color: var(--terminal-bg);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            text-align: center;
+        }
+
+        #notepad-container {
+            width: 100vw; height: 100dvh;
+            display: flex; flex-direction: column;
+            background-color: var(--terminal-bg);
+        }
+
+        #app-header {
+            height: var(--header-height);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 0 20px;
+        }
+
+        #note-app-layout { display: flex; flex-grow: 1; overflow: hidden; }
+
+        #notes-list {
+            width: 30%; border-right: 1px solid var(--border-color);
+            overflow-y: auto; padding: 10px;
+        }
+
+        #note-editor { width: 70%; padding: 20px; display: flex; flex-direction: column; }
+
+        textarea {
+            flex-grow: 1; background: transparent;
+            border: none; outline: none; resize: none;
+            font-size: 1rem; line-height: 1.6;
+            color: var(--neon-pink);
+        }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            background: transparent; border: none;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.2rem; margin-bottom: 10px; padding: 10px;
+            width: 100%;
+        }
+
+        .custom-button, button {
+            padding: 8px 15px; border: 1px solid var(--primary-color);
+            background: transparent; cursor: pointer;
+            margin: 5px; font-family: var(--font-mono);
+            transition: 0.3s;
+        }
+        
+        .custom-button:hover { background: var(--hover-bg); }
+
+        .note-item { 
+            padding: 10px; cursor: pointer; border-bottom: 1px solid #222;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .note-item.kb-highlight { background-color: var(--primary-color) !important; color: var(--bg-color) !important; }
+        .active { border-left: 4px solid var(--neon-pink); background: var(--hover-bg); }
+
+        #control-bar {
+            height: var(--footer-height); border-top: 1px solid var(--border-color);
+            display: flex; align-items: center; padding: 0 10px; font-size: 0.75rem;
+        }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-box {
+            background: var(--terminal-bg); padding: 30px; 
+            border: 2px solid var(--primary-color); text-align:center;
+            min-width: 300px;
+        }
+        .danger-border { border-color: var(--danger-color) !important; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-container">
+        <h2 style="color: var(--primary-color)">:: SECURE ACCESS ::</h2>
+        <input type="email" id="email-input" placeholder="EMAIL">
+        <input type="password" id="password-input" placeholder="PASSWORD">
+        <div style="margin-top: 10px;">
+            <button class="custom-button" onclick="loginUser()">LOGIN [ENTER]</button>
+            <button class="custom-button" onclick="signupUser()" style="border-color: #007acc; color: #007acc;">SIGNUP</button>
+        </div>
+    </div>
+
+    <div id="notepad-container" style="display: none;">
+        <div id="app-header">
+            <h3>SECURE_SHELL (DEV: MOHASIN)</h3>
+            <div>
+                <button class="custom-button" onclick="createNewNote()">NEW [CTRL+M]</button>
+                <button class="custom-button" onclick="showLogoutModal()">EXIT [ALT+L]</button>
+                <button onclick="toggleDarkMode()">☀️/🌙 [F1]</button>
+            </div>
+        </div>
+        
+        <div id="note-app-layout">
+            <div id="notes-list"></div>
+            <div id="note-editor">
+                <input type="text" id="note-title" placeholder="TITLE (Enter to go Body)...">
+                <textarea id="note-text" placeholder="TYPE DATA..."></textarea>
+                <input type="hidden" id="current-note-id">
+            </div>
+        </div>
+
+        <div id="control-bar">
+            <button class="custom-button" onclick="saveNote()">SAVE [CTRL+S]</button>
+            <button class="custom-button" onclick="showDeleteModal()" id="delete-btn" style="border-color: var(--danger-color); display:none;">DEL [ALT+X]</button>
+            <span id="save-status" style="margin-left: 10px;">:: READY ::</span>
+            <span style="margin-left: auto; opacity: 0.7;">Q:List | S:Save | X:Del | L:Exit | F1:Mode</span>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="modal-overlay">
+        <div class="modal-box danger-border">
+            <p>DELETE PERMANENTLY? (Y/N)</p>
+            <button class="custom-button" onclick="confirmDelete(true)">YES [ENTER]</button>
+            <button class="custom-button" onclick="closeModals()">NO [ESC]</button>
+        </div>
+    </div>
+
+    <div id="logout-modal" class="modal-overlay">
+        <div class="modal-box">
+            <p>LOGOUT FROM SECURE SHELL?</p>
+            <button class="custom-button" onclick="confirmLogout()">YES [ENTER]</button>
+            <button class="custom-button" onclick="closeModals()">NO [ESC]</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // --- নতুন কনফিগারেশন আপডেট করা হয়েছে ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
+            authDomain: "notepad-c5b98.firebaseapp.com",
+            databaseURL: "https://notepad-c5b98-default-rtdb.firebaseio.com",
+            projectId: "notepad-c5b98",
+            storageBucket: "notepad-c5b98.firebasestorage.app",
+            messagingSenderId: "737040022800",
+            appId: "1:737040022800:web:5e5eb1971ccadf6d753995"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let currentUserId = null;
+        let selectedIndex = -1;
+        let autoSaveTimer;
+
+        // Fullscreen Logic
+        function enableFullscreen() {
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) { elem.requestFullscreen(); }
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+        }
+
+        // --- Keyboard Controls ---
+        document.addEventListener('keydown', (e) => {
+            const notes = document.querySelectorAll('.note-item');
+            const logoutVisible = document.getElementById('logout-modal').style.display === 'flex';
+            const deleteVisible = document.getElementById('delete-modal').style.display === 'flex';
+
+            if (logoutVisible || deleteVisible) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if(logoutVisible) confirmLogout();
+                    if(deleteVisible) confirmDelete(true);
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeModals();
+                }
+                return;
+            }
+
+            if (e.altKey && e.key === 'l') { e.preventDefault(); showLogoutModal(); }
+            if (e.altKey && e.key === 'x') { e.preventDefault(); showDeleteModal(); }
+            if (e.key === 'F1') { e.preventDefault(); toggleDarkMode(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveNote(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') { e.preventDefault(); createNewNote(); }
+            
+            if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % notes.length;
+                    updateVisualSelection();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex - 1 + notes.length) % notes.length;
+                    updateVisualSelection();
+                } else if (e.key === 'Enter' && selectedIndex !== -1) {
+                    e.preventDefault();
+                    notes[selectedIndex].click();
+                    document.getElementById('note-text').focus();
+                }
+            }
+        });
+
+        document.getElementById('note-title').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('note-text').focus();
+            }
+        });
+
+        // Auto Save
+        function triggerAutoSave() {
+            clearTimeout(autoSaveTimer);
+            document.getElementById('save-status').innerText = ":: TYPING... ::";
+            autoSaveTimer = setTimeout(saveNote, 800);
+        }
+
+        document.getElementById('note-title').addEventListener('input', triggerAutoSave);
+        document.getElementById('note-text').addEventListener('input', triggerAutoSave);
+
+        function updateVisualSelection() {
+            const notes = document.querySelectorAll('.note-item');
+            notes.forEach((n, i) => {
+                n.classList.toggle('kb-highlight', i === selectedIndex);
+                if(i === selectedIndex) n.scrollIntoView({ block: 'nearest' });
+            });
+        }
+
+        function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
+        
+        // --- Authentication Functions ---
+        function loginUser() {
+            const e = document.getElementById('email-input').value;
+            const p = document.getElementById('password-input').value;
+            if(!e || !p) return alert("পাসওয়ার্ড এবং ইমেইল দিন");
+            auth.signInWithEmailAndPassword(e, p).catch(err => alert("Login Error: " + err.message));
+        }
+
+        function signupUser() {
+            const e = document.getElementById('email-input').value;
+            const p = document.getElementById('password-input').value;
+            if(!e || !p) return alert("সব ঘর পূরণ করুন");
+            auth.createUserWithEmailAndPassword(e, p)
+                .then(() => alert("অ্যাকাউন্ট তৈরি হয়েছে! অটো লগইন হচ্ছে..."))
+                .catch(err => alert("Signup Error: " + err.message));
+        }
+
+        function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
+        function confirmLogout() { auth.signOut(); closeModals(); }
+
+        function showDeleteModal() { 
+            if (document.getElementById('current-note-id').value) {
+                document.getElementById('delete-modal').style.display = 'flex'; 
+            }
+        }
+        function confirmDelete(confirm) {
+            const id = document.getElementById('current-note-id').value;
+            if (confirm && id) {
+                db.ref(`notes/${currentUserId}/${id}`).remove();
+                createNewNote();
+            }
+            closeModals();
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        }
+
+        // Auth Listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUserId = user.uid;
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('notepad-container').style.display = 'flex';
+                loadAllNotes(user.uid);
+                enableFullscreen();
+            } else { 
+                document.getElementById('auth-container').style.display = 'block';
+                document.getElementById('notepad-container').style.display = 'none';
+                currentUserId = null;
+            }
+        });
+
+        function loadAllNotes(uid) {
+            db.ref(`notes/${uid}`).on('value', snap => {
+                const list = document.getElementById('notes-list');
+                list.innerHTML = '';
+                const data = snap.val();
+                if (data) {
+                    Object.entries(data).reverse().forEach(([id, note]) => {
+                        const div = document.createElement('div');
+                        div.className = 'note-item';
+                        div.innerText = `> ${note.title || 'Untitled'}`;
+                        div.onclick = () => {
+                            document.getElementById('current-note-id').value = id;
+                            document.getElementById('note-title').value = note.title;
+                            document.getElementById('note-text').value = note.text;
+                            document.getElementById('delete-btn').style.display = 'inline-block';
+                            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+                            div.classList.add('active');
+                        };
+                        list.appendChild(div);
+                    });
+                }
+            });
+        }
+
+        function saveNote() {
+            if (!currentUserId) return;
+            const id = document.getElementById('current-note-id').value;
+            const title = document.getElementById('note-title').value;
+            const text = document.getElementById('note-text').value;
+            if(!title && !text) return;
+
+            const status = document.getElementById('save-status');
+            const noteData = { title, text, timestamp: Date.now() };
+            status.innerText = ":: SAVING ::";
+
+            if (id) {
+                db.ref(`notes/${currentUserId}/${id}`).update(noteData);
+            } else {
+                const newRef = db.ref(`notes/${currentUserId}`).push();
+                newRef.set(noteData);
+                document.getElementById('current-note-id').value = newRef.key;
+            }
+            setTimeout(() => status.innerText = ":: READY ::", 800);
+        }
+
+        function createNewNote() {
+            document.getElementById('current-note-id').value = '';
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-text').value = '';
+            document.getElementById('delete-btn').style.display = 'none';
+            document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('note-title').focus();
+        }
+    </script>
+</body>
+</html>
