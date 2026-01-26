@@ -1,26 +1,33 @@
-<!DOCTYPE html>  <html lang="en">  
+<!DOCTYPE html>  
+<html lang="en">  
 <head>  
     <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>DATABASE CONNECTED NOTEPAD v3.0</title>  <link rel="manifest" href="manifest.json">  
-<meta name="theme-color" content="#020202">  
-<meta name="apple-mobile-web-app-capable" content="yes">  
+    <title>DB NOTEPAD v5.0 [ULTIMATE]</title>  
+    <link rel="manifest" href="manifest.json">  
+    <meta name="theme-color" content="#020202">  
+    <meta name="apple-mobile-web-app-capable" content="yes">  
   
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">  
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- HTML2PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>  
     :root {  
         --bg-deep: #020202;  
         --bg-panel: #0d0d0d;  
         --bg-hover: #1a1a1a;  
-        --neon-green: #0f0;  
-        --neon-dim: #004d00;  
+        --neon-main: #0f0;  /* Dynamic Main Color */
+        --neon-dim: #004d00; 
         --neon-red: #ff003c;  
         --neon-blue: #00f3ff;  
+        --neon-yellow: #fcee0a;
         --border-color: #333;  
         --font-stack: 'Fira Code', monospace;  
-        --sidebar-width: 380px;   
+        --sidebar-width: 320px;   
     }  
 
     * { box-sizing: border-box; outline: none; }  
@@ -31,7 +38,7 @@
     body {  
         margin: 0; padding: 0;  
         background-color: var(--bg-deep);  
-        color: var(--neon-green);  
+        color: var(--neon-main);  
         font-family: var(--font-stack);  
         height: 100vh; overflow: hidden;  
         display: flex; flex-direction: column;  
@@ -41,10 +48,10 @@
         content: " "; display: block; position: absolute;  
         top: 0; left: 0; bottom: 0; right: 0;  
         background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));  
-        z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;  
+        z-index: 900; background-size: 100% 2px, 3px 100%; pointer-events: none;  
     }  
 
-    /* Auth Screen */  
+    /* --- Auth Screen --- */  
     #auth-layer {  
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;  
         background: var(--bg-deep); z-index: 1000;  
@@ -52,94 +59,238 @@
     }  
     .login-box {  
         width: 90%; max-width: 400px; padding: 40px;  
-        border: 2px solid var(--neon-green);  
-        background: rgba(0, 20, 0, 0.9);  
+        border: 2px solid var(--neon-main);  
+        background: rgba(0, 10, 0, 0.95);  
+        box-shadow: 0 0 20px var(--neon-dim);
         text-align: center;  
     }  
     .login-input {  
         width: 100%; padding: 12px; margin: 10px 0;  
         background: black; border: 1px solid var(--neon-dim);  
-        color: var(--neon-green); font-family: var(--font-stack);  
+        color: var(--neon-main); font-family: var(--font-stack);  
     }  
+    .login-input:focus { border-color: var(--neon-main); }
 
-    /* App Layout */  
+    /* --- App Layout --- */  
     #app-layer { display: none; width: 100%; height: 100%; flex-direction: column; }  
     header {  
         height: 50px; border-bottom: 2px solid var(--border-color);  
         display: flex; justify-content: space-between; align-items: center;  
         padding: 0 20px; background: var(--bg-panel);  
+        z-index: 950;
     }  
     .btn {  
         background: transparent; border: 1px solid var(--neon-dim);  
-        color: var(--neon-green); padding: 5px 15px; cursor: pointer;  
-        font-family: var(--font-stack); font-size: 0.8rem;  
+        color: var(--neon-main); padding: 5px 12px; cursor: pointer;  
+        font-family: var(--font-stack); font-size: 0.8rem; margin-left: 5px; 
+        transition: 0.2s;
     }  
-    .btn:hover { background: var(--neon-green); color: black; }  
+    .btn:hover { background: var(--neon-main); color: black; box-shadow: 0 0 10px var(--neon-dim); }
+    .btn.active { background: var(--neon-main); color: black; }
+    
+    .btn-danger { color: var(--neon-red); border-color: #500; }
+    .btn-danger:hover { background: var(--neon-red); color: white; box-shadow: 0 0 15px var(--neon-red); }
+    
+    .btn-info { color: var(--neon-blue); border-color: #004d4d; }
+    .btn-info:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
       
     .workspace { display: flex; flex: 1; overflow: hidden; }  
-    aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }  
+    aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; z-index: 910; transition: 0.3s;}  
+    
+    .search-container { padding: 10px; position: relative; border-bottom: 1px solid #111; }
+    .search-bar {
+        width: 100%; padding: 8px 8px 8px 30px;
+        background: black; border: 1px solid var(--border-color);
+        color: white; font-family: var(--font-stack);
+    }
+    .search-icon { position: absolute; left: 20px; top: 20px; color: #555; font-size: 0.8rem; }
+    .user-info { padding: 10px 15px; font-size: 0.7rem; color: var(--neon-blue); border-bottom: 1px dashed #222; display: flex; justify-content: space-between; cursor: pointer;}
+
+    .tag-cloud { padding: 10px; border-bottom: 1px solid #222; display: flex; flex-wrap: wrap; gap: 5px; max-height: 80px; overflow-y: auto;}
+    .tag-pill { font-size: 0.7rem; background: #111; padding: 2px 6px; border: 1px solid #333; cursor: pointer; color: #888; }
+    .tag-pill:hover, .tag-pill.active { border-color: var(--neon-main); color: var(--neon-main); }
+
     .notes-list { flex: 1; overflow-y: auto; }  
-    .note-item { padding: 15px 20px; border-bottom: 1px solid #111; cursor: pointer; }  
-    .note-item:hover { background: var(--bg-hover); }  
+    .notes-section-title { font-size: 0.7rem; color: #555; padding: 10px 15px 5px; text-transform: uppercase; letter-spacing: 1px;}
 
-    main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); }  
-    #doc-title { width: 100%; padding: 15px 30px; background: transparent; border: none; color: var(--neon-green); font-family: var(--font-stack); font-size: 1.4rem; border-bottom: 1px dashed #333; }  
-    #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; }  
-      
-    .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; }  
+    .note-item { padding: 12px 20px; border-bottom: 1px solid #111; cursor: pointer; transition: 0.2s; position: relative; display: flex; justify-content: space-between; align-items: center; }  
+    .note-item:hover { background: var(--bg-hover); padding-left: 25px; }  
+    .note-item.active { background: rgba(0, 255, 0, 0.05); border-right: 4px solid var(--neon-main); }
+    .note-item .pin-icon { opacity: 0; font-size: 0.7rem; color: var(--neon-yellow); }
+    .note-item.pinned .pin-icon { opacity: 1; }
 
-    #alert-system { position: fixed; top: 20px; right: 20px; z-index: 2000; }  
-    .terminal-alert { min-width: 250px; padding: 15px; background: black; border: 1px solid; margin-bottom: 10px; }  
+    main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); position: relative; }  
+    
+    .editor-toolbar {
+        display: flex; align-items: center; border-bottom: 1px dashed #333; padding: 5px 20px;
+        background: #050505;
+    }
+    #doc-title { flex: 1; padding: 10px; background: transparent; border: none; color: var(--neon-main); font-family: var(--font-stack); font-size: 1.2rem; }  
+    
+    .split-view { display: flex; flex: 1; overflow: hidden; position: relative; }
+    #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; line-height: 1.6; z-index: 10; width: 100%; }  
+    
+    /* Markdown Preview */
+    #md-preview { 
+        flex: 1; padding: 30px; background: #080808; 
+        color: #aaa; overflow-y: auto; 
+        border-left: 1px solid #333; 
+        display: none; /* Hidden by default */
+        font-family: sans-serif;
+    }
+    #md-preview.active { display: block; }
+    #md-preview h1, #md-preview h2 { color: var(--neon-main); border-bottom: 1px solid #333; padding-bottom: 5px; }
+    #md-preview code { background: #222; padding: 2px 5px; color: var(--neon-yellow); font-family: var(--font-stack); }
+    #md-preview blockquote { border-left: 3px solid var(--neon-blue); margin-left: 0; padding-left: 10px; color: var(--neon-blue); }
+
+    .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; z-index: 950; }  
+
+    /* --- Modals --- */
+    #modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); z-index: 3000;
+        justify-content: center; align-items: center;
+        backdrop-filter: blur(2px);
+    }
+    .modal-box {
+        width: 450px; padding: 25px;
+        background: #000; border: 2px solid;
+        box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        text-align: center;
+        animation: popIn 0.2s ease-out;
+        border-color: var(--neon-main);
+    }
+    .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: var(--neon-main); border-bottom: 1px solid #333; padding-bottom: 10px;}
+    .modal-body { text-align: left; max-height: 300px; overflow-y: auto; margin-bottom: 20px; color: #ccc; font-size: 0.9rem; }
+    .theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .theme-opt { padding: 10px; border: 1px solid #333; cursor: pointer; text-align: center; }
+    .theme-opt:hover { border-color: white; }
+
+    /* --- Alerts --- */
+    #alert-system { position: fixed; top: 60px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }  
+    .terminal-alert { 
+        min-width: 300px; padding: 12px 15px; background: rgba(0,0,0,0.9); border-left: 4px solid; 
+        font-family: var(--font-stack); font-size: 0.85rem; display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 5px 5px 0px rgba(0,0,0,0.5); animation: slideLeft 0.3s ease-out; opacity: 0.9;
+    }
+    
     .alert-error { border-color: var(--neon-red); color: var(--neon-red); }  
-    .alert-success { border-color: var(--neon-green); color: var(--neon-green); }  
+    .alert-success { border-color: var(--neon-main); color: var(--neon-main); }  
+    .alert-info { border-color: var(--neon-blue); color: var(--neon-blue); }
+
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes slideLeft { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 0.9; } }
 
     @media (max-width: 768px) {  
-        aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; transition: 0.3s; }  
+        aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; }  
         aside.open { transform: translateX(0); }  
         #menu-btn { display: block !important; }  
+        #md-preview.active { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; }
     }  
 </style>
 
 </head>  
-<body class="crt">  <div id="auth-layer">  
+<body class="crt">  
+
+<!-- AUTH LAYER -->
+<div id="auth-layer">  
     <div class="login-box">  
-        <h2 style="color: var(--neon-green);">:: SYSTEM ACCESS ::</h2>  
-        <input type="email" id="email" class="login-input" placeholder="USER_EMAIL">  
-        <input type="password" id="pass" class="login-input" placeholder="ACCESS_KEY">  
+        <h2 style="color: var(--neon-main); margin-bottom:5px;">:: SYSTEM ACCESS ::</h2>  
+        <p style="color:#444; font-size:0.7rem; margin-bottom:20px;">SECURE TERMINAL V5.0</p>
+        <input type="email" id="email" class="login-input" placeholder="IDENTIFICATION (EMAIL)">  
+        <input type="password" id="pass" class="login-input" placeholder="ACCESS KEY (PASSWORD)">  
         <div style="margin-top: 20px; display: flex; gap: 10px;">  
-            <button class="btn" onclick="authAction('login')" style="flex:1">LOGIN</button>  
-            <button class="btn" onclick="authAction('signup')" style="flex:1; color: var(--neon-blue);">INIT NEW</button>  
+            <button class="btn" onclick="authAction('login')" style="flex:1"><i class="fas fa-unlock"></i> LOGIN</button>  
+            <button class="btn" onclick="authAction('signup')" style="flex:1; color: var(--neon-blue);"><i class="fas fa-user-plus"></i> INIT</button>  
         </div>  
+        <p onclick="resetPass()" style="margin-top:15px; font-size:0.7rem; cursor:pointer; text-decoration:underline; opacity: 0.6; color: #aaa;">LOST CREDENTIALS?</p>
     </div>  
 </div>  
 
+<!-- MODAL (Multipurpose) -->
+<div id="modal-overlay">
+    <div class="modal-box" id="modal-box">
+        <div class="modal-header" id="modal-title">TITLE</div>
+        <div class="modal-body" id="modal-body">Content</div>
+        <div class="modal-actions" id="modal-actions">
+            <button class="btn" onclick="closeModal()">CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<!-- APP LAYER -->
 <div id="app-layer">  
     <header>  
         <div style="display: flex; align-items: center; gap: 15px;">  
             <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>  
-            <div style="font-weight:600;">DATABASE CONNECTED NOTEPAD v3.0</div>  
+            <div style="font-weight:600;"><i class="fas fa-terminal"></i> DB NOTEPAD v5.0</div>  
         </div>  
-        <div>  
-            <button class="btn" onclick="createNewNote()">+ NEW</button>  
-            <button class="btn" onclick="logout()">EXIT</button>  
+        <div style="display:flex; align-items:center;">  
+            <!-- Toolbar -->
+            <button class="btn btn-info" onclick="toggleMarkdown()" title="Split Preview"><i class="fas fa-columns"></i> MD</button>
+            <button class="btn" onclick="openSettings()" title="Themes & Settings"><i class="fas fa-cog"></i></button>
+            <button class="btn" onclick="openExportMenu()" title="Export"><i class="fas fa-file-export"></i></button>
+            
+            <span style="width:1px; height:20px; background:#333; margin:0 10px;"></span>
+            
+            <button class="btn" onclick="createNewNote()" title="New (Ctrl+N)">+ NEW</button>  
+            <button class="btn" onclick="toggleFullScreen()"><i class="fas fa-expand"></i></button>
+            <button class="btn btn-danger" onclick="confirmLogout()"><i class="fas fa-power-off"></i></button>  
         </div>  
     </header>  
 
     <div class="workspace">  
         <aside id="sidebar">  
-            <div style="padding:15px; font-size:0.7rem; border-bottom:1px solid #222;" id="status-line">STATUS: CHECKING...</div>  
+            <div id="user-display" class="user-info">
+                <span>USER: GUEST</span>
+                <i class="fas fa-circle" style="color:var(--neon-main); font-size:0.5rem; align-self:center;"></i>
+            </div>
+            
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-bar" class="search-bar" placeholder="SEARCH (Ctrl+F)">
+            </div>
+            
+            <div class="tag-cloud" id="tag-cloud">
+                <!-- Tags generated via JS -->
+            </div>
+
+            <div style="padding:5px 15px; font-size:0.6rem; border-bottom:1px solid #222;" id="status-line">STATUS: CHECKING...</div>  
+            
             <div class="notes-list" id="notes-list"></div>  
         </aside>  
+        
         <main>  
-            <input type="text" id="doc-title" placeholder="UNTITLED_DOC">  
-            <textarea id="doc-body" placeholder="Start typing..."></textarea>  
+            <div class="editor-toolbar">
+                <button class="btn" onclick="togglePin()" title="Pin Note" id="pin-btn" style="border:none;"><i class="far fa-star"></i></button>
+                <input type="text" id="doc-title" placeholder="UNTITLED_DOC">  
+                <div style="font-size: 0.8rem; color: #555;">
+                    <button class="btn" onclick="editorUndo()" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+                    <button class="btn" onclick="editorRedo()" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
+                    <button class="btn" onclick="openVersionHistory()" title="Snapshots"><i class="fas fa-history"></i></button>
+                    <button class="btn btn-info" onclick="generateShareLink()" title="Share Link"><i class="fas fa-link"></i></button>
+                </div>
+            </div>
+
+            <div class="split-view">
+                <textarea id="doc-body" placeholder="Start typing... Supports Markdown (# H1, **bold**, - list)"></textarea>  
+                <div id="md-preview"></div>
+            </div>
+            
             <input type="hidden" id="current-id">  
+            <input type="hidden" id="is-pinned" value="false">
         </main>  
     </div>  
 
     <div class="status-bar">  
-        <span id="save-indicator">[READY]</span>  
-        <span id="clock-display">00:00:00</span>  
+        <div style="display:flex; gap:15px; align-items:center;">
+            <span id="save-indicator">[READY]</span>  
+            <span id="word-count" style="color: #666;">WORDS: 0</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="btn btn-danger" style="padding: 0 10px; font-size: 0.7rem; height: 20px; display: none;" id="del-btn" onclick="confirmDelete()">DEL</button>
+            <span id="clock-display">00:00:00</span>  
+        </div>
     </div>  
 </div>  
 
@@ -165,23 +316,96 @@
 
     let currentUser = null;  
     let autoSaveTimer;  
+    let currentTags = new Set();
+    let filterTag = null;
     
-    // OFFLINE STORAGE CONSTANTS
+    // History System (Undo/Redo)
+    class SimpleHistory {
+        constructor() { this.stack = []; this.index = -1; this.max = 20; }
+        push(state) {
+            if (this.index < this.stack.length - 1) {
+                this.stack = this.stack.slice(0, this.index + 1);
+            }
+            this.stack.push(state);
+            if (this.stack.length > this.max) this.stack.shift();
+            else this.index++;
+        }
+        undo() { if (this.index > 0) return this.stack[--this.index]; return null; }
+        redo() { if (this.index < this.stack.length - 1) return this.stack[++this.index]; return null; }
+        current() { return this.stack[this.index]; }
+        reset() { this.stack = []; this.index = -1; }
+    }
+    const noteHistory = new SimpleHistory();
+
     const CACHE_KEY_PREFIX = 'ghost_cache_';
     const QUEUE_KEY_PREFIX = 'ghost_queue_';
 
-    // AUTH Logic
+    // --- UTILS & NOTIFICATIONS ---
+
+    function logActivity(msg, type = 'info') {
+        const container = document.getElementById('alert-system');
+        const box = document.createElement('div');
+        box.className = `terminal-alert alert-${type}`;
+        
+        let icon = 'fa-info-circle';
+        if(type === 'success') icon = 'fa-check';
+        if(type === 'error') icon = 'fa-times-circle';
+
+        const time = new Date().toLocaleTimeString([], { hour12: false });
+
+        box.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;">
+                <i class="fas ${icon}"></i> <span>${msg.toUpperCase()}</span>
+            </div>
+            <span style="font-size:0.7rem; color:#555">[${time}]</span>
+        `;
+        
+        container.appendChild(box);
+        setTimeout(() => {
+            box.style.opacity = '0';
+            box.style.transform = 'translateX(100%)';
+            setTimeout(() => box.remove(), 300);
+        }, 3500);
+    }
+
+    function showCustomModal(title, htmlContent, actionsHtml = null) {
+        document.getElementById('modal-overlay').style.display = 'flex';
+        document.getElementById('modal-title').innerHTML = title;
+        document.getElementById('modal-body').innerHTML = htmlContent;
+        if(actionsHtml) document.getElementById('modal-actions').innerHTML = actionsHtml;
+        else document.getElementById('modal-actions').innerHTML = '<button class="btn" onclick="closeModal()">CLOSE</button>';
+    }
+
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+    // --- AUTH LOGIC ---
+
     function authAction(type) {  
         const e = document.getElementById('email').value;  
         const p = document.getElementById('pass').value;  
-        if(!e || !p) return terminalAlert("Fill all fields", "error");  
+        if(!e || !p) return logActivity("MISSING CREDENTIALS", "error");  
 
         if(type === 'login') {  
-            auth.signInWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));  
+            auth.signInWithEmailAndPassword(e, p)
+                .then(() => logActivity("ACCESS GRANTED", "success"))
+                .catch(err => logActivity(err.message, "error"));  
         } else {  
-            auth.createUserWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));  
+            auth.createUserWithEmailAndPassword(e, p)
+                .then(() => logActivity("NEW USER INITIALIZED", "success"))
+                .catch(err => logActivity(err.message, "error"));  
         }  
-    }  
+    } 
+
+    function resetPass() {
+        const e = document.getElementById('email').value;
+        if(!e) return logActivity("ENTER EMAIL FOR RECOVERY", 'error');
+        auth.sendPasswordResetEmail(e).then(() => logActivity("RECOVERY PROTOCOL SENT", 'info'));
+    }
+
+    function confirmLogout() {
+        showCustomModal("TERMINATE SESSION?", "Unsaved local changes are preserved but sync will stop.", 
+        `<button class="btn btn-danger" onclick="auth.signOut(); closeModal(); logActivity('LOGGED OUT','error')">LOGOUT</button> <button class="btn" onclick="closeModal()">CANCEL</button>`);
+    }
 
     auth.onAuthStateChanged(user => {  
         const authLayer = document.getElementById('auth-layer');  
@@ -190,6 +414,7 @@
             currentUser = user.uid;  
             authLayer.style.display = 'none';  
             appLayer.style.display = 'flex';  
+            document.getElementById('user-display').innerHTML = `<span>OP: ${user.email.split('@')[0].toUpperCase()}</span> <i class="fas fa-wifi"></i>`;
             loadNotes();  
             checkConnection();
         } else {  
@@ -199,192 +424,234 @@
         }  
     });  
 
-    function logout() { auth.signOut(); }  
+    // --- DATA LOGIC ---
 
-    // --- OFFLINE / ONLINE SYNC LOGIC ---
-
-    // Helpers for Local Storage
-    function getLocalCache() {
-        return JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + currentUser)) || {};
-    }
-    
-    function setLocalCache(data) {
-        localStorage.setItem(CACHE_KEY_PREFIX + currentUser, JSON.stringify(data));
-    }
-
-    function getOfflineQueue() {
-        return JSON.parse(localStorage.getItem(QUEUE_KEY_PREFIX + currentUser)) || {};
-    }
-
+    function getLocalCache() { return JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + currentUser)) || {}; }
+    function setLocalCache(data) { localStorage.setItem(CACHE_KEY_PREFIX + currentUser, JSON.stringify(data)); }
+    function getOfflineQueue() { return JSON.parse(localStorage.getItem(QUEUE_KEY_PREFIX + currentUser)) || {}; }
     function addToOfflineQueue(id, data) {
         const queue = getOfflineQueue();
         queue[id] = data;
         localStorage.setItem(QUEUE_KEY_PREFIX + currentUser, JSON.stringify(queue));
     }
-
     function removeFromOfflineQueue(id) {
         const queue = getOfflineQueue();
         delete queue[id];
         localStorage.setItem(QUEUE_KEY_PREFIX + currentUser, JSON.stringify(queue));
     }
 
-    // Render Logic (Shared for Offline and Online)
     function renderNoteList(data) {
         const list = document.getElementById('notes-list');  
+        const activeId = document.getElementById('current-id').value;
         list.innerHTML = '';  
+        
+        let allTags = new Set();
+        let notesArr = [];
+
         if (data) {  
-            // Filter out empty entries if any
-            Object.entries(data).reverse().forEach(([id, note]) => {  
+            Object.entries(data).forEach(([id, note]) => {  
                 if (!note) return;
+                notesArr.push({id, ...note});
+                
+                // Extract tags
+                const tags = (note.text || '').match(/#[a-z0-9_]+/gi);
+                if(tags) tags.forEach(t => allTags.add(t.toLowerCase()));
+            });
+            
+            // Sort: Pinned first, then Timestamp (Newest)
+            notesArr.sort((a, b) => {
+                if (a.pinned === b.pinned) return (b.timestamp || 0) - (a.timestamp || 0);
+                return a.pinned ? -1 : 1;
+            });
+
+            // Update Tag Cloud
+            renderTags(allTags);
+
+            notesArr.forEach(note => {
+                // Filter logic
+                const noteText = (note.text || '').toLowerCase();
+                const noteTitle = (note.title || '').toLowerCase();
+                if(filterTag && !noteText.includes(filterTag)) return;
+                
                 const div = document.createElement('div');  
-                div.className = 'note-item';  
-                // Mark dirty notes visually
-                const isDirty = getOfflineQueue()[id] ? ' *' : '';
-                div.innerHTML = `<div>${(note.title || 'UNTITLED') + isDirty}</div>`;  
-                div.onclick = () => {  
-                    document.getElementById('current-id').value = id;  
-                    document.getElementById('doc-title').value = note.title || '';  
-                    document.getElementById('doc-body').value = note.text || '';  
-                    if(window.innerWidth <= 768) toggleSidebar();  
-                };  
+                div.className = 'note-item' + (note.id === activeId ? ' active' : '') + (note.pinned ? ' pinned' : '');  
+                
+                const isDirty = getOfflineQueue()[note.id] ? ' <span style="color:var(--neon-yellow)">*</span>' : '';
+                div.innerHTML = `
+                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <i class="fas fa-file-alt" style="font-size:0.7rem; margin-right:8px; opacity:0.5;"></i> 
+                        ${(note.title || 'UNTITLED') + isDirty}
+                    </div>
+                    <i class="fas fa-star pin-icon"></i>
+                `;  
+                div.onclick = () => loadNoteIntoEditor(note.id, note);  
                 list.appendChild(div);  
             });  
         }
+        if(notesArr.length === 0) list.innerHTML = '<div style="padding:20px; text-align:center; color:#444;">NO DATA FOUND</div>';
     }
 
-    // Main Load Function
+    function renderTags(tags) {
+        const cloud = document.getElementById('tag-cloud');
+        cloud.innerHTML = '';
+        if(tags.size === 0) { cloud.style.display = 'none'; return; }
+        cloud.style.display = 'flex';
+        
+        const allBtn = document.createElement('span');
+        allBtn.className = `tag-pill ${!filterTag ? 'active' : ''}`;
+        allBtn.innerText = "ALL";
+        allBtn.onclick = () => { filterTag = null; loadNotes(); };
+        cloud.appendChild(allBtn);
+
+        tags.forEach(tag => {
+            const pill = document.createElement('span');
+            pill.className = `tag-pill ${filterTag === tag ? 'active' : ''}`;
+            pill.innerText = tag;
+            pill.onclick = () => { filterTag = tag; loadNotes(); };
+            cloud.appendChild(pill);
+        });
+    }
+
     function loadNotes() {  
-        // 1. Load immediately from local cache (Works offline)
         const localData = getLocalCache();
         renderNoteList(localData);
 
-        // 2. Setup Firebase listener (Syncs down when online)
         db.ref(`notes/${currentUser}`).on('value', snap => {  
             const serverData = snap.val() || {};
-            const currentCache = getLocalCache();
             const currentQueue = getOfflineQueue();
-
-            // Merge Strategy: Server data updates local cache, 
-            // BUT we preserve locally queued changes so we don't overwrite user's offline work
             const mergedData = { ...serverData };
-            
-            // Re-apply local dirty changes over server data
-            Object.keys(currentQueue).forEach(queueId => {
-                if(currentQueue[queueId]) {
-                    mergedData[queueId] = currentQueue[queueId];
-                }
-            });
-
+            Object.keys(currentQueue).forEach(qid => mergedData[qid] = currentQueue[qid]);
             setLocalCache(mergedData);
             renderNoteList(mergedData);
         });
-
-        // 3. Attempt to sync offline queue if online
-        if(navigator.onLine) {
-            processOfflineQueue();
-        }
+        if(navigator.onLine) processOfflineQueue();
     }  
 
-    // Modified Save Function
-    function saveNote() {  
+    function loadNoteIntoEditor(id, note) {
+        document.getElementById('current-id').value = id;  
+        document.getElementById('doc-title').value = note.title || '';  
+        document.getElementById('doc-body').value = note.text || '';  
+        
+        // Pin Button State
+        const isPinned = note.pinned || false;
+        document.getElementById('is-pinned').value = isPinned;
+        updatePinBtnUI(isPinned);
+
+        document.getElementById('del-btn').style.display = 'inline-block';
+        updateWordCount(); 
+        
+        // Markdown Update
+        if(document.getElementById('md-preview').classList.contains('active')) {
+            document.getElementById('md-preview').innerHTML = marked.parse(note.text || '');
+        }
+
+        // History Reset
+        noteHistory.reset();
+        noteHistory.push(note.text || '');
+
+        // UI Highlighting
+        document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+        // Re-render handled by reactivity usually, but strictly adding class here for instant feedback
+        
+        if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+    }
+
+    function saveNote(silent = false) {  
         if (!currentUser) return;  
         
-        // Handle ID: If empty, create one. If offline, create a temporary local ID.
         let id = document.getElementById('current-id').value;  
         const isNew = !id;
         
         if (isNew) {
-            // If online, get a real key. If offline, generate temp key.
             id = navigator.onLine ? db.ref(`notes/${currentUser}`).push().key : `temp_${Date.now()}`;
             document.getElementById('current-id').value = id;
+            document.getElementById('del-btn').style.display = 'inline-block';
         }
 
         const title = document.getElementById('doc-title').value;  
         const text = document.getElementById('doc-body').value;  
-        // Note payload
-        const payload = { title, text, timestamp: Date.now() };  
+        const pinned = document.getElementById('is-pinned').value === 'true';
 
-        // 1. Update Local Cache & UI immediately
+        const payload = { title, text, pinned, timestamp: Date.now() };  
+
+        // Optimistic Update
         const cache = getLocalCache();
         cache[id] = payload;
         setLocalCache(cache);
-        renderNoteList(cache); // Re-render to update list titles immediately
+        renderNoteList(cache); 
 
-        // 2. Network / Queue Logic
+        // Update Undo Stack if different
+        if(noteHistory.current() !== text) noteHistory.push(text);
+
         if (navigator.onLine) {
-            // Online: Save directly
             document.getElementById('save-indicator').innerText = "[SYNCING...]";
-            const updatePromise = isNew || id.startsWith('temp_') 
-                ? db.ref(`notes/${currentUser}/${id}`).set(payload)
-                : db.ref(`notes/${currentUser}/${id}`).update(payload);
+            const ref = db.ref(`notes/${currentUser}/${id}`);
+            const updatePromise = (isNew || id.startsWith('temp_')) ? ref.set(payload) : ref.update(payload);
 
             updatePromise.then(() => {
                 document.getElementById('save-indicator').innerText = "[SAVED]";
+                if(!silent) logActivity("DATA SECURE & SYNCED", "success");
             }).catch(err => {
-                // Fallback to queue if connection drops mid-save
                 addToOfflineQueue(id, payload);
-                document.getElementById('save-indicator').innerText = "[OFFLINE PENDING]";
-                renderNoteList(getLocalCache()); // Updates asterisk
+                document.getElementById('save-indicator').innerText = "[QUEUED]";
+                logActivity("NET ERROR: QUEUED", "error");
             });
         } else {
-            // Offline: Add to queue
             addToOfflineQueue(id, payload);
-            document.getElementById('save-indicator').innerText = "[OFFLINE SAVED]";
-            renderNoteList(cache); // Adds asterisk to UI
+            document.getElementById('save-indicator').innerText = "[LOCAL]";
+            if(!silent) logActivity("OFFLINE SAVE", "info");
         }
-    }  
+    } 
 
-    // Sync System
+    function confirmDelete() {
+        const id = document.getElementById('current-id').value;
+        if(!id) return;
+        
+        showCustomModal('DELETE FILE?', 'This cannot be undone.', 
+        `<button class="btn btn-danger" onclick="executeDelete('${id}')">CONFIRM DELETE</button> <button class="btn" onclick="closeModal()">CANCEL</button>`);
+    }
+
+    function executeDelete(id) {
+        const cache = getLocalCache();
+        delete cache[id]; setLocalCache(cache);
+        
+        const queue = getOfflineQueue();
+        if(queue[id]) { delete queue[id]; removeFromOfflineQueue(id); }
+
+        if(navigator.onLine && !id.startsWith('temp_')) {
+            db.ref(`notes/${currentUser}/${id}`).remove();
+        }
+        createNewNote();
+        renderNoteList(cache);
+        closeModal();
+        logActivity("FILE PURGED", "error");
+    }
+
     function processOfflineQueue() {
         const queue = getOfflineQueue();
-        const ids = Object.keys(queue);
-        
-        if (ids.length === 0) return;
-
-        document.getElementById('save-indicator').innerText = "[SYNCING OFFLINE DATA...]";
-
-        ids.forEach(localId => {
-            const noteData = queue[localId];
-            
-            // Check if it's a temporary ID generated offline
+        Object.keys(queue).forEach(localId => {
+            const data = queue[localId];
             if (localId.startsWith('temp_')) {
-                // It's a new note created offline. Create fresh ref on server.
                 const newRef = db.ref(`notes/${currentUser}`).push();
-                const realKey = newRef.key;
-
-                newRef.set(noteData).then(() => {
-                    // Success: Swap ID in local storage
+                newRef.set(data).then(() => {
                     const cache = getLocalCache();
-                    delete cache[localId]; // Remove temp
-                    cache[realKey] = noteData; // Add real
+                    delete cache[localId]; cache[newRef.key] = data; 
                     setLocalCache(cache);
-                    
-                    removeFromOfflineQueue(localId); // Clear from queue
-
-                    // If user is currently viewing this temp note, update the UI ID
-                    if (document.getElementById('current-id').value === localId) {
-                        document.getElementById('current-id').value = realKey;
-                    }
+                    removeFromOfflineQueue(localId); 
+                    if (document.getElementById('current-id').value === localId) document.getElementById('current-id').value = newRef.key;
                     renderNoteList(cache);
-                    document.getElementById('save-indicator').innerText = "[SYNC COMPLETE]";
                 });
             } else {
-                // Existing note updated offline
-                db.ref(`notes/${currentUser}/${localId}`).update(noteData).then(() => {
-                    removeFromOfflineQueue(localId);
-                    renderNoteList(getLocalCache()); // Removes asterisk
-                    document.getElementById('save-indicator').innerText = "[SYNC COMPLETE]";
-                });
+                db.ref(`notes/${currentUser}/${localId}`).update(data).then(() => removeFromOfflineQueue(localId));
             }
         });
     }
 
-    // Network Status Listeners
     function checkConnection() {
         const statusDiv = document.getElementById('status-line');
         if (navigator.onLine) {
-            statusDiv.innerText = "STATUS: ONLINE";
-            statusDiv.style.color = "var(--neon-green)";
+            statusDiv.innerText = "STATUS: ONLINE [SECURE]";
+            statusDiv.style.color = "var(--neon-main)";
             processOfflineQueue();
         } else {
             statusDiv.innerText = "STATUS: OFFLINE MODE";
@@ -395,41 +662,281 @@
     window.addEventListener('online', checkConnection);
     window.addEventListener('offline', checkConnection);
 
-    // --- STANDARD UI LOGIC ---
+    // --- EDITOR FEATURES ---
+
+    // 1. Markdown Split View
+    function toggleMarkdown() {
+        const preview = document.getElementById('md-preview');
+        const editor = document.getElementById('doc-body');
+        const isActive = preview.classList.toggle('active');
+        
+        if(isActive) {
+            preview.innerHTML = marked.parse(editor.value);
+            // On mobile, full screen overlay. On desktop, split view.
+            if(window.innerWidth > 768) editor.style.width = '50%';
+        } else {
+            editor.style.width = '100%';
+        }
+    }
+
+    // 2. Pinning
+    function togglePin() {
+        const el = document.getElementById('is-pinned');
+        const newState = !(el.value === 'true');
+        el.value = newState;
+        updatePinBtnUI(newState);
+        saveNote(true);
+    }
+    
+    function updatePinBtnUI(isPinned) {
+        const btn = document.getElementById('pin-btn');
+        if(isPinned) {
+            btn.innerHTML = '<i class="fas fa-star"></i>';
+            btn.style.color = 'var(--neon-yellow)';
+        } else {
+            btn.innerHTML = '<i class="far fa-star"></i>';
+            btn.style.color = 'var(--neon-main)';
+        }
+    }
+
+    // 3. Undo/Redo
+    function editorUndo() {
+        const prev = noteHistory.undo();
+        if(prev !== null) {
+            document.getElementById('doc-body').value = prev;
+            updateWordCount();
+        }
+    }
+    function editorRedo() {
+        const next = noteHistory.redo();
+        if(next !== null) {
+            document.getElementById('doc-body').value = next;
+            updateWordCount();
+        }
+    }
+
+    // 4. Version History (Snapshots)
+    function openVersionHistory() {
+        const id = document.getElementById('current-id').value;
+        if(!id) return logActivity("SAVE FILE FIRST", "error");
+
+        showCustomModal("SNAPSHOT MANAGER", 
+        `<p>Create a manual restore point for this session?</p>
+         <button class="btn btn-info" onclick="createSnapshot('${id}')">CREATE SNAPSHOT</button>
+         <hr style="border-color:#333">
+         <div id="snapshot-list" style="font-size:0.8rem; color:#888;">Fetching...</div>`);
+         
+         // In a real app, query a sub-collection 'history/noteId'. 
+         // For this version, we'll mock it or just use simple localstorage history if needed.
+         // Let's implement a basic one:
+         loadSnapshots(id);
+    }
+
+    function createSnapshot(id) {
+        const text = document.getElementById('doc-body').value;
+        const ts = Date.now();
+        const snapData = { text, ts };
+        
+        // Save to a sub-node
+        db.ref(`snapshots/${currentUser}/${id}`).push(snapData).then(() => {
+            logActivity("SNAPSHOT SAVED", "success");
+            loadSnapshots(id);
+        });
+    }
+
+    function loadSnapshots(id) {
+        db.ref(`snapshots/${currentUser}/${id}`).limitToLast(5).once('value', snap => {
+            const list = document.getElementById('snapshot-list');
+            list.innerHTML = '';
+            if(!snap.exists()) { list.innerHTML = "No snapshots found."; return; }
+            
+            snap.forEach(child => {
+                const val = child.val();
+                const date = new Date(val.ts).toLocaleString();
+                list.innerHTML += `<div style="padding:5px; border-bottom:1px dashed #333; display:flex; justify-content:space-between;">
+                    <span>${date}</span>
+                    <button class="btn" style="padding:2px 5px;" onclick="restoreSnapshot('${val.text ? val.text.replace(/'/g, "\\'") : ''}')">LOAD</button>
+                </div>`;
+            });
+        });
+    }
+
+    window.restoreSnapshot = (text) => {
+        document.getElementById('doc-body').value = text;
+        updateWordCount();
+        saveNote();
+        closeModal();
+        logActivity("VERSION RESTORED", "info");
+    };
+
+    // 5. Themes
+    function openSettings() {
+        const themes = [
+            { name: 'MATRIX', main: '#0f0', bg: '#020202' },
+            { name: 'RETRO AMBER', main: '#ffb000', bg: '#1a1000' },
+            { name: 'CYBERPUNK', main: '#00f3ff', bg: '#050a14' },
+            { name: 'CRIMSON', main: '#ff003c', bg: '#110000' },
+            { name: 'ICE', main: '#ffffff', bg: '#000000' }
+        ];
+
+        let html = '<div class="theme-grid">';
+        themes.forEach(t => {
+            html += `<div class="theme-opt" style="color:${t.main}; background:${t.bg}" onclick="setTheme('${t.main}', '${t.bg}')">${t.name}</div>`;
+        });
+        html += '</div>';
+
+        showCustomModal("SYSTEM CONFIGURATION", html);
+    }
+
+    function setTheme(main, bg) {
+        document.documentElement.style.setProperty('--neon-main', main);
+        document.documentElement.style.setProperty('--bg-deep', bg);
+        closeModal();
+    }
+
+    // 6. Exports
+    function openExportMenu() {
+        const html = `
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn" onclick="exportDoc('txt')">DOWNLOAD .TXT</button>
+                <button class="btn" onclick="exportDoc('md')">DOWNLOAD .MD</button>
+                <button class="btn" onclick="exportDoc('pdf')">EXPORT PDF</button>
+                <button class="btn" onclick="exportDoc('email')">SEND VIA EMAIL</button>
+            </div>
+        `;
+        showCustomModal("EXPORT DATA", html);
+    }
+
+    function exportDoc(type) {
+        const title = document.getElementById('doc-title').value || 'untitled';
+        const text = document.getElementById('doc-body').value;
+        
+        if(type === 'email') {
+            window.location.href = `mailto:?subject=${title}&body=${encodeURIComponent(text)}`;
+        } else if (type === 'pdf') {
+            const element = document.createElement('div');
+            element.innerHTML = `<h1>${title}</h1>` + marked.parse(text);
+            html2pdf().from(element).save(title + '.pdf');
+        } else {
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${title}.${type}`;
+            a.click();
+        }
+        closeModal();
+    }
+
+    // 7. Sharing
+    function generateShareLink() {
+        const id = document.getElementById('current-id').value;
+        if(!id || id.startsWith('temp_')) return logActivity("SYNC FILE BEFORE SHARING", "error");
+        
+        // In a real backend, we would set a 'public' flag.
+        // For this demo, we simulate a public link.
+        const link = `${window.location.origin}${window.location.pathname}?share=${id}&user=${currentUser}`;
+        
+        navigator.clipboard.writeText(link).then(() => {
+            logActivity("LINK COPIED TO CLIPBOARD", "success");
+            showCustomModal("SHARE LINK GENERATED", `<input type="text" value="${link}" style="width:100%; background:black; color:white; border:1px solid #333; padding:10px;"> <p style="font-size:0.7rem; color:#666; margin-top:5px;">Note: Requires database rules to allow public read access.</p>`);
+        });
+    }
+
+    // Check for Shared Link on Load
+    const urlParams = new URLSearchParams(window.location.search);
+    const shareId = urlParams.get('share');
+    const shareUser = urlParams.get('user');
+
+    if(shareId && shareUser) {
+        // Read-only Mode
+        document.getElementById('auth-layer').style.display = 'none';
+        document.getElementById('app-layer').style.display = 'flex';
+        document.querySelector('header').style.display = 'none'; // Hide controls
+        document.getElementById('sidebar').style.display = 'none';
+        document.getElementById('doc-body').setAttribute('readonly', true);
+        document.getElementById('doc-title').setAttribute('readonly', true);
+        
+        db.ref(`notes/${shareUser}/${shareId}`).once('value').then(snap => {
+            if(snap.exists()) {
+                const val = snap.val();
+                document.getElementById('doc-title').value = val.title;
+                document.getElementById('doc-body').value = val.text;
+                // Auto show markdown
+                toggleMarkdown();
+            } else {
+                alert("Shared note not found or access denied.");
+            }
+        });
+    }
+
+    // --- GENERAL INPUT HANDLERS ---
 
     function triggerSave() {  
         document.getElementById('save-indicator').innerText = "[TYPING...]";  
+        updateWordCount();
+        
+        // Markdown Realtime
+        if(document.getElementById('md-preview').classList.contains('active')) {
+             document.getElementById('md-preview').innerHTML = marked.parse(document.getElementById('doc-body').value);
+        }
+
         clearTimeout(autoSaveTimer);  
-        autoSaveTimer = setTimeout(saveNote, 1000);  
+        autoSaveTimer = setTimeout(() => saveNote(true), 2000); 
     }  
 
     document.getElementById('doc-title').oninput = triggerSave;  
     document.getElementById('doc-body').oninput = triggerSave;  
+    
+    // Search
+    document.getElementById('search-bar').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.note-item').forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(term) ? 'flex' : 'none';
+        });
+    });
 
     function createNewNote() {  
         document.getElementById('current-id').value = '';  
         document.getElementById('doc-title').value = '';  
         document.getElementById('doc-body').value = '';  
-        document.getElementById('doc-title').focus();  
+        document.getElementById('is-pinned').value = 'false';
+        updatePinBtnUI(false);
+        document.getElementById('del-btn').style.display = 'none';
+        document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+        updateWordCount();
+        document.getElementById('doc-title').focus(); 
+        logActivity("NEW WORKSPACE", "info"); 
     }  
+    
+    function updateWordCount() {
+        const text = document.getElementById('doc-body').value;
+        const count = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        document.getElementById('word-count').innerText = `WORDS: ${count}`;
+    }
 
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }  
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
     
-    function terminalAlert(msg, type) {  
-        const container = document.getElementById('alert-system');  
-        const box = document.createElement('div');  
-        box.className = `terminal-alert alert-${type}`;  
-        box.innerText = msg;  
-        container.appendChild(box);  
-        setTimeout(() => box.remove(), 3000);  
-    }  
-    
+    // 8. Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if(e.ctrlKey || e.metaKey) {
+            switch(e.key.toLowerCase()) {
+                case 's': e.preventDefault(); saveNote(false); break;
+                case 'n': e.preventDefault(); createNewNote(); break;
+                case 'f': e.preventDefault(); document.getElementById('search-bar').focus(); break;
+                case 'z': e.preventDefault(); editorUndo(); break;
+                case 'y': e.preventDefault(); editorRedo(); break;
+                case 'p': e.preventDefault(); togglePin(); break;
+            }
+        }
+    });
+
     setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);  
 
-    if ('serviceWorker' in navigator) {  
-        // Keeping SW registration for caching static assets if sw.js exists
-        navigator.serviceWorker.register('sw.js').catch(() => {});  
-    }  
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});  
 </script>
 
 </body>  
