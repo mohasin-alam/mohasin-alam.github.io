@@ -1,275 +1,436 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHOST_SHELL v3.0</title>
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>DATABASE CONNECTED NOTEPAD v3.0</title>  <link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#020202">  
+<meta name="apple-mobile-web-app-capable" content="yes">  
+  
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  
+
+<style>  
+    :root {  
+        --bg-deep: #020202;  
+        --bg-panel: #0d0d0d;  
+        --bg-hover: #1a1a1a;  
+        --neon-green: #0f0;  
+        --neon-dim: #004d00;  
+        --neon-red: #ff003c;  
+        --neon-blue: #00f3ff;  
+        --border-color: #333;  
+        --font-stack: 'Fira Code', monospace;  
+        --sidebar-width: 380px;   
+    }  
+
+    * { box-sizing: border-box; outline: none; }  
+    ::-webkit-scrollbar { width: 5px; height: 5px; }  
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }  
+    ::-webkit-scrollbar-thumb { background: var(--neon-dim); }  
+
+    body {  
+        margin: 0; padding: 0;  
+        background-color: var(--bg-deep);  
+        color: var(--neon-green);  
+        font-family: var(--font-stack);  
+        height: 100vh; overflow: hidden;  
+        display: flex; flex-direction: column;  
+    }  
+
+    .crt::before {  
+        content: " "; display: block; position: absolute;  
+        top: 0; left: 0; bottom: 0; right: 0;  
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));  
+        z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;  
+    }  
+
+    /* Auth Screen */  
+    #auth-layer {  
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;  
+        background: var(--bg-deep); z-index: 1000;  
+        display: flex; justify-content: center; align-items: center;  
+    }  
+    .login-box {  
+        width: 90%; max-width: 400px; padding: 40px;  
+        border: 2px solid var(--neon-green);  
+        background: rgba(0, 20, 0, 0.9);  
+        text-align: center;  
+    }  
+    .login-input {  
+        width: 100%; padding: 12px; margin: 10px 0;  
+        background: black; border: 1px solid var(--neon-dim);  
+        color: var(--neon-green); font-family: var(--font-stack);  
+    }  
+
+    /* App Layout */  
+    #app-layer { display: none; width: 100%; height: 100%; flex-direction: column; }  
+    header {  
+        height: 50px; border-bottom: 2px solid var(--border-color);  
+        display: flex; justify-content: space-between; align-items: center;  
+        padding: 0 20px; background: var(--bg-panel);  
+    }  
+    .btn {  
+        background: transparent; border: 1px solid var(--neon-dim);  
+        color: var(--neon-green); padding: 5px 15px; cursor: pointer;  
+        font-family: var(--font-stack); font-size: 0.8rem;  
+    }  
+    .btn:hover { background: var(--neon-green); color: black; }  
+      
+    .workspace { display: flex; flex: 1; overflow: hidden; }  
+    aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }  
+    .notes-list { flex: 1; overflow-y: auto; }  
+    .note-item { padding: 15px 20px; border-bottom: 1px solid #111; cursor: pointer; }  
+    .note-item:hover { background: var(--bg-hover); }  
+
+    main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); }  
+    #doc-title { width: 100%; padding: 15px 30px; background: transparent; border: none; color: var(--neon-green); font-family: var(--font-stack); font-size: 1.4rem; border-bottom: 1px dashed #333; }  
+    #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; }  
+      
+    .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; }  
+
+    #alert-system { position: fixed; top: 20px; right: 20px; z-index: 2000; }  
+    .terminal-alert { min-width: 250px; padding: 15px; background: black; border: 1px solid; margin-bottom: 10px; }  
+    .alert-error { border-color: var(--neon-red); color: var(--neon-red); }  
+    .alert-success { border-color: var(--neon-green); color: var(--neon-green); }  
+
+    @media (max-width: 768px) {  
+        aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; transition: 0.3s; }  
+        aside.open { transform: translateX(0); }  
+        #menu-btn { display: block !important; }  
+    }  
+</style>
+
+</head>  
+<body class="crt">  <div id="auth-layer">  
+    <div class="login-box">  
+        <h2 style="color: var(--neon-green);">:: SYSTEM ACCESS ::</h2>  
+        <input type="email" id="email" class="login-input" placeholder="USER_EMAIL">  
+        <input type="password" id="pass" class="login-input" placeholder="ACCESS_KEY">  
+        <div style="margin-top: 20px; display: flex; gap: 10px;">  
+            <button class="btn" onclick="authAction('login')" style="flex:1">LOGIN</button>  
+            <button class="btn" onclick="authAction('signup')" style="flex:1; color: var(--neon-blue);">INIT NEW</button>  
+        </div>  
+    </div>  
+</div>  
+
+<div id="app-layer">  
+    <header>  
+        <div style="display: flex; align-items: center; gap: 15px;">  
+            <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>  
+            <div style="font-weight:600;">DATABASE CONNECTED NOTEPAD v3.0</div>  
+        </div>  
+        <div>  
+            <button class="btn" onclick="createNewNote()">+ NEW</button>  
+            <button class="btn" onclick="logout()">EXIT</button>  
+        </div>  
+    </header>  
+
+    <div class="workspace">  
+        <aside id="sidebar">  
+            <div style="padding:15px; font-size:0.7rem; border-bottom:1px solid #222;" id="status-line">STATUS: CHECKING...</div>  
+            <div class="notes-list" id="notes-list"></div>  
+        </aside>  
+        <main>  
+            <input type="text" id="doc-title" placeholder="UNTITLED_DOC">  
+            <textarea id="doc-body" placeholder="Start typing..."></textarea>  
+            <input type="hidden" id="current-id">  
+        </main>  
+    </div>  
+
+    <div class="status-bar">  
+        <span id="save-indicator">[READY]</span>  
+        <span id="clock-display">00:00:00</span>  
+    </div>  
+</div>  
+
+<div id="alert-system"></div>  
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  
+
+<script>  
+    const firebaseConfig = {  
+        apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",  
+        authDomain: "notepad-c5b98.firebaseapp.com",  
+        databaseURL: "https://notepad-c5b98-default-rtdb.firebaseio.com",  
+        projectId: "notepad-c5b98",  
+        storageBucket: "notepad-c5b98.firebasestorage.app",  
+        messagingSenderId: "737040022800",  
+        appId: "1:737040022800:web:5e5eb1971ccadf6d753995"  
+    };  
+    firebase.initializeApp(firebaseConfig);  
+    const auth = firebase.auth();  
+    const db = firebase.database();  
+
+    let currentUser = null;  
+    let autoSaveTimer;  
     
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#020202">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    // OFFLINE STORAGE CONSTANTS
+    const CACHE_KEY_PREFIX = 'ghost_cache_';
+    const QUEUE_KEY_PREFIX = 'ghost_queue_';
+
+    // AUTH Logic
+    function authAction(type) {  
+        const e = document.getElementById('email').value;  
+        const p = document.getElementById('pass').value;  
+        if(!e || !p) return terminalAlert("Fill all fields", "error");  
+
+        if(type === 'login') {  
+            auth.signInWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));  
+        } else {  
+            auth.createUserWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));  
+        }  
+    }  
+
+    auth.onAuthStateChanged(user => {  
+        const authLayer = document.getElementById('auth-layer');  
+        const appLayer = document.getElementById('app-layer');  
+        if (user) {  
+            currentUser = user.uid;  
+            authLayer.style.display = 'none';  
+            appLayer.style.display = 'flex';  
+            loadNotes();  
+            checkConnection();
+        } else {  
+            authLayer.style.display = 'flex';  
+            appLayer.style.display = 'none';  
+            currentUser = null;
+        }  
+    });  
+
+    function logout() { auth.signOut(); }  
+
+    // --- OFFLINE / ONLINE SYNC LOGIC ---
+
+    // Helpers for Local Storage
+    function getLocalCache() {
+        return JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + currentUser)) || {};
+    }
     
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    function setLocalCache(data) {
+        localStorage.setItem(CACHE_KEY_PREFIX + currentUser, JSON.stringify(data));
+    }
 
-    <style>
-        :root {
-            --bg-deep: #020202;
-            --bg-panel: #0d0d0d;
-            --bg-hover: #1a1a1a;
-            --neon-green: #0f0;
-            --neon-dim: #004d00;
-            --neon-red: #ff003c;
-            --neon-blue: #00f3ff;
-            --border-color: #333;
-            --font-stack: 'Fira Code', monospace;
-            --sidebar-width: 380px; 
+    function getOfflineQueue() {
+        return JSON.parse(localStorage.getItem(QUEUE_KEY_PREFIX + currentUser)) || {};
+    }
+
+    function addToOfflineQueue(id, data) {
+        const queue = getOfflineQueue();
+        queue[id] = data;
+        localStorage.setItem(QUEUE_KEY_PREFIX + currentUser, JSON.stringify(queue));
+    }
+
+    function removeFromOfflineQueue(id) {
+        const queue = getOfflineQueue();
+        delete queue[id];
+        localStorage.setItem(QUEUE_KEY_PREFIX + currentUser, JSON.stringify(queue));
+    }
+
+    // Render Logic (Shared for Offline and Online)
+    function renderNoteList(data) {
+        const list = document.getElementById('notes-list');  
+        list.innerHTML = '';  
+        if (data) {  
+            // Filter out empty entries if any
+            Object.entries(data).reverse().forEach(([id, note]) => {  
+                if (!note) return;
+                const div = document.createElement('div');  
+                div.className = 'note-item';  
+                // Mark dirty notes visually
+                const isDirty = getOfflineQueue()[id] ? ' *' : '';
+                div.innerHTML = `<div>${(note.title || 'UNTITLED') + isDirty}</div>`;  
+                div.onclick = () => {  
+                    document.getElementById('current-id').value = id;  
+                    document.getElementById('doc-title').value = note.title || '';  
+                    document.getElementById('doc-body').value = note.text || '';  
+                    if(window.innerWidth <= 768) toggleSidebar();  
+                };  
+                list.appendChild(div);  
+            });  
         }
+    }
 
-        * { box-sizing: border-box; outline: none; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: var(--neon-dim); }
+    // Main Load Function
+    function loadNotes() {  
+        // 1. Load immediately from local cache (Works offline)
+        const localData = getLocalCache();
+        renderNoteList(localData);
 
-        body {
-            margin: 0; padding: 0;
-            background-color: var(--bg-deep);
-            color: var(--neon-green);
-            font-family: var(--font-stack);
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
+        // 2. Setup Firebase listener (Syncs down when online)
+        db.ref(`notes/${currentUser}`).on('value', snap => {  
+            const serverData = snap.val() || {};
+            const currentCache = getLocalCache();
+            const currentQueue = getOfflineQueue();
 
-        .crt::before {
-            content: " "; display: block; position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
-
-        /* Auth Screen */
-        #auth-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-deep); z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .login-box {
-            width: 90%; max-width: 400px; padding: 40px;
-            border: 2px solid var(--neon-green);
-            background: rgba(0, 20, 0, 0.9);
-            text-align: center;
-        }
-        .login-input {
-            width: 100%; padding: 12px; margin: 10px 0;
-            background: black; border: 1px solid var(--neon-dim);
-            color: var(--neon-green); font-family: var(--font-stack);
-        }
-
-        /* App Layout */
-        #app-layer { display: none; width: 100%; height: 100%; flex-direction: column; }
-        header {
-            height: 50px; border-bottom: 2px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; background: var(--bg-panel);
-        }
-        .btn {
-            background: transparent; border: 1px solid var(--neon-dim);
-            color: var(--neon-green); padding: 5px 15px; cursor: pointer;
-            font-family: var(--font-stack); font-size: 0.8rem;
-        }
-        .btn:hover { background: var(--neon-green); color: black; }
-        
-        .workspace { display: flex; flex: 1; overflow: hidden; }
-        aside { width: var(--sidebar-width); background: var(--bg-panel); border-right: 2px solid var(--border-color); display: flex; flex-direction: column; }
-        .notes-list { flex: 1; overflow-y: auto; }
-        .note-item { padding: 15px 20px; border-bottom: 1px solid #111; cursor: pointer; }
-        .note-item:hover { background: var(--bg-hover); }
-
-        main { flex: 1; display: flex; flex-direction: column; background: var(--bg-deep); }
-        #doc-title { width: 100%; padding: 15px 30px; background: transparent; border: none; color: var(--neon-green); font-family: var(--font-stack); font-size: 1.4rem; border-bottom: 1px dashed #333; }
-        #doc-body { flex: 1; padding: 30px; background: transparent; border: none; color: #ccc; font-family: var(--font-stack); font-size: 1rem; resize: none; }
-        
-        .status-bar { height: 30px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 0.75rem; }
-
-        #alert-system { position: fixed; top: 20px; right: 20px; z-index: 2000; }
-        .terminal-alert { min-width: 250px; padding: 15px; background: black; border: 1px solid; margin-bottom: 10px; }
-        .alert-error { border-color: var(--neon-red); color: var(--neon-red); }
-        .alert-success { border-color: var(--neon-green); color: var(--neon-green); }
-
-        @media (max-width: 768px) {
-            aside { position: absolute; height: 100%; z-index: 100; transform: translateX(-100%); width: 100%; transition: 0.3s; }
-            aside.open { transform: translateX(0); }
-            #menu-btn { display: block !important; }
-        }
-    </style>
-</head>
-<body class="crt">
-
-    <div id="auth-layer">
-        <div class="login-box">
-            <h2 style="color: var(--neon-green);">:: SYSTEM ACCESS ::</h2>
-            <input type="email" id="email" class="login-input" placeholder="USER_EMAIL">
-            <input type="password" id="pass" class="login-input" placeholder="ACCESS_KEY">
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="btn" onclick="authAction('login')" style="flex:1">LOGIN</button>
-                <button class="btn" onclick="authAction('signup')" style="flex:1; color: var(--neon-blue);">INIT NEW</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="app-layer">
-        <header>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <button class="btn" onclick="toggleSidebar()" id="menu-btn" style="display:none;">≡</button>
-                <div style="font-weight:600;">GHOST_SHELL v3.0</div>
-            </div>
-            <div>
-                <button class="btn" onclick="createNewNote()">+ NEW</button>
-                <button class="btn" onclick="logout()">EXIT</button>
-            </div>
-        </header>
-
-        <div class="workspace">
-            <aside id="sidebar">
-                <div style="padding:15px; font-size:0.7rem; border-bottom:1px solid #222;">STATUS: ONLINE</div>
-                <div class="notes-list" id="notes-list"></div>
-            </aside>
-            <main>
-                <input type="text" id="doc-title" placeholder="UNTITLED_DOC">
-                <textarea id="doc-body" placeholder="Start typing..."></textarea>
-                <input type="hidden" id="current-id">
-            </main>
-        </div>
-
-        <div class="status-bar">
-            <span id="save-indicator">[READY]</span>
-            <span id="clock-display">00:00:00</span>
-        </div>
-    </div>
-
-    <div id="alert-system"></div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJDYv3qR88OcpR5Jfm_rMd8z9WZPYqWjw",
-            authDomain: "notepad-c5b98.firebaseapp.com",
-            databaseURL: "https://notepad-c5b98-default-rtdb.firebaseio.com",
-            projectId: "notepad-c5b98",
-            storageBucket: "notepad-c5b98.firebasestorage.app",
-            messagingSenderId: "737040022800",
-            appId: "1:737040022800:web:5e5eb1971ccadf6d753995"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-
-        let currentUser = null;
-        let autoSaveTimer;
-
-        // AUTH Logic - Fxied
-        function authAction(type) {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('pass').value;
-            if(!e || !p) return terminalAlert("Fill all fields", "error");
-
-            if(type === 'login') {
-                auth.signInWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));
-            } else {
-                auth.createUserWithEmailAndPassword(e, p).catch(err => terminalAlert(err.message, "error"));
-            }
-        }
-
-        auth.onAuthStateChanged(user => {
-            const authLayer = document.getElementById('auth-layer');
-            const appLayer = document.getElementById('app-layer');
-            if (user) {
-                currentUser = user.uid;
-                authLayer.style.display = 'none'; // Fixed: Hide login
-                appLayer.style.display = 'flex';  // Fixed: Show App
-                loadNotes();
-            } else {
-                authLayer.style.display = 'flex';
-                appLayer.style.display = 'none';
-            }
-        });
-
-        function logout() { auth.signOut(); }
-
-        // Database Logic
-        function loadNotes() {
-            db.ref(`notes/${currentUser}`).on('value', snap => {
-                const list = document.getElementById('notes-list');
-                list.innerHTML = '';
-                const data = snap.val();
-                if (data) {
-                    Object.entries(data).reverse().forEach(([id, note]) => {
-                        const div = document.createElement('div');
-                        div.className = 'note-item';
-                        div.innerHTML = `<div>${note.title || 'UNTITLED'}</div>`;
-                        div.onclick = () => {
-                            document.getElementById('current-id').value = id;
-                            document.getElementById('doc-title').value = note.title;
-                            document.getElementById('doc-body').value = note.text;
-                            if(window.innerWidth <= 768) toggleSidebar();
-                        };
-                        list.appendChild(div);
-                    });
+            // Merge Strategy: Server data updates local cache, 
+            // BUT we preserve locally queued changes so we don't overwrite user's offline work
+            const mergedData = { ...serverData };
+            
+            // Re-apply local dirty changes over server data
+            Object.keys(currentQueue).forEach(queueId => {
+                if(currentQueue[queueId]) {
+                    mergedData[queueId] = currentQueue[queueId];
                 }
             });
+
+            setLocalCache(mergedData);
+            renderNoteList(mergedData);
+        });
+
+        // 3. Attempt to sync offline queue if online
+        if(navigator.onLine) {
+            processOfflineQueue();
+        }
+    }  
+
+    // Modified Save Function
+    function saveNote() {  
+        if (!currentUser) return;  
+        
+        // Handle ID: If empty, create one. If offline, create a temporary local ID.
+        let id = document.getElementById('current-id').value;  
+        const isNew = !id;
+        
+        if (isNew) {
+            // If online, get a real key. If offline, generate temp key.
+            id = navigator.onLine ? db.ref(`notes/${currentUser}`).push().key : `temp_${Date.now()}`;
+            document.getElementById('current-id').value = id;
         }
 
-        function saveNote() {
-            if (!currentUser) return;
-            const id = document.getElementById('current-id').value;
-            const title = document.getElementById('doc-title').value;
-            const text = document.getElementById('doc-body').value;
-            if(!title && !text) return;
+        const title = document.getElementById('doc-title').value;  
+        const text = document.getElementById('doc-body').value;  
+        // Note payload
+        const payload = { title, text, timestamp: Date.now() };  
 
-            const payload = { title, text, timestamp: Date.now() };
-            if (id) db.ref(`notes/${currentUser}/${id}`).update(payload);
-            else {
+        // 1. Update Local Cache & UI immediately
+        const cache = getLocalCache();
+        cache[id] = payload;
+        setLocalCache(cache);
+        renderNoteList(cache); // Re-render to update list titles immediately
+
+        // 2. Network / Queue Logic
+        if (navigator.onLine) {
+            // Online: Save directly
+            document.getElementById('save-indicator').innerText = "[SYNCING...]";
+            const updatePromise = isNew || id.startsWith('temp_') 
+                ? db.ref(`notes/${currentUser}/${id}`).set(payload)
+                : db.ref(`notes/${currentUser}/${id}`).update(payload);
+
+            updatePromise.then(() => {
+                document.getElementById('save-indicator').innerText = "[SAVED]";
+            }).catch(err => {
+                // Fallback to queue if connection drops mid-save
+                addToOfflineQueue(id, payload);
+                document.getElementById('save-indicator').innerText = "[OFFLINE PENDING]";
+                renderNoteList(getLocalCache()); // Updates asterisk
+            });
+        } else {
+            // Offline: Add to queue
+            addToOfflineQueue(id, payload);
+            document.getElementById('save-indicator').innerText = "[OFFLINE SAVED]";
+            renderNoteList(cache); // Adds asterisk to UI
+        }
+    }  
+
+    // Sync System
+    function processOfflineQueue() {
+        const queue = getOfflineQueue();
+        const ids = Object.keys(queue);
+        
+        if (ids.length === 0) return;
+
+        document.getElementById('save-indicator').innerText = "[SYNCING OFFLINE DATA...]";
+
+        ids.forEach(localId => {
+            const noteData = queue[localId];
+            
+            // Check if it's a temporary ID generated offline
+            if (localId.startsWith('temp_')) {
+                // It's a new note created offline. Create fresh ref on server.
                 const newRef = db.ref(`notes/${currentUser}`).push();
-                newRef.set(payload);
-                document.getElementById('current-id').value = newRef.key;
+                const realKey = newRef.key;
+
+                newRef.set(noteData).then(() => {
+                    // Success: Swap ID in local storage
+                    const cache = getLocalCache();
+                    delete cache[localId]; // Remove temp
+                    cache[realKey] = noteData; // Add real
+                    setLocalCache(cache);
+                    
+                    removeFromOfflineQueue(localId); // Clear from queue
+
+                    // If user is currently viewing this temp note, update the UI ID
+                    if (document.getElementById('current-id').value === localId) {
+                        document.getElementById('current-id').value = realKey;
+                    }
+                    renderNoteList(cache);
+                    document.getElementById('save-indicator').innerText = "[SYNC COMPLETE]";
+                });
+            } else {
+                // Existing note updated offline
+                db.ref(`notes/${currentUser}/${localId}`).update(noteData).then(() => {
+                    removeFromOfflineQueue(localId);
+                    renderNoteList(getLocalCache()); // Removes asterisk
+                    document.getElementById('save-indicator').innerText = "[SYNC COMPLETE]";
+                });
             }
-            document.getElementById('save-indicator').innerText = "[SAVED]";
-        }
+        });
+    }
 
-        function triggerSave() {
-            document.getElementById('save-indicator').innerText = "[TYPING...]";
-            clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(saveNote, 1000);
+    // Network Status Listeners
+    function checkConnection() {
+        const statusDiv = document.getElementById('status-line');
+        if (navigator.onLine) {
+            statusDiv.innerText = "STATUS: ONLINE";
+            statusDiv.style.color = "var(--neon-green)";
+            processOfflineQueue();
+        } else {
+            statusDiv.innerText = "STATUS: OFFLINE MODE";
+            statusDiv.style.color = "var(--neon-red)";
         }
+    }
 
-        document.getElementById('doc-title').oninput = triggerSave;
-        document.getElementById('doc-body').oninput = triggerSave;
+    window.addEventListener('online', checkConnection);
+    window.addEventListener('offline', checkConnection);
 
-        function createNewNote() {
-            document.getElementById('current-id').value = '';
-            document.getElementById('doc-title').value = '';
-            document.getElementById('doc-body').value = '';
-            document.getElementById('doc-title').focus();
-        }
+    // --- STANDARD UI LOGIC ---
 
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        function terminalAlert(msg, type) {
-            const container = document.getElementById('alert-system');
-            const box = document.createElement('div');
-            box.className = `terminal-alert alert-${type}`;
-            box.innerText = msg;
-            container.appendChild(box);
-            setTimeout(() => box.remove(), 3000);
-        }
-        setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);
+    function triggerSave() {  
+        document.getElementById('save-indicator').innerText = "[TYPING...]";  
+        clearTimeout(autoSaveTimer);  
+        autoSaveTimer = setTimeout(saveNote, 1000);  
+    }  
 
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
-</body>
+    document.getElementById('doc-title').oninput = triggerSave;  
+    document.getElementById('doc-body').oninput = triggerSave;  
+
+    function createNewNote() {  
+        document.getElementById('current-id').value = '';  
+        document.getElementById('doc-title').value = '';  
+        document.getElementById('doc-body').value = '';  
+        document.getElementById('doc-title').focus();  
+    }  
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }  
+    
+    function terminalAlert(msg, type) {  
+        const container = document.getElementById('alert-system');  
+        const box = document.createElement('div');  
+        box.className = `terminal-alert alert-${type}`;  
+        box.innerText = msg;  
+        container.appendChild(box);  
+        setTimeout(() => box.remove(), 3000);  
+    }  
+    
+    setInterval(() => { document.getElementById('clock-display').innerText = new Date().toLocaleTimeString(); }, 1000);  
+
+    if ('serviceWorker' in navigator) {  
+        // Keeping SW registration for caching static assets if sw.js exists
+        navigator.serviceWorker.register('sw.js').catch(() => {});  
+    }  
+</script>
+
+</body>  
 </html>
