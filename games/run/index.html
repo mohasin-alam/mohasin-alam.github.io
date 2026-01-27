@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Memory Grid</title>
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="Offline Neon Memory Card Matching Game">
+    <style>
+        /* --- 1. CSS VARIABLES & RESET --- */
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #0aff0a;
+            --neon-purple: #bc13fe;
+            --text-color: #fff;
+            --font-main: 'Courier New', Courier, monospace; 
+            --gap-size: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            touch-action: manipulation; /* Prevents double-tap zoom */
+        }
+
+        /* --- 2. LAYOUT & UI --- */
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        h1.title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            text-transform: uppercase;
+            text-align: center;
+            margin: 10px 0 20px 0;
+            letter-spacing: 2px;
+            animation: flicker 4s infinite alternate;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            color: #fff;
+        }
+
+        /* SCREENS */
+        .screen {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .screen.active { display: flex; }
+
+        /* INPUTS & BUTTONS */
+        .input-group {
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--neon-purple);
+            padding: 15px;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            width: 80%;
+            border-radius: 8px;
+            outline: none;
+            font-family: var(--font-main);
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            font-weight: bold;
+            border-radius: 5px;
+            margin: 10px;
+            width: 80%;
+            max-width: 300px;
+        }
+        .btn:hover, .btn:active {
+            background: var(--neon-cyan);
+            color: var(--bg-color);
+            box-shadow: 0 0 25px var(--neon-cyan);
+        }
+
+        .btn-secondary {
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+            font-size: 0.9rem;
+            padding: 10px;
+        }
+        .btn-danger {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            margin-top: 30px;
+            font-size: 0.8rem;
+        }
+
+        /* --- 3. GAME HUD --- */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+        .hud div span {
+            display: block;
+            color: var(--neon-green);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* --- 4. CARD GRID --- */
+        .grid-container {
+            display: grid;
+            gap: var(--gap-size);
+            width: 100%;
+            perspective: 1000px; /* Essential for 3D flip */
+        }
+        
+        /* Grid Layouts handled by JS classes */
+        .grid-4x4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-4x5 { grid-template-columns: repeat(4, 1fr); }
+        .grid-6x6 { grid-template-columns: repeat(6, 1fr); }
+
+        /* CARD STYLES */
+        .card {
+            background-color: transparent;
+            /* Aspect Ratio Hack for square cards */
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%; 
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border-radius: 8px;
+        }
+
+        /* Flip State */
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 2px solid;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        /* Back (Face down) */
+        .card-back {
+            background-color: #1a1a1a;
+            border-color: #333;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        .card-back::after {
+            content: '?';
+            font-weight: bold;
+            opacity: 0.2;
+        }
+
+        /* Front (Face up) */
+        .card-front {
+            background-color: #111;
+            border-color: var(--neon-purple);
+            color: white;
+            transform: rotateY(180deg);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            text-shadow: 0 0 5px var(--neon-purple);
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        /* Matched State */
+        .card.matched .card-inner .card-front {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+            animation: pulse 1s infinite;
+        }
+
+        /* --- 5. MODAL (GAME OVER) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+
+        .modal-content {
+            background: #111;
+            border: 2px solid var(--neon-pink);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 30px var(--neon-pink);
+            width: 85%;
+            max-width: 400px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        /* --- 6. ANIMATIONS --- */
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.5; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+
+        /* --- 7. UTILITIES --- */
+        .hidden { display: none !important; }
+        .neon-text { color: var(--neon-cyan); }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1 class="title">NEON MATCH</h1>
+
+        <!-- SCREEN: MENU -->
+        <div id="menu-screen" class="screen active">
+            <div class="input-group">
+                <label style="display:block; margin-bottom:10px; color:#aaa;">PLAYER IDENTITY</label>
+                <input type="text" id="player-name" placeholder="Enter Name" maxlength="10">
+            </div>
+
+            <p style="margin-top:20px; color:#aaa;">SELECT DIFFICULTY</p>
+            <button class="btn" onclick="Game.start('easy')">Easy (4x4)</button>
+            <button class="btn" onclick="Game.start('medium')">Medium (4x5)</button>
+            <button class="btn" onclick="Game.start('hard')">Hard (6x6)</button>
+
+            <button class="btn btn-danger" onclick="Game.resetData()">Reset Progress</button>
+        </div>
+
+        <!-- SCREEN: GAME -->
+        <div id="game-screen" class="screen">
+            <div class="hud">
+                <div>Player: <span id="hud-name" style="color:var(--neon-purple)">-</span></div>
+                <div>Time: <span id="hud-time">00:00</span></div>
+                <div>Moves: <span id="hud-moves">0</span></div>
+            </div>
+
+            <div id="grid" class="grid-container">
+                <!-- Cards injected here -->
+            </div>
+
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="Game.quit()">Quit Game</button>
+        </div>
+    </div>
+
+    <!-- MODAL: GAME OVER -->
+    <div id="game-over-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="color: var(--neon-green); margin-top:0;">SYSTEM MATCHED</h2>
+            
+            <div class="stat-row">
+                <span>Time Taken:</span>
+                <span id="end-time" class="neon-text">00:00</span>
+            </div>
+            <div class="stat-row">
+                <span>Moves:</span>
+                <span id="end-moves" class="neon-text">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Difficulty:</span>
+                <span id="end-diff" style="text-transform: capitalize;">-</span>
+            </div>
+            <div class="stat-row">
+                <span>Best (Time):</span>
+                <span id="end-best" style="color: var(--neon-pink)">-</span>
+            </div>
+
+            <button class="btn" onclick="Game.restart()">Play Again</button>
+            <button class="btn btn-secondary" onclick="Game.quit()">Menu</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * NEON MEMORY GAME ENGINE
+         * Fully Offline, LocalStorage, Mobile Friendly
+         */
+        const Game = (() => {
+            // --- CONFIG & STATE ---
+            const state = {
+                playerName: '',
+                difficulty: 'easy', // easy, medium, hard
+                cards: [],
+                flippedCards: [],
+                matchedPairs: 0,
+                totalPairs: 0,
+                moves: 0,
+                timerStart: null,
+                timerInterval: null,
+                isLocked: false,
+                bestScores: {
+                    easy: { time: Infinity, moves: Infinity },
+                    medium: { time: Infinity, moves: Infinity },
+                    hard: { time: Infinity, moves: Infinity }
+                }
+            };
+
+            // Icons for cards (Unicode / Emoji for offline compat)
+            const ICONS = [
+                '🚀', '🛸', '👾', '🤖', '⚡', '💎', '🧬', '🔮',
+                '🧿', '🦠', '💊', '💣', '🪐', '🌙', '⭐', '🔥',
+                '🕹️', '💾'
+            ];
+
+            // --- DOM ELEMENTS ---
+            const els = {
+                menuScreen: document.getElementById('menu-screen'),
+                gameScreen: document.getElementById('game-screen'),
+                grid: document.getElementById('grid'),
+                nameInput: document.getElementById('player-name'),
+                hudName: document.getElementById('hud-name'),
+                hudTime: document.getElementById('hud-time'),
+                hudMoves: document.getElementById('hud-moves'),
+                modal: document.getElementById('game-over-modal')
+            };
+
+            // --- INIT ---
+            function init() {
+                loadData();
+                els.nameInput.value = state.playerName;
+                // Pre-warm audio if needed (omitted for pure silence/simplicity per request)
+            }
+
+            // --- STORAGE ---
+            function loadData() {
+                const storedName = localStorage.getItem('neonMem_name');
+                const storedScores = localStorage.getItem('neonMem_scores');
+                
+                if (storedName) state.playerName = storedName;
+                if (storedScores) state.bestScores = JSON.parse(storedScores);
+            }
+
+            function saveData() {
+                localStorage.setItem('neonMem_name', state.playerName);
+                localStorage.setItem('neonMem_scores', JSON.stringify(state.bestScores));
+            }
+
+            function resetData() {
+                if(confirm("Erase player name and all high scores?")) {
+                    localStorage.removeItem('neonMem_name');
+                    localStorage.removeItem('neonMem_scores');
+                    location.reload();
+                }
+            }
+
+            // --- GAME LOGIC ---
+            function start(difficulty) {
+                // Save Name
+                const nameVal = els.nameInput.value.trim() || 'Player 1';
+                state.playerName = nameVal;
+                state.difficulty = difficulty;
+                saveData();
+
+                // Setup Grid
+                let rows, cols;
+                if (difficulty === 'easy') { rows=4; cols=4; }
+                else if (difficulty === 'medium') { rows=4; cols=5; }
+                else { rows=6; cols=6; } // Hard
+
+                state.totalPairs = (rows * cols) / 2;
+                setupBoard(state.totalPairs, difficulty);
+
+                // UI Updates
+                els.hudName.textContent = state.playerName;
+                els.hudMoves.textContent = '0';
+                els.hudTime.textContent = '00:00';
+                
+                switchScreen('game');
+                
+                // Reset State
+                state.moves = 0;
+                state.matchedPairs = 0;
+                state.flippedCards = [];
+                state.isLocked = false;
+                
+                startTimer();
+            }
+
+            function setupBoard(pairsCount, difficulty) {
+                // Generate Pairs
+                const gameIcons = ICONS.slice(0, pairsCount);
+                const deck = [...gameIcons, ...gameIcons];
+                
+                // Shuffle (Fisher-Yates)
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+
+                // Render
+                els.grid.innerHTML = '';
+                els.grid.className = `grid-container grid-${difficulty === 'hard' ? '6x6' : (difficulty === 'medium' ? '4x5' : '4x4')}`;
+
+                deck.forEach((icon, index) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.dataset.icon = icon;
+                    card.dataset.index = index;
+                    
+                    // Inner HTML structure for 3D flip
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-front">${icon}</div>
+                            <div class="card-back"></div>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', () => handleCardClick(card));
+                    els.grid.appendChild(card);
+                });
+            }
+
+            function handleCardClick(card) {
+                // Ignore if locked, already flipped, or already matched
+                if (state.isLocked || 
+                    card.classList.contains('flipped') || 
+                    card.classList.contains('matched')) {
+                    return;
+                }
+
+                // Flip
+                card.classList.add('flipped');
+                state.flippedCards.push(card);
+
+                if (state.flippedCards.length === 2) {
+                    state.moves++;
+                    els.hudMoves.textContent = state.moves;
+                    checkForMatch();
+                }
+            }
+
+            function checkForMatch() {
+                state.isLocked = true; // Prevent clicking others
+                const [card1, card2] = state.flippedCards;
+                const match = card1.dataset.icon === card2.dataset.icon;
+
+                if (match) {
+                    disableCards(card1, card2);
+                } else {
+                    unflipCards(card1, card2);
+                }
+            }
+
+            function disableCards(c1, c2) {
+                setTimeout(() => {
+                    c1.classList.add('matched');
+                    c2.classList.add('matched');
+                    state.flippedCards = [];
+                    state.isLocked = false;
+                    state.matchedPairs++;
+
+                    if (state.matchedPairs === state.totalPairs) {
+                        endGame();
+                    }
+                }, 500);
+            }
+
+            function unflipCards(c1, c2) {
+                setTimeout(() => {
+                    c1.classList.remove('flipped');
+                    c2.classList.remove('flipped');
+                    state.flippedCards = [];
+                    state.isLocked = false;
+                }, 1000);
+            }
+
+            // --- TIMER ---
+            function startTimer() {
+                stopTimer();
+                state.timerStart = Date.now();
+                state.timerInterval = setInterval(() => {
+                    const delta = Math.floor((Date.now() - state.timerStart) / 1000);
+                    const m = Math.floor(delta / 60).toString().padStart(2, '0');
+                    const s = (delta % 60).toString().padStart(2, '0');
+                    els.hudTime.textContent = `${m}:${s}`;
+                }, 1000);
+            }
+
+            function stopTimer() {
+                if (state.timerInterval) clearInterval(state.timerInterval);
+            }
+
+            // --- END GAME ---
+            function endGame() {
+                stopTimer();
+                const timeTaken = Math.floor((Date.now() - state.timerStart) / 1000);
+                
+                // Update High Score
+                const currentBest = state.bestScores[state.difficulty].time;
+                let isNewRecord = false;
+                if (timeTaken < currentBest) {
+                    state.bestScores[state.difficulty].time = timeTaken;
+                    state.bestScores[state.difficulty].moves = state.moves;
+                    saveData();
+                    isNewRecord = true;
+                }
+
+                // Populate Modal
+                document.getElementById('end-time').textContent = els.hudTime.textContent;
+                document.getElementById('end-moves').textContent = state.moves;
+                document.getElementById('end-diff').textContent = state.difficulty;
+                
+                const bestM = Math.floor(state.bestScores[state.difficulty].time / 60).toString().padStart(2, '0');
+                const bestS = (state.bestScores[state.difficulty].time % 60).toString().padStart(2, '0');
+                
+                document.getElementById('end-best').textContent = 
+                    state.bestScores[state.difficulty].time === Infinity 
+                    ? "--:--" 
+                    : `${bestM}:${bestS} ${isNewRecord ? '(NEW RECORD!)' : ''}`;
+
+                els.modal.classList.add('active');
+            }
+
+            // --- NAVIGATION ---
+            function restart() {
+                els.modal.classList.remove('active');
+                start(state.difficulty);
+            }
+
+            function quit() {
+                stopTimer();
+                els.modal.classList.remove('active');
+                switchScreen('menu');
+            }
+
+            function switchScreen(to) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                if (to === 'menu') els.menuScreen.classList.add('active');
+                if (to === 'game') els.gameScreen.classList.add('active');
+            }
+
+            return {
+                init,
+                start,
+                restart,
+                quit,
+                resetData
+            };
+        })();
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', Game.init);
+
+    </script>
+</body>
+</html>
