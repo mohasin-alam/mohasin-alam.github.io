@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon 2048 | Offline Arcade</title>
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="Futuristic Neon 2048 Puzzle Game">
+    <style>
+        /* --- 1. CSS VARIABLES & RESET --- */
+        :root {
+            --bg-color: #050505;
+            --grid-bg: #111;
+            --text-color: #fff;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #0aff0a;
+            --neon-purple: #bc13fe;
+            --neon-yellow: #fefe00;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --tile-size: clamp(60px, 18vw, 100px);
+            --gap: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            touch-action: none; /* Prevent scroll on mobile */
+        }
+
+        /* --- 2. HEADER & HUD --- */
+        header {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1.title {
+            font-size: 2rem;
+            margin: 0;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            animation: flicker 4s infinite alternate;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: 1px solid #333;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .status-badge.online {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green);
+        }
+        .status-badge.offline {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            box-shadow: 0 0 5px var(--neon-pink);
+        }
+
+        .scores-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 450px;
+            justify-content: center;
+        }
+
+        .score-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+            min-width: 100px;
+        }
+        .score-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+        .score-val { font-size: 1.2rem; font-weight: bold; }
+
+        /* --- 3. GAME GRID --- */
+        .game-container {
+            position: relative;
+            padding: var(--gap);
+            background: var(--grid-bg);
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, var(--tile-size));
+            grid-template-rows: repeat(4, var(--tile-size));
+            gap: var(--gap);
+        }
+
+        .cell-bg {
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tile-container {
+            position: absolute;
+            top: var(--gap);
+            left: var(--gap);
+            width: calc(100% - (var(--gap) * 2));
+            height: calc(100% - (var(--gap) * 2));
+            pointer-events: none;
+        }
+
+        .tile {
+            position: absolute;
+            width: var(--tile-size);
+            height: var(--tile-size);
+            background: #222;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: transform 0.15s ease-in-out, background 0.2s;
+            animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            z-index: 2;
+        }
+
+        /* TILE COLORS (Neon Palette) */
+        .tile-2 { color: #fff; border-color: #444; text-shadow: 0 0 5px #fff; }
+        .tile-4 { color: var(--neon-cyan); border-color: var(--neon-cyan); box-shadow: inset 0 0 10px var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan); }
+        .tile-8 { color: var(--neon-purple); border-color: var(--neon-purple); box-shadow: inset 0 0 10px var(--neon-purple); text-shadow: 0 0 5px var(--neon-purple); }
+        .tile-16 { color: var(--neon-pink); border-color: var(--neon-pink); box-shadow: inset 0 0 10px var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink); }
+        .tile-32 { color: var(--neon-green); border-color: var(--neon-green); box-shadow: inset 0 0 10px var(--neon-green); text-shadow: 0 0 5px var(--neon-green); }
+        .tile-64 { color: var(--neon-yellow); border-color: var(--neon-yellow); box-shadow: inset 0 0 15px var(--neon-yellow); text-shadow: 0 0 5px var(--neon-yellow); }
+        .tile-128 { background: rgba(0, 243, 255, 0.2); color: #fff; border-color: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); }
+        .tile-256 { background: rgba(188, 19, 254, 0.2); color: #fff; border-color: var(--neon-purple); box-shadow: 0 0 15px var(--neon-purple); }
+        .tile-512 { background: rgba(255, 0, 85, 0.2); color: #fff; border-color: var(--neon-pink); box-shadow: 0 0 20px var(--neon-pink); }
+        .tile-1024 { background: rgba(10, 255, 10, 0.2); color: #fff; border-color: var(--neon-green); box-shadow: 0 0 20px var(--neon-green); font-size: 1.8rem; }
+        .tile-2048 { background: var(--neon-yellow); color: #000; border-color: #fff; box-shadow: 0 0 30px var(--neon-yellow); font-size: 1.8rem; animation: glow 1.5s infinite alternate; }
+
+        /* --- 4. OVERLAYS --- */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        .overlay.active { display: flex; animation: fadeIn 0.3s; }
+
+        .btn {
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: 0.2s;
+        }
+        .btn:active { transform: scale(0.95); background: var(--neon-cyan); color: #000; }
+        .btn-restart { margin-top: 20px; font-size: 0.9rem; padding: 10px 20px; border-color: #555; color: #aaa; box-shadow: none; }
+
+        input[type="text"] {
+            background: transparent;
+            border: 2px solid var(--neon-purple);
+            color: white;
+            padding: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        /* --- 5. FOOTER --- */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+        }
+        .dev-credit { color: var(--neon-purple); font-weight: bold; text-shadow: 0 0 5px var(--neon-purple); }
+
+        /* --- ANIMATIONS --- */
+        @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes glow { from { box-shadow: 0 0 10px var(--neon-yellow); } to { box-shadow: 0 0 30px var(--neon-yellow); } }
+        @keyframes flicker { 0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; } 20%, 24%, 55% { opacity: 0.5; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <div id="status-indicator" class="status-badge">Checking...</div>
+            <div id="player-display" style="margin-top:5px; font-size:0.9rem; color:#aaa;">Player</div>
+        </div>
+        <h1 class="title">2048</h1>
+    </header>
+
+    <div class="scores-container">
+        <div class="score-box">
+            <div class="score-label">SCORE</div>
+            <div class="score-val" id="score-current">0</div>
+        </div>
+        <div class="score-box">
+            <div class="score-label">BEST</div>
+            <div class="score-val" id="score-best">0</div>
+        </div>
+    </div>
+
+    <!-- MAIN GAME AREA -->
+    <div class="game-container" id="game-touch-area">
+        <div class="grid">
+            <!-- 16 Cells for background -->
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+            <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        </div>
+        <div class="tile-container" id="tile-layer">
+            <!-- Tiles injected by JS -->
+        </div>
+    </div>
+
+    <button class="btn btn-restart" onclick="Game.confirmRestart()">NEW GAME</button>
+
+    <!-- OVERLAYS -->
+    <div id="start-overlay" class="overlay active">
+        <h2 style="color:var(--neon-cyan)">WELCOME</h2>
+        <input type="text" id="player-name-input" placeholder="Enter Name" maxlength="10">
+        <button class="btn" onclick="Game.initPlayer()">START</button>
+    </div>
+
+    <div id="game-over-overlay" class="overlay">
+        <h2 style="color:var(--neon-pink); font-size:2.5rem; text-shadow:0 0 10px var(--neon-pink)">GAME OVER</h2>
+        <p>Score: <span id="final-score">0</span></p>
+        <button class="btn" onclick="Game.restart()">TRY AGAIN</button>
+    </div>
+
+    <div id="win-overlay" class="overlay">
+        <h2 style="color:var(--neon-yellow); font-size:2.5rem; text-shadow:0 0 10px var(--neon-yellow)">2048!</h2>
+        <p>Mission Accomplished.</p>
+        <button class="btn" onclick="Game.continueGame()">CONTINUE</button>
+        <button class="btn btn-restart" onclick="Game.restart()">NEW GAME</button>
+    </div>
+
+    <footer>
+        Developed by: <br>
+        <span class="dev-credit">Csm Mohasin Alam</span>
+    </footer>
+
+    <script>
+        /**
+         * NEON 2048 ENGINE
+         * Pure JS, Offline, Responsive
+         */
+        const Game = (() => {
+            const SIZE = 4;
+            let grid = [];
+            let score = 0;
+            let highScore = 0;
+            let playerName = "";
+            let gameWon = false;
+            let keepPlaying = false;
+
+            const els = {
+                tileLayer: document.getElementById('tile-layer'),
+                scoreCur: document.getElementById('score-current'),
+                scoreBest: document.getElementById('score-best'),
+                startScreen: document.getElementById('start-overlay'),
+                gameOverScreen: document.getElementById('game-over-overlay'),
+                winScreen: document.getElementById('win-overlay'),
+                nameInput: document.getElementById('player-name-input'),
+                playerDisplay: document.getElementById('player-display'),
+                netStatus: document.getElementById('status-indicator'),
+                finalScore: document.getElementById('final-score')
+            };
+
+            // --- 1. SETUP ---
+            function init() {
+                loadData();
+                setupNetwork();
+                setupInputs();
+                
+                if(playerName) {
+                    els.playerDisplay.textContent = playerName;
+                    els.startScreen.classList.remove('active');
+                    startGame();
+                }
+            }
+
+            function initPlayer() {
+                const name = els.nameInput.value.trim() || "Player";
+                playerName = name;
+                saveData();
+                els.playerDisplay.textContent = playerName;
+                els.startScreen.classList.remove('active');
+                startGame();
+            }
+
+            function startGame() {
+                score = 0;
+                gameWon = false;
+                keepPlaying = false;
+                grid = Array(SIZE * SIZE).fill(0);
+                els.gameOverScreen.classList.remove('active');
+                els.winScreen.classList.remove('active');
+                
+                spawnTile();
+                spawnTile();
+                updateView();
+            }
+
+            // --- 2. GAME LOGIC ---
+            function spawnTile() {
+                const emptyCells = grid.map((val, idx) => val === 0 ? idx : null).filter(val => val !== null);
+                if (emptyCells.length === 0) return;
+                
+                const randomIdx = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                grid[randomIdx] = Math.random() < 0.9 ? 2 : 4;
+            }
+
+            // Logic to slide a single row [2, 0, 2, 4] -> [4, 4, 0, 0]
+            function slideRow(row) {
+                // 1. Remove zeros
+                let filtered = row.filter(val => val !== 0);
+                // 2. Merge
+                for (let i = 0; i < filtered.length - 1; i++) {
+                    if (filtered[i] === filtered[i + 1]) {
+                        filtered[i] *= 2;
+                        score += filtered[i];
+                        filtered[i + 1] = 0;
+                        
+                        // Check Win
+                        if(filtered[i] === 2048 && !gameWon && !keepPlaying) {
+                            gameWon = true;
+                            setTimeout(() => els.winScreen.classList.add('active'), 300);
+                        }
+                    }
+                }
+                // 3. Remove zeros created by merge and pad
+                filtered = filtered.filter(val => val !== 0);
+                while (filtered.length < SIZE) {
+                    filtered.push(0);
+                }
+                return filtered;
+            }
+
+            function move(direction) {
+                let rotated = [...grid];
+                let hasChanged = false;
+
+                // 1. Transform grid so we always slide "Left" logic
+                if (direction === 'right') rotated = reverseRows(rotated);
+                else if (direction === 'up') rotated = rotateLeft(rotated);
+                else if (direction === 'down') rotated = rotateRight(rotated);
+
+                // 2. Process Rows
+                let newGrid = [];
+                for (let i = 0; i < SIZE; i++) {
+                    const row = rotated.slice(i * SIZE, i * SIZE + SIZE);
+                    const newRow = slideRow(row);
+                    newGrid.push(...newRow);
+                }
+
+                // 3. Transform back
+                if (direction === 'right') newGrid = reverseRows(newGrid);
+                else if (direction === 'up') newGrid = rotateRight(newGrid); // Reverse left is right
+                else if (direction === 'down') newGrid = rotateLeft(newGrid);
+
+                // 4. Check change
+                if (JSON.stringify(grid) !== JSON.stringify(newGrid)) {
+                    grid = newGrid;
+                    hasChanged = true;
+                }
+
+                if (hasChanged) {
+                    spawnTile();
+                    updateView();
+                    if (isGameOver()) {
+                        els.finalScore.textContent = score;
+                        setTimeout(() => els.gameOverScreen.classList.add('active'), 500);
+                    }
+                }
+            }
+
+            // --- 3. MATRIX UTILS ---
+            function rotateLeft(arr) {
+                const newArr = Array(SIZE*SIZE).fill(0);
+                for(let r=0; r<SIZE; r++) {
+                    for(let c=0; c<SIZE; c++) {
+                        // (r, c) -> (SIZE-1-c, r)
+                        newArr[(SIZE-1-c)*SIZE + r] = arr[r*SIZE + c];
+                    }
+                }
+                return newArr;
+            }
+
+            function rotateRight(arr) { // 3 lefts = 1 right
+                return rotateLeft(rotateLeft(rotateLeft(arr)));
+            }
+
+            function reverseRows(arr) {
+                const newArr = [];
+                for(let i=0; i<SIZE; i++) {
+                    const row = arr.slice(i*SIZE, (i+1)*SIZE).reverse();
+                    newArr.push(...row);
+                }
+                return newArr;
+            }
+
+            function isGameOver() {
+                if (grid.includes(0)) return false; // Have space
+                // Check neighbors
+                for (let i = 0; i < SIZE * SIZE; i++) {
+                    const val = grid[i];
+                    // Check Right
+                    if ((i + 1) % SIZE !== 0 && grid[i + 1] === val) return false;
+                    // Check Down
+                    if (i + SIZE < SIZE * SIZE && grid[i + SIZE] === val) return false;
+                }
+                return true;
+            }
+
+            // --- 4. RENDER ---
+            function updateView() {
+                // Update Score
+                if(score > highScore) highScore = score;
+                els.scoreCur.textContent = score;
+                els.scoreBest.textContent = highScore;
+                saveData();
+
+                // Render Tiles
+                els.tileLayer.innerHTML = '';
+                const gap = 10;
+                // Calculate responsive tile size based on container width if needed, 
+                // but CSS Variables usually handle this. 
+                // Here we use CSS grid positioning logic mapping to absolute percentage.
+                
+                grid.forEach((val, index) => {
+                    if (val === 0) return;
+
+                    const row = Math.floor(index / SIZE);
+                    const col = index % SIZE;
+
+                    const tile = document.createElement('div');
+                    tile.classList.add('tile', `tile-${val}`);
+                    if(val > 2048) tile.classList.add('tile-2048'); // Fallback style
+                    
+                    tile.textContent = val;
+                    
+                    // Position calculations handled by CSS Grid parent is hard for absolute tiles animation.
+                    // We simply translate them based on percentage (0%, 100%, 200%, 300%) + gaps.
+                    // A simpler way for pure CSS responsiveness:
+                    tile.style.transform = `translate(calc(${col} * (100% + ${gap}px)), calc(${row} * (100% + ${gap}px)))`;
+                    
+                    // Note: For "slide" animation in pure JS, we need ID tracking of tiles.
+                    // For this simpler version, we use "pop" animation on render.
+                    
+                    els.tileLayer.appendChild(tile);
+                });
+            }
+
+            // --- 5. INPUT HANDLING ---
+            function setupInputs() {
+                // Keyboard
+                document.addEventListener('keydown', (e) => {
+                    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+                        e.preventDefault();
+                        const dir = e.key.replace('Arrow','').toLowerCase();
+                        move(dir);
+                    }
+                });
+
+                // Touch
+                let startX, startY;
+                const touchArea = document.getElementById('game-touch-area');
+
+                touchArea.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }, {passive: false});
+
+                touchArea.addEventListener('touchend', (e) => {
+                    if(!startX || !startY) return;
+                    const endX = e.changedTouches[0].clientX;
+                    const endY = e.changedTouches[0].clientY;
+                    
+                    const dx = endX - startX;
+                    const dy = endY - startY;
+                    
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        if(Math.abs(dx) > 30) move(dx > 0 ? 'right' : 'left');
+                    } else {
+                        if(Math.abs(dy) > 30) move(dy > 0 ? 'down' : 'up');
+                    }
+                    startX = null;
+                    startY = null;
+                }, {passive: false});
+            }
+
+            // --- 6. DATA & UTILS ---
+            function saveData() {
+                localStorage.setItem('neon2048', JSON.stringify({
+                    highScore, playerName
+                }));
+            }
+
+            function loadData() {
+                const data = JSON.parse(localStorage.getItem('neon2048'));
+                if(data) {
+                    highScore = data.highScore || 0;
+                    playerName = data.playerName || "";
+                    els.scoreBest.textContent = highScore;
+                }
+            }
+
+            function confirmRestart() {
+                if(confirm("Restart Game? Current progress will be lost.")) {
+                    startGame();
+                }
+            }
+            
+            function continueGame() {
+                keepPlaying = true;
+                els.winScreen.classList.remove('active');
+            }
+
+            function restart() {
+                startGame();
+            }
+
+            function setupNetwork() {
+                function updateStatus() {
+                    if (navigator.onLine) {
+                        els.netStatus.textContent = "🟢 ONLINE";
+                        els.netStatus.className = "status-badge online";
+                    } else {
+                        els.netStatus.textContent = "🔴 OFFLINE";
+                        els.netStatus.className = "status-badge offline";
+                    }
+                }
+                window.addEventListener('online', updateStatus);
+                window.addEventListener('offline', updateStatus);
+                updateStatus();
+            }
+
+            return {
+                init,
+                initPlayer,
+                confirmRestart,
+                restart,
+                continueGame
+            };
+        })();
+
+        document.addEventListener('DOMContentLoaded', Game.init);
+
+        // Service Worker Reg
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('SW Registered'));
+        }
+    </script>
+</body>
+</html>
