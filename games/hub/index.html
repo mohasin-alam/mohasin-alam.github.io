@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Arcade Hub | Offline</title>
+    <meta name="theme-color" content="#050505">
+    <meta name="description" content="Offline Neon Game Hub - Play Arcade Classics">
+    <style>
+        /* --- 1. CSS VARIABLES & RESET --- */
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-green: #0aff0a;
+            --neon-purple: #bc13fe;
+            --neon-yellow: #fefe00;
+            --text-main: #fff;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --gap: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. HEADER --- */
+        header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            background: rgba(0,0,0,0.8);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: flicker 4s infinite alternate;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-badge {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        .player-name {
+            color: var(--neon-purple);
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--neon-purple);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-badge.online {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green);
+        }
+        .status-badge.offline {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            box-shadow: 0 0 5px var(--neon-pink);
+        }
+
+        /* --- 3. HUB VIEW (GRID) --- */
+        #hub-view {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            padding: 10px;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+        
+        /* Specific Card Theme Colors */
+        .card-tictactoe:hover { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); }
+        .card-snake:hover { border-color: var(--neon-green); box-shadow: 0 0 20px rgba(10, 255, 10, 0.3); }
+        .card-rps:hover { border-color: var(--neon-pink); box-shadow: 0 0 20px rgba(255, 0, 85, 0.3); }
+        .card-2048:hover { border-color: var(--neon-yellow); box-shadow: 0 0 20px rgba(254, 254, 0, 0.3); }
+        .card-connect4:hover { border-color: var(--neon-purple); box-shadow: 0 0 20px rgba(188, 19, 254, 0.3); }
+
+        .game-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+        .game-card:hover .game-icon { transform: scale(1.2); }
+
+        .game-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        /* --- 4. GAME CONTAINER (VIEW) --- */
+        #game-view {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            width: 100%;
+            height: calc(100vh - 70px); /* Minus header */
+            background: #000;
+        }
+
+        .game-nav-bar {
+            padding: 10px 20px;
+            background: #111;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .btn-back:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 10px var(--neon-cyan); }
+
+        #active-game-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 5. OVERLAYS --- */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .hidden { display: none !important; }
+
+        input[type="text"] {
+            background: #111;
+            border: 2px solid var(--neon-purple);
+            padding: 15px;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--neon-purple);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        /* --- 6. FOOTER --- */
+        footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #555;
+            background: #050505;
+            border-top: 1px solid #111;
+            margin-top: auto;
+        }
+        .dev-credit {
+            color: var(--neon-green);
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(10, 255, 10, 0.4);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+            20%, 24%, 55% { opacity: 0.5; }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 7. HELPER FOR GAMES (Styles to support injected games) --- */
+        /* Basic TicTacToe styles for the demo */
+        .ttt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .ttt-cell { width: 80px; height: 80px; background: #222; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; cursor: pointer; border: 2px solid #444; }
+        .ttt-cell.x { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+        .ttt-cell.o { color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+    </style>
+</head>
+<body>
+
+    <!-- WELCOME OVERLAY -->
+    <div id="welcome-screen" class="overlay">
+        <h1 class="brand" style="font-size: 2rem; margin-bottom: 30px;">NEON ARCADE</h1>
+        <p style="color:#aaa; margin-bottom:10px;">ENTER PLAYER ID</p>
+        <input type="text" id="player-input" placeholder="Name / Callsign" maxlength="12">
+        <button class="btn-primary" onclick="App.setPlayerName()">ENTER HUB</button>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header>
+        <div class="brand">ARCADE HUB</div>
+        <div class="header-right">
+            <div id="status-badge" class="status-badge">Checking...</div>
+            <div class="player-badge">Pilot: <span id="display-name" class="player-name">Guest</span></div>
+        </div>
+    </header>
+
+    <!-- HUB VIEW (GAME SELECTION) -->
+    <div id="hub-view">
+        <div class="games-grid">
+            <!-- Game 1: Tic Tac Toe (Fully Implemented Demo) -->
+            <div class="game-card card-tictactoe" onclick="App.launchGame('tictactoe')">
+                <div class="game-icon" style="color:var(--neon-cyan)">❌⭕</div>
+                <div class="game-title">Tic Tac Toe</div>
+            </div>
+
+            <!-- Game 2: Snake -->
+            <div class="game-card card-snake" onclick="App.launchGame('snake')">
+                <div class="game-icon" style="color:var(--neon-green)">🐍</div>
+                <div class="game-title">Neon Snake</div>
+            </div>
+
+            <!-- Game 3: RPS -->
+            <div class="game-card card-rps" onclick="App.launchGame('rps')">
+                <div class="game-icon" style="color:var(--neon-pink)">✊✋✌️</div>
+                <div class="game-title">R.P.S. Battle</div>
+            </div>
+
+            <!-- Game 4: 2048 -->
+            <div class="game-card card-2048" onclick="App.launchGame('2048')">
+                <div class="game-icon" style="color:var(--neon-yellow)">🔢</div>
+                <div class="game-title">2048 Neon</div>
+            </div>
+
+            <!-- Game 5: Connect 4 -->
+            <div class="game-card card-connect4" onclick="App.launchGame('connect4')">
+                <div class="game-icon" style="color:var(--neon-purple)">🔴🔵</div>
+                <div class="game-title">Connect 4</div>
+            </div>
+
+            <!-- Game 6: Space Shooter -->
+            <div class="game-card" onclick="App.launchGame('space')">
+                <div class="game-icon" style="color:var(--neon-cyan)">🚀</div>
+                <div class="game-title">Space Shooter</div>
+            </div>
+            
+             <!-- Game 7: Memory -->
+             <div class="game-card" onclick="App.launchGame('memory')">
+                <div class="game-icon" style="color:var(--neon-green)">🧠</div>
+                <div class="game-title">Memory Grid</div>
+            </div>
+
+            <!-- Reset Data -->
+            <div class="game-card" style="border-color:#333; opacity:0.7" onclick="App.resetAllData()">
+                <div class="game-icon" style="color:#666">🗑️</div>
+                <div class="game-title">Reset Data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME VIEW (CONTAINER) -->
+    <div id="game-view">
+        <div class="game-nav-bar">
+            <button class="btn-back" onclick="App.backToHub()">◀ BACK TO HUB</button>
+            <span id="active-game-title" style="color:#fff; font-weight:bold; text-transform:uppercase;">GAME TITLE</span>
+        </div>
+        <div id="active-game-container">
+            <!-- Games are injected here -->
+        </div>
+    </div>
+
+    <footer>
+        Developed by: <span class="dev-credit">Csm Mohasin Alam</span>
+    </footer>
+
+    <script>
+        /**
+         * MAIN APPLICATION CONTROLLER
+         * Handles Navigation, Identity, Offline Status, and Game Loading
+         */
+        const App = (() => {
+            const state = {
+                playerName: 'Guest',
+                currentGame: null
+            };
+
+            const els = {
+                welcome: document.getElementById('welcome-screen'),
+                hub: document.getElementById('hub-view'),
+                gameView: document.getElementById('game-view'),
+                gameContainer: document.getElementById('active-game-container'),
+                gameTitle: document.getElementById('active-game-title'),
+                input: document.getElementById('player-input'),
+                displayName: document.getElementById('display-name'),
+                status: document.getElementById('status-badge')
+            };
+
+            function init() {
+                loadPlayer();
+                setupNetwork();
+                // Check if user has name
+                if (localStorage.getItem('neonHub_name')) {
+                    els.welcome.classList.add('hidden');
+                }
+            }
+
+            function loadPlayer() {
+                const stored = localStorage.getItem('neonHub_name');
+                if (stored) {
+                    state.playerName = stored;
+                    els.displayName.textContent = stored;
+                }
+            }
+
+            function setPlayerName() {
+                const val = els.input.value.trim();
+                if (val) {
+                    state.playerName = val;
+                    localStorage.setItem('neonHub_name', val);
+                    els.displayName.textContent = val;
+                    els.welcome.classList.add('hidden');
+                }
+            }
+
+            function resetAllData() {
+                if(confirm("Factory Reset: Clear all high scores and player data?")) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            }
+
+            // --- NAVIGATION & GAME LOADER ---
+
+            function launchGame(gameId) {
+                state.currentGame = gameId;
+                
+                // Switch Views
+                els.hub.style.display = 'none';
+                els.gameView.style.display = 'flex';
+                
+                // Clear previous game
+                els.gameContainer.innerHTML = '';
+
+                // Load Game Logic
+                switch(gameId) {
+                    case 'tictactoe':
+                        els.gameTitle.textContent = "TIC TAC TOE";
+                        Games.TicTacToe.init(els.gameContainer, state.playerName);
+                        break;
+                    
+                    case 'snake':
+                        els.gameTitle.textContent = "NEON SNAKE";
+                        // To implement: Copy logic from Snake response
+                        renderPlaceholder("Snake Game", "Paste Snake Code Here in JS");
+                        break;
+
+                    case 'rps':
+                        els.gameTitle.textContent = "ROCK PAPER SCISSORS";
+                        renderPlaceholder("RPS Battle", "Paste RPS Code Here in JS");
+                        break;
+                    
+                    case '2048':
+                        els.gameTitle.textContent = "2048";
+                        renderPlaceholder("2048", "Paste 2048 Code Here in JS");
+                        break;
+                    
+                    case 'connect4':
+                        els.gameTitle.textContent = "CONNECT 4";
+                        renderPlaceholder("Connect 4", "Paste Connect 4 Code Here in JS");
+                        break;
+
+                    case 'space':
+                        els.gameTitle.textContent = "SPACE SHOOTER";
+                        renderPlaceholder("Space Shooter", "Paste Shooter Code Here in JS");
+                        break;
+                    
+                    case 'memory':
+                        els.gameTitle.textContent = "MEMORY GAME";
+                        renderPlaceholder("Memory Game", "Paste Memory Code Here in JS");
+                        break;
+                }
+            }
+
+            function backToHub() {
+                // Kill current game loop/state if necessary
+                state.currentGame = null;
+                els.gameContainer.innerHTML = ''; // Wipe DOM
+
+                els.gameView.style.display = 'none';
+                els.hub.style.display = 'flex';
+            }
+
+            function renderPlaceholder(title, msg) {
+                els.gameContainer.innerHTML = `
+                    <div style="text-align:center; color:#666;">
+                        <h2 style="color:var(--neon-cyan)">${title}</h2>
+                        <p>${msg}</p>
+                        <p style="font-size:0.8rem">In a real deployment, the individual game logic would be imported here.</p>
+                    </div>
+                `;
+            }
+
+            // --- NETWORK STATUS ---
+            function setupNetwork() {
+                function update() {
+                    if (navigator.onLine) {
+                        els.status.innerHTML = '<span style="color:var(--neon-green)">●</span> ONLINE';
+                        els.status.className = 'status-badge online';
+                    } else {
+                        els.status.innerHTML = '<span style="color:var(--neon-pink)">●</span> OFFLINE';
+                        els.status.className = 'status-badge offline';
+                    }
+                }
+                window.addEventListener('online', update);
+                window.addEventListener('offline', update);
+                update();
+            }
+
+            return {
+                init,
+                setPlayerName,
+                launchGame,
+                backToHub,
+                resetAllData
+            };
+        })();
+
+        /**
+         * INDIVIDUAL GAME MODULES
+         * This is where you insert the logic for specific games.
+         * I have implemented TicTacToe fully as the demo.
+         */
+        const Games = {
+            TicTacToe: {
+                init: (container, playerName) => {
+                    let board = Array(9).fill(null);
+                    let turn = 'X';
+                    let active = true;
+
+                    // Create UI
+                    const boardHTML = `
+                        <div style="text-align:center">
+                            <div style="margin-bottom:10px; font-size:1.2rem; color:var(--neon-purple)">
+                                <span id="ttt-status">Your Turn (X)</span>
+                            </div>
+                            <div class="ttt-grid" id="ttt-grid">
+                                ${board.map((_, i) => `<div class="ttt-cell" data-i="${i}"></div>`).join('')}
+                            </div>
+                            <button class="btn-primary" style="margin-top:20px" id="ttt-restart">RESTART</button>
+                        </div>
+                    `;
+                    container.innerHTML = boardHTML;
+
+                    const statusEl = document.getElementById('ttt-status');
+                    const cells = document.querySelectorAll('.ttt-cell');
+
+                    // Logic
+                    cells.forEach(cell => {
+                        cell.addEventListener('click', () => {
+                            const i = cell.dataset.i;
+                            if(!active || board[i]) return;
+                            
+                            board[i] = turn;
+                            cell.textContent = turn;
+                            cell.classList.add(turn.toLowerCase());
+
+                            if(checkWin(turn)) {
+                                active = false;
+                                statusEl.textContent = `${turn === 'X' ? playerName : 'Opponent'} Wins!`;
+                                statusEl.style.color = 'var(--neon-green)';
+                                return;
+                            }
+                            if(!board.includes(null)) {
+                                active = false;
+                                statusEl.textContent = "Draw!";
+                                return;
+                            }
+
+                            turn = turn === 'X' ? 'O' : 'X';
+                            statusEl.textContent = turn === 'X' ? 'Your Turn (X)' : 'O Turn';
+                        });
+                    });
+
+                    document.getElementById('ttt-restart').addEventListener('click', () => {
+                         Games.TicTacToe.init(container, playerName);
+                    });
+
+                    function checkWin(p) {
+                        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+                        return wins.some(c => board[c[0]]===p && board[c[1]]===p && board[c[2]]===p);
+                    }
+                }
+            },
+            
+            // PLACEHOLDER FOR OTHER GAMES
+            // To add Snake, for example, create a Snake object here and 
+            // put the Canvas/Game loop logic inside an init() function.
+        };
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', App.init);
+
+        // Service Worker Reg
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(() => console.log('SW Registered'));
+        }
+    </script>
+</body>
+</html>
