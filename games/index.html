@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Game Hub</title>
+<style>
+    /* Basic Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body {
+        background: #0f0f0f;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 3rem;
+        color: #0ff;
+        text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+        margin-bottom: 30px;
+        animation: flicker 2s infinite;
+    }
+
+    @keyframes flicker {
+        0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+        20%, 22%, 24%, 55% { opacity: 0.5; }
+    }
+
+    .game-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .game-card {
+        background: #111;
+        border: 2px solid #0ff;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 0 20px #0ff44;
+    }
+
+    .game-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px #0ff, 0 0 50px #0ff66;
+    }
+
+    .game-card h2 {
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        color: #0ff;
+        text-shadow: 0 0 5px #0ff;
+    }
+
+    .game-card p {
+        font-size: 1rem;
+        color: #aaffff;
+    }
+
+    footer {
+        margin-top: 40px;
+        font-size: 0.9rem;
+        color: #0ff;
+        text-shadow: 0 0 5px #0ff;
+    }
+
+    /* Online / Offline Badge */
+    #status {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        color: #000;
+        background-color: #0ff;
+        box-shadow: 0 0 10px #0ff;
+    }
+    #status.offline {
+        background-color: #f00;
+        color: #fff;
+        box-shadow: 0 0 10px #f00;
+    }
+</style>
+</head>
+<body>
+
+<h1>Neon Game Hub</h1>
+<div id="status">🟢 Online</div>
+
+<div class="game-grid">
+    <div class="game-card" onclick="location.href='2048/'">
+        <h2>2048</h2>
+        <p>Slide & merge tiles to reach 2048!</p>
+    </div>
+    <div class="game-card" onclick="location.href='Minesweeper/'">
+        <h2>Minesweeper</h2>
+        <p>Uncover the grid without hitting mines!</p>
+    </div>
+    <div class="game-card" onclick="location.href='connect-4/'">
+        <h2>Connect 4</h2>
+        <p>Classic Connect 4 – Player vs AI!</p>
+    </div>
+    <div class="game-card" onclick="location.href='snake/'">
+        <h2>Snake</h2>
+        <p>Grow your neon snake as long as possible!</p>
+    </div>
+    <div class="game-card" onclick="location.href='space/'">
+        <h2>Space Shooter</h2>
+        <p>Shoot enemies & survive the waves!</p>
+    </div>
+    <div class="game-card" onclick="location.href='word/'">
+        <h2>Word Search</h2>
+        <p>Find all hidden words in the neon grid!</p>
+    </div>
+    <div class="game-card" onclick="location.href='run/'">
+        <h2>Endless Runner</h2>
+        <p>Dodge obstacles & collect points!</p>
+    </div>
+    <div class="game-card" onclick="location.href='hub/'">
+        <h2>Full Hub</h2>
+        <p>Open all games from one place!</p>
+    </div>
+</div>
+
+<footer>Developed by: Csm Mohasin Alam</footer>
+
+<script>
+    function updateStatus() {
+        const status = document.getElementById('status');
+        if(navigator.onLine){
+            status.textContent = '🟢 Online';
+            status.classList.remove('offline');
+        } else {
+            status.textContent = '🔴 Offline';
+            status.classList.add('offline');
+        }
+    }
+
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+</script>
+
+</body>
+</html>
