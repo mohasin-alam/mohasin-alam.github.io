@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Tic-Tac-Toe</title>
+    <style>
+        /* --- 1. CSS VARIABLES & RESET --- */
+        :root {
+            --bg-color: #050505;
+            --grid-color: #1a1a1a;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-pink: #ff0055;
+            --neon-green: #0aff0a;
+            --text-color: #ffffff;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --cell-size: clamp(80px, 20vw, 120px);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation; /* Prevents double-tap zoom */
+        }
+
+        /* --- 2. LAYOUT & TYPOGRAPHY --- */
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1.title {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            animation: colorCycle 8s infinite linear, flicker 3s infinite alternate;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* --- 3. SCREENS --- */
+        .screen {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* --- 4. INPUTS & BUTTONS --- */
+        .btn {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+            font-weight: bold;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        .btn:hover, .btn:active {
+            background: var(--neon-blue);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .btn-secondary {
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+            font-size: 1rem;
+            padding: 10px 20px;
+        }
+        .btn-secondary:hover {
+            background: var(--neon-purple);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        .btn-danger {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .btn-danger:hover {
+            background: var(--neon-pink);
+            color: white;
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        input[type="text"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--neon-purple);
+            padding: 15px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 100%;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+        /* --- 5. GAME BOARD --- */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .score-box {
+            display: flex;
+            flex-direction: column;
+        }
+        .score-val {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .turn-indicator {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            min-height: 1.5em;
+        }
+        .turn-highlight {
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+            font-weight: bold;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 0 auto;
+            background-color: var(--bg-color);
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        /* Markers */
+        .cell.x {
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue);
+        }
+        .cell.o {
+            color: var(--neon-pink);
+            text-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        /* Winning Line Glow */
+        .cell.win {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--neon-green);
+            box-shadow: inset 0 0 20px var(--neon-green);
+        }
+
+        /* AI Move Animation */
+        .cell.ai-pulse {
+            animation: aiPulse 0.5s ease-out;
+        }
+
+        /* Hover effects for desktop */
+        @media(hover: hover) {
+            .cell:not(.x):not(.o):hover {
+                box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.2);
+                border-color: #555;
+            }
+        }
+
+        /* --- 6. ANIMATIONS --- */
+        @keyframes colorCycle {
+            0% { color: var(--neon-blue); }
+            33% { color: var(--neon-purple); }
+            66% { color: var(--neon-pink); }
+            100% { color: var(--neon-blue); }
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 1;
+            }
+            20%, 24%, 55% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes aiPulse {
+            0% { box-shadow: inset 0 0 0 var(--neon-pink); }
+            50% { box-shadow: inset 0 0 30px var(--neon-pink); border-color: var(--neon-pink); }
+            100% { box-shadow: inset 0 0 0 transparent; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 7. UTILS --- */
+        .hidden { display: none !important; }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sound-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid #333;
+            color: #666;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .sound-toggle.on {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            box-shadow: 0 0 5px var(--neon-green);
+        }
+
+    </style>
+</head>
+<body>
+
+    <button id="sound-btn" class="sound-toggle">SOUND: OFF</button>
+
+    <div class="app-container">
+        <h1 class="title">NEON TAC TOE</h1>
+
+        <!-- SCREEN 1: MODE SELECTION -->
+        <div id="mode-screen" class="screen active">
+            <h2>Select Mode</h2>
+            <button class="btn" onclick="Game.selectMode('pvp')">Player vs Player</button>
+            <button class="btn" onclick="Game.selectMode('pve')">Player vs AI</button>
+            
+            <div style="margin-top: 30px; font-size: 0.9rem; color: #666;">
+                History: P1 <span id="hist-p1">0</span> | P2/AI <span id="hist-p2">0</span> | Draws <span id="hist-draw">0</span>
+            </div>
+            <button class="btn btn-danger" onclick="Game.resetData()">Reset All Data</button>
+        </div>
+
+        <!-- SCREEN 2: NAME INPUT -->
+        <div id="name-screen" class="screen">
+            <h2 id="name-title">Enter Names</h2>
+            <div id="p1-input-group">
+                <label>Player X Name</label>
+                <input type="text" id="p1-name" placeholder="Player 1" maxlength="8">
+            </div>
+            <div id="p2-input-group">
+                <label>Player O Name</label>
+                <input type="text" id="p2-name" placeholder="Player 2" maxlength="8">
+            </div>
+            <button class="btn" onclick="Game.startGame()">START GAME</button>
+            <button class="btn btn-secondary" onclick="Game.showScreen('mode-screen')">Back</button>
+        </div>
+
+        <!-- SCREEN 3: GAME BOARD -->
+        <div id="game-screen" class="screen">
+            <div class="scoreboard">
+                <div class="score-box">
+                    <span id="score-p1-name">P1</span>
+                    <span class="score-val" id="score-p1">0</span>
+                </div>
+                <div class="score-box">
+                    <span style="color: #666">DRAW</span>
+                    <span class="score-val" id="score-draw">0</span>
+                </div>
+                <div class="score-box">
+                    <span id="score-p2-name">P2</span>
+                    <span class="score-val" id="score-p2">0</span>
+                </div>
+            </div>
+
+            <div class="turn-indicator" id="turn-display">Player X's Turn</div>
+
+            <div class="game-grid" id="grid">
+                <!-- Cells generated by JS -->
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="Game.restartMatch()">Rematch</button>
+                <button class="btn btn-secondary" onclick="Game.quitGame()">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * NEON TIC TAC TOE - Pure Vanilla JS
+         * Handles Game Logic, AI, Audio, and Storage
+         */
+
+        const Game = (() => {
+            // --- STATE MANAGEMENT ---
+            const state = {
+                mode: 'pvp', // 'pvp' or 'pve'
+                board: Array(9).fill(null),
+                currentPlayer: 'X',
+                active: false,
+                names: { X: 'Player 1', O: 'Player 2' },
+                scores: { X: 0, O: 0, draw: 0 },
+                soundOn: false,
+                aiDelay: 500, // ms
+            };
+
+            // Audio Context (Synthesizer)
+            let audioCtx = null;
+
+            // Winning Combinations
+            const wins = [
+                [0,1,2], [3,4,5], [6,7,8], // Rows
+                [0,3,6], [1,4,7], [2,5,8], // Cols
+                [0,4,8], [2,4,6]           // Diagonals
+            ];
+
+            // --- INITIALIZATION ---
+            function init() {
+                loadStorage();
+                renderHistory();
+                setupGrid();
+                setupAudio();
+            }
+
+            // --- UI FUNCTIONS ---
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+                document.getElementById(screenId).classList.add('active');
+            }
+
+            function setupGrid() {
+                const grid = document.getElementById('grid');
+                grid.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.index = i;
+                    cell.setAttribute('aria-label', `Cell ${i+1}`);
+                    cell.addEventListener('click', () => handleCellClick(i));
+                    grid.appendChild(cell);
+                }
+            }
+
+            function updateBoardUI(index, player, winningLine = null) {
+                const cells = document.querySelectorAll('.cell');
+                const cell = cells[index];
+                
+                cell.textContent = player;
+                cell.classList.add(player.toLowerCase());
+
+                // AI Pulse Effect
+                if (state.mode === 'pve' && player === 'O') {
+                    cell.classList.add('ai-pulse');
+                    setTimeout(() => cell.classList.remove('ai-pulse'), 600);
+                }
+
+                playTone(player === 'X' ? 400 : 300, 'square');
+
+                if (winningLine) {
+                    winningLine.forEach(idx => cells[idx].classList.add('win'));
+                    playWinSound();
+                }
+            }
+
+            function updateTurnUI() {
+                const display = document.getElementById('turn-display');
+                const name = state.names[state.currentPlayer];
+                display.innerHTML = `<span class="turn-highlight">${name}</span> (${state.currentPlayer})`;
+            }
+
+            function updateScoreUI() {
+                document.getElementById('score-p1').textContent = state.scores.X;
+                document.getElementById('score-p2').textContent = state.scores.O;
+                document.getElementById('score-draw').textContent = state.scores.draw;
+                document.getElementById('score-p1-name').textContent = state.names.X;
+                document.getElementById('score-p2-name').textContent = state.names.O;
+            }
+
+            // --- GAME FLOW ---
+            function selectMode(mode) {
+                state.mode = mode;
+                const p2Input = document.getElementById('p2-input-group');
+                const p2Name = document.getElementById('p2-name');
+
+                if (mode === 'pve') {
+                    p2Input.style.display = 'none';
+                    state.names.O = "NEON AI";
+                } else {
+                    p2Input.style.display = 'block';
+                    p2Name.value = state.names.O !== "NEON AI" ? state.names.O : ""; 
+                }
+                
+                document.getElementById('p1-name').value = state.names.X;
+                showScreen('name-screen');
+            }
+
+            function startGame() {
+                // Get Names
+                const p1 = document.getElementById('p1-name').value.trim() || "Player 1";
+                let p2 = state.names.O;
+                
+                if (state.mode === 'pvp') {
+                    p2 = document.getElementById('p2-name').value.trim() || "Player 2";
+                }
+
+                state.names = { X: p1, O: p2 };
+                saveStorage(); // Save names
+                restartMatch();
+                showScreen('game-screen');
+                
+                // Init Audio Context on first user interaction
+                if(!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContext();
+                }
+            }
+
+            function restartMatch() {
+                state.board.fill(null);
+                state.currentPlayer = 'X';
+                state.active = true;
+                
+                document.querySelectorAll('.cell').forEach(c => {
+                    c.textContent = '';
+                    c.className = 'cell';
+                });
+                
+                updateScoreUI();
+                updateTurnUI();
+            }
+
+            function quitGame() {
+                showScreen('mode-screen');
+                renderHistory();
+            }
+
+            // --- GAME LOGIC ---
+            function handleCellClick(index) {
+                if (!state.active || state.board[index]) return;
+
+                // If PvE and it's O's turn (AI), ignore clicks
+                if (state.mode === 'pve' && state.currentPlayer === 'O') return;
+
+                makeMove(index);
+            }
+
+            function makeMove(index) {
+                state.board[index] = state.currentPlayer;
+                updateBoardUI(index, state.currentPlayer);
+
+                if (checkWin(state.currentPlayer)) {
+                    endGame(state.currentPlayer);
+                } else if (state.board.every(cell => cell !== null)) {
+                    endGame('draw');
+                } else {
+                    state.currentPlayer = state.currentPlayer === 'X' ? 'O' : 'X';
+                    updateTurnUI();
+
+                    if (state.mode === 'pve' && state.currentPlayer === 'O' && state.active) {
+                        setTimeout(makeAiMove, state.aiDelay);
+                    }
+                }
+            }
+
+            function checkWin(player) {
+                const board = state.board;
+                for (let combo of wins) {
+                    if (combo.every(idx => board[idx] === player)) {
+                        updateBoardUI(combo[0], player, combo); // Highlight
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function endGame(result) {
+                state.active = false;
+                const display = document.getElementById('turn-display');
+
+                if (result === 'draw') {
+                    state.scores.draw++;
+                    display.innerHTML = "GAME DRAW!";
+                    playTone(150, 'sawtooth', 0.5);
+                } else {
+                    state.scores[result]++;
+                    display.innerHTML = `<span class="turn-highlight">${state.names[result]} WINS!</span>`;
+                }
+                
+                saveStorage();
+                setTimeout(updateScoreUI, 500);
+            }
+
+            // --- AI LOGIC (SMART) ---
+            function makeAiMove() {
+                if (!state.active) return;
+                
+                // 1. Try to Win
+                let move = findBestMove('O'); 
+                
+                // 2. Block Player
+                if (move === null) move = findBestMove('X'); 
+                
+                // 3. Random but Smart (Center -> Corner -> Side)
+                if (move === null) {
+                    const empties = state.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                    
+                    if (empties.includes(4)) move = 4; // Center
+                    else {
+                        const corners = [0, 2, 6, 8].filter(i => empties.includes(i));
+                        if (corners.length > 0) move = corners[Math.floor(Math.random() * corners.length)];
+                        else move = empties[Math.floor(Math.random() * empties.length)];
+                    }
+                }
+
+                makeMove(move);
+            }
+
+            function findBestMove(player) {
+                for (let combo of wins) {
+                    const [a, b, c] = combo;
+                    const vals = [state.board[a], state.board[b], state.board[c]];
+                    // Check if 2 are player and 1 is null
+                    const playerCount = vals.filter(v => v === player).length;
+                    const nullCount = vals.filter(v => v === null).length;
+                    
+                    if (playerCount === 2 && nullCount === 1) {
+                        return combo[vals.indexOf(null)];
+                    }
+                }
+                return null;
+            }
+
+            // --- STORAGE & HISTORY ---
+            function saveStorage() {
+                const data = {
+                    scores: state.scores,
+                    names: state.names,
+                    mode: state.mode
+                };
+                localStorage.setItem('neonTicTacToe', JSON.stringify(data));
+            }
+
+            function loadStorage() {
+                const saved = localStorage.getItem('neonTicTacToe');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state.scores = parsed.scores || { X: 0, O: 0, draw: 0 };
+                    // Only load names, don't override P2 if switching modes later
+                    if(parsed.names) {
+                        state.names.X = parsed.names.X;
+                        if(parsed.names.O !== "NEON AI") state.names.O = parsed.names.O;
+                    }
+                }
+            }
+
+            function renderHistory() {
+                document.getElementById('hist-p1').textContent = state.scores.X;
+                document.getElementById('hist-p2').textContent = state.scores.O;
+                document.getElementById('hist-draw').textContent = state.scores.draw;
+            }
+
+            function resetData() {
+                if(confirm("Reset all scores and player names?")) {
+                    localStorage.removeItem('neonTicTacToe');
+                    state.scores = { X: 0, O: 0, draw: 0 };
+                    state.names = { X: 'Player 1', O: 'Player 2' };
+                    renderHistory();
+                    alert("Data Reset.");
+                }
+            }
+
+            // --- AUDIO SYSTEM (Web Audio API) ---
+            function setupAudio() {
+                const btn = document.getElementById('sound-btn');
+                btn.addEventListener('click', () => {
+                    state.soundOn = !state.soundOn;
+                    btn.textContent = `SOUND: ${state.soundOn ? 'ON' : 'OFF'}`;
+                    btn.classList.toggle('on', state.soundOn);
+                    
+                    if(state.soundOn && !audioCtx) {
+                         const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        audioCtx = new AudioContext();
+                    }
+                });
+            }
+
+            function playTone(freq, type, duration = 0.1) {
+                if (!state.soundOn || !audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            }
+
+            function playWinSound() {
+                if (!state.soundOn) return;
+                // Simple Arpeggio
+                setTimeout(() => playTone(500, 'sine', 0.1), 0);
+                setTimeout(() => playTone(600, 'sine', 0.1), 100);
+                setTimeout(() => playTone(800, 'sine', 0.2), 200);
+            }
+
+            // Expose public methods
+            return {
+                selectMode,
+                startGame,
+                restartMatch,
+                quitGame,
+                resetData,
+                showScreen,
+                init
+            };
+        })();
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', Game.init);
+
+    </script>
+</body>
+</html>
