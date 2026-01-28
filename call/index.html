@@ -2,83 +2,276 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>2 Person Voice Call</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group Voice & Chat</title>
   <style>
+    :root {
+      --bg-dark: #1e1e24;
+      --bg-panel: #2b2b35;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
       margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* --- Login / Lobby Screen --- */
+    #lobby {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .lobby-card {
+      background: var(--bg-panel);
+      padding: 40px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      width: 350px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #1a1a1f;
+      color: white;
+      box-sizing: border-box;
+    }
+
+    /* --- Main App Layout --- */
+    #app-container {
+      display: none; /* Hidden until joined */
+      flex: 1;
+      height: 100%;
+      display: flex;
+    }
+
+    /* Left: Participants Grid */
+    #main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       padding: 20px;
     }
-    h2 {
-      color: #333;
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
+
+    .room-badge {
+      background: #333;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border: 1px solid #444;
+    }
+
+    #participants-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      overflow-y: auto;
+    }
+
+    .user-card {
+      background: var(--bg-panel);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .user-card.talking {
+      border-color: var(--success);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .mic-icon {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: #333;
+      border-radius: 50%;
+      padding: 4px;
+      font-size: 12px;
+    }
+
+    /* Right: Chat Sidebar */
+    #chat-sidebar {
+      width: 320px;
+      background: var(--bg-panel);
+      border-left: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      font-size: 0.9em;
+      line-height: 1.4;
+    }
+    .msg-header {
+      font-size: 0.75em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .msg-content {
+      background: #3f3f4e;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    #chat-input-area {
+      padding: 15px;
+      border-top: 1px solid #333;
+      display: flex;
+      gap: 10px;
+    }
+
+    /* --- Bottom Controls --- */
+    #controls-bar {
+      height: 80px;
+      background: #15151a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      border-top: 1px solid #333;
+    }
+
     button {
       padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      background-color: #4f46e5;
-      color: white;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #3730a3;
-    }
-    #status {
       font-weight: bold;
-      margin-top: 15px;
-      color: #111;
+      transition: 0.2s;
     }
-    #callId {
-      font-weight: bold;
-      color: #4f46e5;
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #d13636; }
+
+    .btn-icon {
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
     }
-    audio {
-      margin-top: 20px;
-      outline: none;
-    }
-    .container {
-      max-width: 400px;
-      margin: 0 auto;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    }
+
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>2 Person Voice Call</h2>
-
-    <button id="micBtn">Enable Microphone 🎤</button>
-    <button id="createCall">Create Call 📞</button>
-    <button id="answerCall">Answer Call ✅</button>
-
-    <p id="status">Status: Not started</p>
-    <p>Call ID: <span id="callId">---</span></p>
-
-    <audio id="remoteAudio" autoplay></audio>
+  <!-- LOBBY -->
+  <div id="lobby">
+    <div class="lobby-card">
+      <h2>🎙️ Group Voice</h2>
+      <input type="text" id="usernameInput" placeholder="Enter your name" maxlength="15">
+      <input type="text" id="roomIdInput" placeholder="Room ID (Optional)">
+      <br>
+      <button class="btn-primary" id="startBtn" style="width: 100%; margin-top: 10px;">Join / Create Room</button>
+      <p id="lobbyStatus" style="font-size: 12px; color: var(--text-muted); margin-top: 15px;"></p>
+    </div>
   </div>
 
+  <!-- MAIN APP -->
+  <div id="app-container" class="hidden">
+    <!-- Left Area -->
+    <div id="main-area">
+      <div class="header-bar">
+        <h3>Participants</h3>
+        <div class="room-badge" id="copyLinkBtn">
+          🆔 Room: <span id="displayRoomId">---</span> 📋
+        </div>
+      </div>
+      <div id="participants-grid">
+        <!-- User Cards Injected Here -->
+      </div>
+    </div>
+
+    <!-- Right Chat -->
+    <div id="chat-sidebar">
+      <div style="padding: 15px; border-bottom: 1px solid #333; font-weight: bold;">💬 Chat</div>
+      <div id="chat-messages"></div>
+      <div id="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type a message..." style="margin:0;">
+        <button class="btn-primary" id="sendChatBtn">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM CONTROLS -->
+  <div id="controls-bar" class="hidden">
+    <button class="btn-primary btn-icon" id="toggleMicBtn">🎤</button>
+    <button class="btn-danger" id="leaveBtn">Exit Call 📞</button>
+  </div>
+
+  <!-- Scripts -->
   <script type="module">
-    /* ================= FIREBASE ================= */
+    /* ================= FIREBASE CONFIG ================= */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      getDoc,
-      addDoc,
-      onSnapshot
+    import { 
+      getFirestore, collection, doc, setDoc, getDoc, addDoc, 
+      onSnapshot, updateDoc, deleteDoc, serverTimestamp, query, orderBy 
     } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+    // Reusing the config you provided.
+    // NOTE: In production, ensure your Firestore rules allow read/write for these collections.
     const firebaseConfig = {
       apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
       authDomain: "voice-call-demo-1201b.firebaseapp.com",
@@ -90,111 +283,345 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    console.log("🔥 Firebase + Firestore connected");
 
-    /* ================= UI ================= */
-    const micBtn = document.getElementById("micBtn");
-    const createCallBtn = document.getElementById("createCall");
-    const answerCallBtn = document.getElementById("answerCall");
-    const statusText = document.getElementById("status");
-    const callIdText = document.getElementById("callId");
-    const remoteAudio = document.getElementById("remoteAudio");
-
-    /* ================= WEBRTC ================= */
-    const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
-    const pc = new RTCPeerConnection(servers);
-
+    /* ================= GLOBALS ================= */
     let localStream;
-    const remoteStream = new MediaStream();
-    remoteAudio.srcObject = remoteStream;
+    let peerConnections = {}; // Map: userId -> RTCPeerConnection
+    let roomId = null;
+    let userId = null;
+    let username = "Guest";
+    let isMicOn = true;
 
-    // Get microphone
-    async function enableMic() {
-      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-      statusText.innerText = "Status: 🎤 Microphone Enabled";
+    // ICE Config
+    const servers = {
+      iceServers: [
+        { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
+      ]
+    };
+
+    /* ================= DOM ELEMENTS ================= */
+    const lobby = document.getElementById('lobby');
+    const appContainer = document.getElementById('app-container');
+    const controlsBar = document.getElementById('controls-bar');
+    const participantsGrid = document.getElementById('participants-grid');
+    const chatMessages = document.getElementById('chat-messages');
+
+    /* ================= INITIALIZATION ================= */
+    
+    document.getElementById('startBtn').addEventListener('click', async () => {
+      const uInput = document.getElementById('usernameInput').value;
+      const rInput = document.getElementById('roomIdInput').value;
+
+      if (!uInput) return alert("Please enter a name");
+      
+      username = uInput;
+      roomId = rInput || generateId();
+      userId = generateId(); // Random Session ID for this user
+
+      document.getElementById('lobbyStatus').innerText = "Requesting Microphone...";
+
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        enterRoom();
+      } catch (err) {
+        alert("Microphone access denied or not found.");
+        console.error(err);
+      }
+    });
+
+    function generateId() {
+      return Math.random().toString(36).substr(2, 9);
     }
 
-    micBtn.onclick = async () => {
-      try {
-        await enableMic();
-      } catch (e) {
-        statusText.innerText = "Status: ❌ Mic denied";
-        console.error(e);
+    /* ================= MAIN LOGIC ================= */
+
+    async function enterRoom() {
+      // 1. UI Switch
+      lobby.style.display = 'none';
+      appContainer.style.display = 'flex';
+      appContainer.classList.remove('hidden');
+      controlsBar.classList.remove('hidden');
+      document.getElementById('displayRoomId').innerText = roomId;
+
+      // 2. Add Self to Firestore
+      // Structure: group_calls/{roomId}/participants/{userId}
+      const userRef = doc(db, 'group_calls', roomId, 'participants', userId);
+      await setDoc(userRef, {
+        name: username,
+        micOn: true,
+        joinedAt: serverTimestamp()
+      });
+
+      // 3. Add Local User Card
+      addParticipantCard(userId, username, true);
+
+      // 4. Setup Audio Analysis (for volume ring)
+      setupAudioAnalysis(localStream, userId);
+
+      // 5. Listen for Room Updates (Participants & Chat)
+      subscribeToRoom();
+
+      // 6. Handle Leaving
+      window.addEventListener('beforeunload', leaveRoom);
+      document.getElementById('leaveBtn').addEventListener('click', () => {
+        leaveRoom();
+        location.reload();
+      });
+    }
+
+    function subscribeToRoom() {
+      // A. Participant Listener (Who is in the room?)
+      const participantsRef = collection(db, 'group_calls', roomId, 'participants');
+      
+      onSnapshot(participantsRef, snapshot => {
+        snapshot.docChanges().forEach(async change => {
+          const pId = change.doc.id;
+          const pData = change.doc.data();
+
+          if (change.type === 'added') {
+            if (pId === userId) return; // Ignore self
+            
+            // Create UI
+            addParticipantCard(pId, pData.name, false);
+            
+            // WEBRTC LOGIC:
+            // To avoid collisions, we enforce a rule: 
+            // The user with the "larger" ID string initiates the Offer.
+            // The user with the "smaller" ID string waits for the Offer.
+            if (userId > pId) {
+              createConnection(pId, true); // Initiator
+            } else {
+              createConnection(pId, false); // Listener
+            }
+
+          } else if (change.type === 'modified') {
+            updateParticipantUI(pId, pData);
+          } else if (change.type === 'removed') {
+            removeParticipant(pId);
+          }
+        });
+      });
+
+      // B. Chat Listener
+      const chatRef = query(collection(db, 'group_calls', roomId, 'messages'), orderBy('timestamp'));
+      onSnapshot(chatRef, snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') renderMessage(change.doc.data());
+        });
+      });
+    }
+
+    /* ================= WEBRTC CORE ================= */
+
+    async function createConnection(remoteId, isInitiator) {
+      if (peerConnections[remoteId]) return; // Already connected
+
+      const pc = new RTCPeerConnection(servers);
+      peerConnections[remoteId] = pc;
+
+      // Add local tracks
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+      // Handle Remote Stream
+      pc.ontrack = (event) => {
+        const remoteStream = event.streams[0];
+        const audioEl = document.getElementById(`audio-${remoteId}`);
+        if (audioEl) {
+          audioEl.srcObject = remoteStream;
+          setupAudioAnalysis(remoteStream, remoteId);
+        }
+      };
+
+      // Database References for Signaling
+      // We use a subcollection under the participant specifically for signaling
+      // Structure: group_calls/{roomId}/participants/{userId}/signals/{targetId}
+      // Note: We send signals TO the remote user.
+      const sendSignalRef = doc(db, 'group_calls', roomId, 'participants', remoteId, 'signals', userId);
+      const listenSignalRef = doc(db, 'group_calls', roomId, 'participants', userId, 'signals', remoteId);
+
+      // Handle ICE Candidates
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+           // In a real production app, we would push to a candidate array.
+           // For simplicity here, we rely on the Offer/Answer SDP update or trickle logic via DB.
+           // We will embed candidates in updateDoc or use a separate queue.
+           // To keep this "Simple", we will just let the Offer/Answer flow handle initial connection,
+           // but optimal WebRTC separates ICE. Let's add a candidates collection.
+           const candRef = collection(db, 'group_calls', roomId, 'participants', remoteId, 'candidates');
+           addDoc(candRef, { sender: userId, candidate: event.candidate.toJSON() });
+        }
+      };
+
+      // Listen for Remote ICE Candidates
+      const myCandRef = collection(db, 'group_calls', roomId, 'participants', userId, 'candidates');
+      onSnapshot(query(myCandRef), snapshot => {
+        snapshot.docChanges().forEach(change => {
+            if (change.type === 'added') {
+                const data = change.doc.data();
+                if (data.sender === remoteId && data.candidate) {
+                    pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            }
+        });
+      });
+
+      // Logic Split
+      if (isInitiator) {
+        // Create Offer
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        
+        // Send Offer
+        await setDoc(sendSignalRef, { type: 'offer', sdp: offer.sdp });
+
+        // Listen for Answer
+        onSnapshot(listenSignalRef, async (snapshot) => {
+          const data = snapshot.data();
+          if (data && data.type === 'answer' && !pc.currentRemoteDescription) {
+            await pc.setRemoteDescription(new RTCSessionDescription(data));
+          }
+        });
+
+      } else {
+        // Listener: Wait for Offer
+        onSnapshot(listenSignalRef, async (snapshot) => {
+          const data = snapshot.data();
+          if (data && data.type === 'offer' && !pc.currentRemoteDescription) {
+            await pc.setRemoteDescription(new RTCSessionDescription(data));
+            
+            // Create Answer
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            
+            // Send Answer
+            await setDoc(sendSignalRef, { type: 'answer', sdp: answer.sdp });
+          }
+        });
       }
-    };
+    }
 
-    // Receive remote audio
-    pc.ontrack = event => {
-      event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-      console.log("Remote audio track received");
-    };
+    /* ================= UI & UTILS ================= */
 
-    /* ================= CREATE CALL ================= */
-    createCallBtn.onclick = async () => {
-      await enableMic();
+    function addParticipantCard(id, name, isLocal) {
+      const div = document.createElement('div');
+      div.className = 'user-card';
+      div.id = `card-${id}`;
+      div.innerHTML = `
+        <div class="avatar">${name.charAt(0).toUpperCase()}</div>
+        <div style="font-weight:bold;">${name} ${isLocal ? '(You)' : ''}</div>
+        <div class="mic-icon" id="mic-icon-${id}">🎤</div>
+        ${!isLocal ? `<audio id="audio-${id}" autoplay></audio>` : ''}
+      `;
+      participantsGrid.appendChild(div);
+    }
 
-      const callDoc = doc(collection(db, "calls"));
-      const offerCandidates = collection(callDoc, "offerCandidates");
-      const answerCandidates = collection(callDoc, "answerCandidates");
+    function removeParticipant(id) {
+      if (peerConnections[id]) {
+        peerConnections[id].close();
+        delete peerConnections[id];
+      }
+      const el = document.getElementById(`card-${id}`);
+      if (el) el.remove();
+    }
 
-      callIdText.innerText = callDoc.id;
+    function updateParticipantUI(id, data) {
+      const micIcon = document.getElementById(`mic-icon-${id}`);
+      if (micIcon) {
+        micIcon.innerText = data.micOn ? '🎤' : '🔇';
+        micIcon.style.background = data.micOn ? '#333' : '#ef4444';
+      }
+    }
 
-      pc.onicecandidate = event => {
-        if (event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
-      };
+    // Audio Activity Visualizer
+    function setupAudioAnalysis(stream, id) {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
 
-      const offerDescription = await pc.createOffer();
-      await pc.setLocalDescription(offerDescription);
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const card = document.getElementById(`card-${id}`);
 
-      await setDoc(callDoc, { offer: { type: offerDescription.type, sdp: offerDescription.sdp } });
+      function checkVolume() {
+        if (!card) return; // element removed
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        let average = sum / dataArray.length;
 
-      onSnapshot(callDoc, snapshot => {
-        const data = snapshot.data();
-        if (!pc.currentRemoteDescription && data?.answer) pc.setRemoteDescription(data.answer);
+        if (average > 10) { // Threshold
+          card.classList.add('talking');
+        } else {
+          card.classList.remove('talking');
+        }
+        requestAnimationFrame(checkVolume);
+      }
+      checkVolume();
+    }
+
+    /* ================= CHAT ================= */
+    
+    document.getElementById('sendChatBtn').addEventListener('click', sendMsg);
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMsg();
+    });
+
+    async function sendMsg() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      await addDoc(collection(db, 'group_calls', roomId, 'messages'), {
+        sender: username,
+        text: text,
+        timestamp: serverTimestamp()
       });
+      input.value = '';
+    }
 
-      onSnapshot(answerCandidates, snapshot => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added") pc.addIceCandidate(change.doc.data());
-        });
-      });
+    function renderMessage(msg) {
+      const div = document.createElement('div');
+      div.className = 'message';
+      const time = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '...';
+      div.innerHTML = `
+        <div class="msg-header">${msg.sender} • ${time}</div>
+        <div class="msg-content">${msg.text}</div>
+      `;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight; // Auto scroll
+    }
 
-      statusText.innerText = "Status: 📞 Call Created";
-    };
+    /* ================= BUTTON ACTIONS ================= */
 
-    /* ================= ANSWER CALL ================= */
-    answerCallBtn.onclick = async () => {
-      const callId = prompt("Enter Call ID:");
-      if (!callId) return;
+    document.getElementById('toggleMicBtn').addEventListener('click', async () => {
+      isMicOn = !isMicOn;
+      localStream.getAudioTracks()[0].enabled = isMicOn;
+      
+      const btn = document.getElementById('toggleMicBtn');
+      btn.innerText = isMicOn ? '🎤' : '🔇';
+      btn.classList.toggle('btn-primary', isMicOn);
+      btn.classList.toggle('btn-danger', !isMicOn);
 
-      await enableMic();
+      // Update DB so others see status
+      const userRef = doc(db, 'group_calls', roomId, 'participants', userId);
+      await updateDoc(userRef, { micOn: isMicOn });
+      
+      updateParticipantUI(userId, { micOn: isMicOn });
+    });
 
-      const callDoc = doc(db, "calls", callId);
-      const offerCandidates = collection(callDoc, "offerCandidates");
-      const answerCandidates = collection(callDoc, "answerCandidates");
+    document.getElementById('copyLinkBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(roomId);
+      alert('Room ID copied: ' + roomId);
+    });
 
-      pc.onicecandidate = event => {
-        if (event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
-      };
-
-      const callData = (await getDoc(callDoc)).data();
-      await pc.setRemoteDescription(callData.offer);
-
-      const answerDescription = await pc.createAnswer();
-      await pc.setLocalDescription(answerDescription);
-
-      await setDoc(callDoc, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } }, { merge: true });
-
-      onSnapshot(offerCandidates, snapshot => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added") pc.addIceCandidate(change.doc.data());
-        });
-      });
-
-      statusText.innerText = "Status: ✅ Call Connected";
-    };
+    async function leaveRoom() {
+      // Clean up DB
+      if (roomId && userId) {
+        await deleteDoc(doc(db, 'group_calls', roomId, 'participants', userId));
+      }
+      // Connections close automatically via GC or removed logic
+    }
   </script>
-
 </body>
 </html>
