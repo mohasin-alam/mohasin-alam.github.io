@@ -3,24 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <title>2 Person Voice Call</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #4f46e5;
+      color: white;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #3730a3;
+    }
+    #status {
+      font-weight: bold;
+      margin-top: 15px;
+      color: #111;
+    }
+    #callId {
+      font-weight: bold;
+      color: #4f46e5;
+    }
+    audio {
+      margin-top: 20px;
+      outline: none;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
 
-  <h2>2 Person Voice Call (Step by Step)</h2>
+  <div class="container">
+    <h2>2 Person Voice Call</h2>
 
-  <button id="micBtn">Enable Microphone</button>
-  <button id="createCall">Create Call</button>
-  <button id="answerCall">Answer Call</button>
+    <button id="micBtn">Enable Microphone 🎤</button>
+    <button id="createCall">Create Call 📞</button>
+    <button id="answerCall">Answer Call ✅</button>
 
-  <p id="status">Status: Not started</p>
-  <p>Call ID: <span id="callId">---</span></p>
+    <p id="status">Status: Not started</p>
+    <p>Call ID: <span id="callId">---</span></p>
 
-  <audio id="remoteAudio" autoplay></audio>
+    <audio id="remoteAudio" autoplay></audio>
+  </div>
 
   <script type="module">
     /* ================= FIREBASE ================= */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      getDoc,
+      addDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
@@ -33,19 +90,18 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     console.log("🔥 Firebase + Firestore connected");
 
     /* ================= UI ================= */
     const micBtn = document.getElementById("micBtn");
+    const createCallBtn = document.getElementById("createCall");
+    const answerCallBtn = document.getElementById("answerCall");
     const statusText = document.getElementById("status");
+    const callIdText = document.getElementById("callId");
     const remoteAudio = document.getElementById("remoteAudio");
 
     /* ================= WEBRTC ================= */
-    const servers = {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-    };
-
+    const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
     const pc = new RTCPeerConnection(servers);
 
     let localStream;
@@ -55,11 +111,8 @@
     // Get microphone
     async function enableMic() {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      localStream.getTracks().forEach(track => {
-        pc.addTrack(track, localStream);
-      });
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
       statusText.innerText = "Status: 🎤 Microphone Enabled";
-      console.log("Mic enabled");
     }
 
     micBtn.onclick = async () => {
@@ -73,19 +126,73 @@
 
     // Receive remote audio
     pc.ontrack = event => {
-      event.streams[0].getTracks().forEach(track => {
-        remoteStream.addTrack(track);
-      });
+      event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
       console.log("Remote audio track received");
     };
 
-    // Buttons (not active yet)
-    document.getElementById("createCall").onclick = () => {
-      alert("Next step-এ কাজ করবে 😄");
+    /* ================= CREATE CALL ================= */
+    createCallBtn.onclick = async () => {
+      await enableMic();
+
+      const callDoc = doc(collection(db, "calls"));
+      const offerCandidates = collection(callDoc, "offerCandidates");
+      const answerCandidates = collection(callDoc, "answerCandidates");
+
+      callIdText.innerText = callDoc.id;
+
+      pc.onicecandidate = event => {
+        if (event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
+      };
+
+      const offerDescription = await pc.createOffer();
+      await pc.setLocalDescription(offerDescription);
+
+      await setDoc(callDoc, { offer: { type: offerDescription.type, sdp: offerDescription.sdp } });
+
+      onSnapshot(callDoc, snapshot => {
+        const data = snapshot.data();
+        if (!pc.currentRemoteDescription && data?.answer) pc.setRemoteDescription(data.answer);
+      });
+
+      onSnapshot(answerCandidates, snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added") pc.addIceCandidate(change.doc.data());
+        });
+      });
+
+      statusText.innerText = "Status: 📞 Call Created";
     };
 
-    document.getElementById("answerCall").onclick = () => {
-      alert("Next step-এ কাজ করবে 😄");
+    /* ================= ANSWER CALL ================= */
+    answerCallBtn.onclick = async () => {
+      const callId = prompt("Enter Call ID:");
+      if (!callId) return;
+
+      await enableMic();
+
+      const callDoc = doc(db, "calls", callId);
+      const offerCandidates = collection(callDoc, "offerCandidates");
+      const answerCandidates = collection(callDoc, "answerCandidates");
+
+      pc.onicecandidate = event => {
+        if (event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
+      };
+
+      const callData = (await getDoc(callDoc)).data();
+      await pc.setRemoteDescription(callData.offer);
+
+      const answerDescription = await pc.createAnswer();
+      await pc.setLocalDescription(answerDescription);
+
+      await setDoc(callDoc, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } }, { merge: true });
+
+      onSnapshot(offerCandidates, snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added") pc.addIceCandidate(change.doc.data());
+        });
+      });
+
+      statusText.innerText = "Status: ✅ Call Connected";
     };
   </script>
 
