@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2 Person Voice Call</title>
+</head>
+<body>
+
+  <h2>2 Person Voice Call (Step by Step)</h2>
+
+  <button id="micBtn">Enable Microphone</button>
+  <p id="status">Status: Not started</p>
+
+  <!-- Firebase + App Script -->
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+    // Firebase config (YOUR PROJECT)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
+      authDomain: "voice-call-demo-1201b.firebaseapp.com",
+      projectId: "voice-call-demo-1201b",
+      storageBucket: "voice-call-demo-1201b.firebasestorage.app",
+      messagingSenderId: "611354192250",
+      appId: "1:611354192250:web:bac02535d65ca6565fcec3"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    console.log("🔥 Firebase + Firestore connected");
+
+    // Mic button
+    const micBtn = document.getElementById("micBtn");
+    const statusText = document.getElementById("status");
+
+    micBtn.onclick = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        statusText.innerText = "Status: 🎤 Microphone Enabled";
+        console.log("Microphone stream:", stream);
+      } catch (err) {
+        statusText.innerText = "Status: ❌ Microphone denied";
+        console.error(err);
+      }
+    };
+  </script>
+
+</body>
+</html>
