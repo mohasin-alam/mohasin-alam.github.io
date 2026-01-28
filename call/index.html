@@ -9,15 +9,19 @@
   <h2>2 Person Voice Call (Step by Step)</h2>
 
   <button id="micBtn">Enable Microphone</button>
-  <p id="status">Status: Not started</p>
+  <button id="createCall">Create Call</button>
+  <button id="answerCall">Answer Call</button>
 
-  <!-- Firebase + App Script -->
+  <p id="status">Status: Not started</p>
+  <p>Call ID: <span id="callId">---</span></p>
+
+  <audio id="remoteAudio" autoplay></audio>
+
   <script type="module">
-    // Firebase imports
+    /* ================= FIREBASE ================= */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-    // Firebase config (YOUR PROJECT)
     const firebaseConfig = {
       apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
       authDomain: "voice-call-demo-1201b.firebaseapp.com",
@@ -27,25 +31,61 @@
       appId: "1:611354192250:web:bac02535d65ca6565fcec3"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
     console.log("🔥 Firebase + Firestore connected");
 
-    // Mic button
+    /* ================= UI ================= */
     const micBtn = document.getElementById("micBtn");
     const statusText = document.getElementById("status");
+    const remoteAudio = document.getElementById("remoteAudio");
+
+    /* ================= WEBRTC ================= */
+    const servers = {
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    };
+
+    const pc = new RTCPeerConnection(servers);
+
+    let localStream;
+    const remoteStream = new MediaStream();
+    remoteAudio.srcObject = remoteStream;
+
+    // Get microphone
+    async function enableMic() {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localStream.getTracks().forEach(track => {
+        pc.addTrack(track, localStream);
+      });
+      statusText.innerText = "Status: 🎤 Microphone Enabled";
+      console.log("Mic enabled");
+    }
 
     micBtn.onclick = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        statusText.innerText = "Status: 🎤 Microphone Enabled";
-        console.log("Microphone stream:", stream);
-      } catch (err) {
-        statusText.innerText = "Status: ❌ Microphone denied";
-        console.error(err);
+        await enableMic();
+      } catch (e) {
+        statusText.innerText = "Status: ❌ Mic denied";
+        console.error(e);
       }
+    };
+
+    // Receive remote audio
+    pc.ontrack = event => {
+      event.streams[0].getTracks().forEach(track => {
+        remoteStream.addTrack(track);
+      });
+      console.log("Remote audio track received");
+    };
+
+    // Buttons (not active yet)
+    document.getElementById("createCall").onclick = () => {
+      alert("Next step-এ কাজ করবে 😄");
+    };
+
+    document.getElementById("answerCall").onclick = () => {
+      alert("Next step-এ কাজ করবে 😄");
     };
   </script>
 
