@@ -295,14 +295,20 @@
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         // !!! REPLACE WITH YOUR CONFIG !!!
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
-        };
+     
+const firebaseConfig = {
+  apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
+  authDomain: "voice-call-demo-1201b.firebaseapp.com",
+  projectId: "voice-call-demo-1201b",
+  storageBucket: "voice-call-demo-1201b.firebasestorage.app",
+  messagingSenderId: "611354192250",
+  appId: "1:611354192250:web:bac02535d65ca6565fcec3",
+  measurementId: "G-TDD0343N6G"
+};
+
+
+
+
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
