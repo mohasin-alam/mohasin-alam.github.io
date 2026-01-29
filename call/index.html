@@ -11,6 +11,7 @@
             /* Smart Professional Palette */
             --bg-app: #0f172a;       /* Slate 900 */
             --bg-panel: #1e293b;     /* Slate 800 */
+            --bg-chat: #0f172a;
             --primary: #3b82f6;      /* Blue 500 */
             --primary-hover: #2563eb;
             --danger: #ef4444;       /* Red 500 */
@@ -35,7 +36,7 @@
         .flex { display: flex; }
         .flex-center { display: flex; align-items: center; justify-content: center; }
         
-        /* --- BUTTONS --- */
+        /* --- BUTTONS & INPUTS --- */
         button {
             background: var(--bg-panel); color: var(--text-main);
             border: 1px solid var(--border);
@@ -56,7 +57,7 @@
         }
         input:focus { border-color: var(--primary); }
 
-        /* --- LAYOUT --- */
+        /* --- LOGIN SCREEN --- */
         #auth-screen {
             position: fixed; inset: 0; background: var(--bg-app);
             z-index: 50; flex-direction: column;
@@ -66,22 +67,27 @@
             width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             border: 1px solid var(--border);
         }
+        .brand-title { color: var(--primary); font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; text-align: center; }
 
-        #app-layout { display: flex; height: 100vh; width: 100vw; }
-        
-        /* Left: Grid + Controls */
+        /* --- MAIN LAYOUT --- */
+        #app-layout {
+            display: flex; height: 100vh; width: 100vw;
+        }
+
+        /* LEFT/TOP: VIDEO GRID */
         #main-stage {
             flex: 3; display: flex; flex-direction: column;
             background: var(--bg-app); position: relative;
         }
 
-        /* Right: Chat */
+        /* RIGHT/BOTTOM: CHAT */
         #chat-panel {
             flex: 1; min-width: 300px; max-width: 400px;
             background: var(--bg-panel); border-left: 1px solid var(--border);
             display: flex; flex-direction: column;
         }
 
+        /* MOBILE LAYOUT */
         @media (max-width: 768px) {
             #app-layout { flex-direction: column; }
             #main-stage { flex: 3; height: 60%; }
@@ -93,30 +99,27 @@
 
         /* --- STATUS BAR --- */
         #status-bar {
-            height: 55px; background: var(--bg-panel);
+            height: 50px; background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 15px; font-size: 0.9rem;
+            padding: 0 20px; font-size: 0.9rem;
         }
         .status-pill {
-            background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 20px;
+            background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px;
             font-size: 0.8rem; display: flex; align-items: center; gap: 8px;
-            border: 1px solid var(--border); color: var(--text-muted);
+            border: 1px solid var(--border);
         }
-        .share-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer;
-            display: flex; align-items: center; gap: 6px; font-weight: 600;
-        }
-        .share-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
+        .status-pill.live { border-color: var(--success); color: var(--success); }
+        .status-pill.ptt { background: var(--primary); color: white; border: none; }
 
-        /* --- GRID & CARDS --- */
+        /* --- GRID --- */
         #grid-container {
             flex: 1; padding: 20px; overflow-y: auto;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px; align-content: start;
         }
 
+        /* --- USER CARD --- */
         .user-card {
             background: var(--bg-panel); border-radius: 12px;
             padding: 20px; display: flex; flex-direction: column; align-items: center;
@@ -133,24 +136,20 @@
             font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;
             position: relative; color: white;
         }
+        .admin-badge { position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-panel); }
         
-        .mic-badge {
-            position: absolute; bottom: 0; right: -5px;
-            width: 24px; height: 24px; border-radius: 50%;
-            background: var(--border); border: 2px solid var(--bg-panel);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.7rem; color: white;
-        }
-        .mic-badge.muted { background: var(--danger); }
+        .card-name { font-weight: 600; margin-bottom: 5px; text-align: center; }
+        .card-timer { font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
 
-        .admin-badge { position: absolute; top: -5px; right: -5px; background: var(--primary); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-panel); }
-        
-        .card-name { font-weight: 600; margin-bottom: 5px; text-align: center; font-size: 0.9rem; }
-        
+        /* Volume Slider */
+        .slider-container { width: 100%; display: flex; align-items: center; gap: 5px; margin-top: 8px; opacity: 0.6; transition: 0.2s; }
+        .slider-container:hover { opacity: 1; }
+        input[type=range] { padding: 0; height: 4px; margin: 0; background: #475569; }
+
         /* --- CONTROLS --- */
         #control-bar {
             height: 70px; background: var(--bg-panel); border-top: 1px solid var(--border);
-            display: flex; justify-content: center; align-items: center; gap: 12px;
+            display: flex; justify-content: center; align-items: center; gap: 15px;
         }
         .ctrl-btn {
             width: 48px; height: 48px; border-radius: 50%; border: none;
@@ -163,50 +162,71 @@
         .ctrl-btn.danger { background: var(--danger); color: white; }
 
         /* --- CHAT --- */
-        #chat-feed { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { font-size: 0.85rem; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); }
-        .msg-header { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px; display: flex; justify-content: space-between; }
-        #chat-input-area { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+        #chat-feed {
+            flex: 1; overflow-y: auto; padding: 15px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .msg { font-size: 0.9rem; line-height: 1.4; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+        .msg.admin { border-left: 3px solid var(--primary); background: rgba(59, 130, 246, 0.1); }
+        .msg-header { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; display: flex; justify-content: space-between; }
+        
+        #chat-input-area {
+            padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px;
+        }
 
-        /* --- TOASTS --- */
+        /* --- FLOATING ELEMENTS --- */
+        .reaction-float {
+            position: absolute; font-size: 2rem;
+            animation: floatUp 1.5s ease-out forwards; pointer-events: none;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        }
+
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100; }
         .toast { background: var(--bg-panel); padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: 500; font-size: 0.9rem; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
+    <!-- TOAST NOTIFICATIONS -->
     <div id="toast-container"></div>
 
-    <!-- 1. AUTH SCREEN -->
+    <!-- 1. LOGIN / LOBBY -->
     <div id="auth-screen" class="flex-center">
         <div class="auth-card">
-            <h2 style="text-align:center; color:var(--primary); margin-top:0;">SmartConnect Pro</h2>
+            <div class="brand-title"><i class="fas fa-layer-group"></i> SmartConnect Pro</div>
             
-            <div style="text-align:center; margin-bottom:15px;">
-                <button class="primary" id="toggle-admin-btn" style="width:100%; font-size:0.8rem;">Are you an Admin?</button>
+            <!-- Admin Toggle -->
+            <div style="display:flex; justify-content:center; margin-bottom:20px;">
+                <button class="primary" id="toggle-admin-btn" style="font-size:0.8rem; width:100%;">Are you an Admin?</button>
             </div>
 
             <div id="admin-login-form" class="hidden">
                 <input type="email" id="adm-email" placeholder="Admin Email">
                 <input type="password" id="adm-pass" placeholder="Password">
-                <button class="primary" id="do-login-btn" style="width:100%">Login as Admin 🔒</button>
+                <button class="primary" id="do-login-btn" style="width:100%">Verify Admin 🔒</button>
                 <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
             </div>
 
+            <!-- Main Join -->
             <div id="join-form">
                 <input type="text" id="username" placeholder="Your Name">
                 <input type="text" id="room-id" placeholder="Room ID">
                 
                 <div class="flex" style="gap:10px; margin-bottom:10px;">
                     <select id="security-level" style="margin:0;">
-                        <option value="public">Public</option>
+                        <option value="public">Public Room</option>
                         <option value="private">Private (Password)</option>
                     </select>
                     <button onclick="document.getElementById('room-id').value = Math.random().toString(36).substr(2,5).toUpperCase()">🎲</button>
                 </div>
                 
                 <input type="password" id="room-pass" class="hidden" placeholder="Room Password">
-                <button class="primary" id="connect-btn" style="width:100%; padding:14px; margin-top:10px;">Join Meeting</button>
+                
+                <button class="primary" id="connect-btn" style="width:100%; padding:14px; font-size:1rem;">Join Meeting</button>
             </div>
         </div>
     </div>
@@ -214,40 +234,45 @@
     <!-- 2. MAIN APP -->
     <div id="app-layout" class="hidden">
         
+        <!-- MAIN STAGE (GRID + STATUS) -->
         <div id="main-stage">
-            <!-- Top Bar -->
+            <!-- Top Status Bar -->
             <div id="status-bar">
-                <div class="flex-center" style="gap:10px;">
-                    <span style="font-weight:700;">Room: <span id="disp-room">---</span></span>
-                    <span class="status-pill"><i class="fas fa-users"></i> <span id="user-count">0</span></span>
+                <div class="flex-center" style="gap:15px;">
+                    <span style="font-weight:700; font-size:1.1rem;">Room: <span id="disp-room">---</span></span>
+                    <span class="status-pill"><i class="fas fa-users"></i> <span id="user-count">1</span></span>
                 </div>
-                <!-- SHARE BUTTON -->
-                <button class="share-btn" id="share-link-btn">
-                    <i class="fas fa-link"></i> Invite
-                </button>
+                <div class="flex-center" style="gap:10px;">
+                    <div id="ptt-badge" class="status-pill hidden"><i class="fas fa-microphone"></i> PTT ACTIVE</div>
+                    <span class="status-pill live"><i class="fas fa-circle" style="font-size:0.6rem;"></i> Connected</span>
+                </div>
             </div>
 
-            <!-- Grid -->
-            <div id="grid-container"></div>
+            <!-- Video/Avatar Grid -->
+            <div id="grid-container">
+                <!-- User Cards Go Here -->
+            </div>
 
-            <!-- Controls -->
+            <!-- Bottom Controls -->
             <div id="control-bar">
-                <button class="ctrl-btn active" id="mic-btn" title="Toggle Mic"><i class="fas fa-microphone"></i></button>
-                <button class="ctrl-btn active" id="sound-btn" title="Toggle Sound"><i class="fas fa-volume-up"></i></button>
-                <button class="ctrl-btn" onclick="window.react('👋')" title="Wave">👋</button>
-                <button class="ctrl-btn danger" id="leave-btn" title="End Call"><i class="fas fa-phone-slash"></i></button>
+                <button class="ctrl-btn active" id="mic-btn" title="Mute/Unmute"><i class="fas fa-microphone"></i></button>
+                <button class="ctrl-btn active" id="sound-btn" title="Deafen"><i class="fas fa-volume-up"></i></button>
+                <button class="ctrl-btn" id="ptt-btn" title="Push To Talk"><i class="fas fa-fingerprint"></i></button>
+                <button class="ctrl-btn" onclick="window.react('👍')" title="Thumbs Up">👍</button>
+                <button class="ctrl-btn danger" id="leave-btn" title="Leave"><i class="fas fa-phone-slash"></i></button>
             </div>
         </div>
 
+        <!-- CHAT PANEL (Always Visible) -->
         <div id="chat-panel">
             <div style="padding:15px; border-bottom:1px solid var(--border); font-weight:600;">
-                <i class="far fa-comments"></i> Chat
+                <i class="far fa-comments"></i> Meeting Chat
             </div>
             <div id="chat-feed">
-                <div class="msg" style="text-align:center; color:var(--text-muted);">Chat Initialized</div>
+                <div class="msg" style="text-align:center; color:var(--text-muted);">Welcome to the chat</div>
             </div>
             <div id="chat-input-area">
-                <input type="text" id="chat-msg" placeholder="Type here..." style="margin:0;">
+                <input type="text" id="chat-msg" placeholder="Type a message..." style="margin:0;">
                 <button class="primary" id="send-btn"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
@@ -263,6 +288,7 @@
             updateDoc, deleteDoc, serverTimestamp, query, orderBy, addDoc, limit 
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
             authDomain: "voice-call-demo-1201b.firebaseapp.com",
@@ -275,9 +301,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const sfxJoin = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
 
-        // CONSTANTS
+        // SOUNDS
+        const sfxJoin = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // Subtle beep
+
+        // STATE
         const ADMIN_NAME = "Csm Mohasin Alam 🅥";
         const state = {
             uid: Math.random().toString(36).substr(2, 9),
@@ -286,47 +314,45 @@
             isAdmin: false,
             localStream: null,
             pcs: {},
-            isMicOn: true
+            isMicOn: true,
+            pttMode: false,
+            spacePressed: false
         };
 
-        // --- AUTH & INIT ---
-        
-        // Auto-fill room from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const roomParam = urlParams.get('room');
-        if(roomParam) document.getElementById('room-id').value = roomParam;
-
+        // --- AUTH & SETUP ---
         document.getElementById('toggle-admin-btn').onclick = () => {
-            document.getElementById('admin-login-form').classList.toggle('hidden');
+            const form = document.getElementById('admin-login-form');
+            form.classList.toggle('hidden');
         };
 
         document.getElementById('do-login-btn').onclick = async () => {
             try {
-                await signInWithEmailAndPassword(auth, 
-                    document.getElementById('adm-email').value, 
-                    document.getElementById('adm-pass').value
-                );
+                const e = document.getElementById('adm-email').value;
+                const p = document.getElementById('adm-pass').value;
+                await signInWithEmailAndPassword(auth, e, p);
                 document.getElementById('admin-login-form').classList.add('hidden');
                 toast("Admin Verified", "success");
             } catch(e) { toast("Invalid Credentials", "error"); }
         };
 
-        onAuthStateChanged(auth, u => {
-            if(u) {
+        onAuthStateChanged(auth, user => {
+            if(user) {
                 state.isAdmin = true;
+                // Force Admin Name
                 document.getElementById('username').value = ADMIN_NAME;
                 document.getElementById('username').disabled = true;
                 document.getElementById('toggle-admin-btn').innerText = "Logged in as Admin";
-                document.getElementById('toggle-admin-btn').classList.add('primary');
+                document.getElementById('toggle-admin-btn').classList.add('success');
             }
         });
 
         document.getElementById('security-level').onchange = (e) => {
-            if(e.target.value === 'private') document.getElementById('room-pass').classList.remove('hidden');
-            else document.getElementById('room-pass').classList.add('hidden');
+            const pass = document.getElementById('room-pass');
+            if(e.target.value === 'private') pass.classList.remove('hidden');
+            else pass.classList.add('hidden');
         };
 
-        // --- CONNECT ---
+        // --- JOIN LOGIC ---
         document.getElementById('connect-btn').onclick = async () => {
             const uName = document.getElementById('username').value || 'Guest';
             const rId = document.getElementById('room-id').value.toUpperCase();
@@ -339,13 +365,14 @@
             state.name = state.isAdmin ? ADMIN_NAME : uName;
             state.room = rId;
 
+            toast("Connecting to servers...");
+
             try {
-                toast("Requesting Microphone...");
                 state.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 await enterRoom(rId, sec, pw);
             } catch(e) {
-                toast("Microphone Denied!", "error");
                 console.error(e);
+                toast("Microphone access denied. Check permissions.", "error");
             }
         };
 
@@ -354,29 +381,35 @@
             const snap = await getDoc(ref);
             
             if(!snap.exists()) {
-                await setDoc(ref, { type, password: type==='private'?pw:null, createdAt: serverTimestamp(), adminUid: auth.currentUser?.uid });
+                await setDoc(ref, { 
+                    type, password: type==='private'?pw:null, 
+                    createdAt: serverTimestamp(), adminUid: auth.currentUser?.uid 
+                });
             } else {
                 const d = snap.data();
                 if(d.type === 'private' && d.password !== pw) return toast("Wrong Password", "error");
             }
 
+            // UI Switch
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-layout').classList.remove('hidden');
             document.getElementById('disp-room').innerText = rid;
 
+            // Add Participant
             await setDoc(doc(db, 'group_calls', rid, 'participants', state.uid), {
-                name: state.name, role: state.isAdmin?'admin':'user', micOn: true, joinedAt: serverTimestamp()
+                name: state.name, role: state.isAdmin?'admin':'user', joinedAt: serverTimestamp()
             });
 
+            // Start Audio & Sync
             AudioEngine.init(state.localStream);
-            renderCard(state.uid, { name: state.name, role: state.isAdmin?'admin':'user', micOn: true }, true);
+            renderCard(state.uid, { name: state.name, role: state.isAdmin?'admin':'user' }, true);
             
-            startSync();
+            syncRoom();
             window.addEventListener('beforeunload', leave);
         }
 
-        // --- SYNC ---
-        function startSync() {
+        // --- CORE SYNC ---
+        function syncRoom() {
             // Participants
             onSnapshot(collection(db, 'group_calls', state.room, 'participants'), snap => {
                 document.getElementById('user-count').innerText = snap.size;
@@ -384,18 +417,15 @@
                     const d = c.doc.data();
                     const id = c.doc.id;
                     if(id === state.uid) {
-                        if(d.kicked) { alert("You were kicked."); leave(); }
-                        if(d.mutedByAdmin && state.isMicOn) toggleMic(false); // Force mute
+                        if(d.kicked) { alert("You have been removed."); leave(); }
+                        if(d.mutedByAdmin && state.isMicOn) toggleMic(false);
                         return;
                     }
                     if(c.type === 'added') {
                         renderCard(id, d, false);
                         initPeer(id, state.uid > id);
-                        toast(`${d.name} Joined`);
-                        sfxJoin.play().catch(()=>{});
-                    }
-                    if(c.type === 'modified') {
-                         updateCardState(id, d);
+                        toast(`${d.name} joined`);
+                        sfxJoin.play().catch(e=>{}); // Play Sound
                     }
                     if(c.type === 'removed') {
                         removeCard(id);
@@ -403,23 +433,27 @@
                 });
             });
 
-            // Chat & Reactions
+            // Chat
             onSnapshot(query(collection(db, 'group_calls', state.room, 'messages'), orderBy('timestamp')), snap => {
-                snap.docChanges().forEach(c => { if(c.type==='added') renderMsg(c.doc.data()); });
+                snap.docChanges().forEach(c => {
+                    if(c.type === 'added') renderMsg(c.doc.data());
+                });
             });
+
+            // Reactions
             onSnapshot(query(collection(db, 'group_calls', state.room, 'reactions'), orderBy('timestamp', 'desc'), limit(1)), snap => {
-                snap.docChanges().forEach(c => { 
-                    if(c.type==='added') {
+                snap.docChanges().forEach(c => {
+                    if(c.type === 'added') {
                         const d = c.doc.data();
                         if(Date.now() - d.timestamp?.toMillis() < 3000) showFloat(d.from, d.emoji);
                     }
                 });
             });
 
-            // Signaling
+            // Signals
             onSnapshot(collection(db, 'group_calls', state.room, 'participants', state.uid, 'inbox'), snap => {
                 snap.docChanges().forEach(async c => {
-                    if(c.type==='added') {
+                    if(c.type === 'added') {
                         await handleSig(c.doc.data());
                         deleteDoc(c.doc.ref);
                     }
@@ -433,7 +467,10 @@
             state.pcs[remoteId] = pc;
             state.localStream.getTracks().forEach(t => pc.addTrack(t, state.localStream));
 
-            pc.ontrack = e => AudioEngine.connectPeer(remoteId, e.streams[0]);
+            pc.ontrack = e => {
+                AudioEngine.connectPeer(remoteId, e.streams[0]);
+            };
+            
             pc.onicecandidate = e => {
                 if(e.candidate) sendSig(remoteId, { type:'cand', candidate: e.candidate.toJSON() });
             };
@@ -459,21 +496,24 @@
                 await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         }
+
         async function sendSig(to, pl) {
             pl.from = state.uid;
             await addDoc(collection(db, 'group_calls', state.room, 'participants', to, 'inbox'), pl);
         }
 
-        // --- AUDIO ENGINE ---
+        // --- AUDIO ENGINE (VAD & Vol) ---
         const AudioEngine = {
             ctx: new (window.AudioContext || window.webkitAudioContext)(),
             nodes: {},
+
             init(stream) {
                 const src = this.ctx.createMediaStreamSource(stream);
                 const anl = this.ctx.createAnalyser();
                 src.connect(anl);
                 this.analyze('self', anl);
             },
+
             connectPeer(id, stream) {
                 const src = this.ctx.createMediaStreamSource(stream);
                 const gain = this.ctx.createGain();
@@ -482,19 +522,24 @@
                 gain.connect(anl);
                 gain.connect(this.ctx.destination);
                 
+                // Add Audio Tag for fallback
                 const aud = document.createElement('audio');
-                aud.srcObject = stream; aud.autoplay = true; aud.volume = 0;
+                aud.srcObject = stream;
+                aud.autoplay = true;
+                aud.volume = 0; // Handled by WebAudio
+
                 this.nodes[id] = { gain };
                 this.analyze(id, anl);
             },
+
             analyze(id, anl) {
                 const data = new Uint8Array(anl.frequencyBinCount);
                 const loop = () => {
-                    const card = document.getElementById(`card-${id}`);
-                    if(!card) return;
+                    if(!document.getElementById(`card-${id}`)) return;
                     anl.getByteFrequencyData(data);
                     const vol = data.reduce((a,b)=>a+b)/data.length;
                     
+                    const card = document.getElementById(`card-${id}`);
                     if(vol > 15) {
                         card.classList.add('talking');
                         if(vol > 40) card.classList.add('spotlight');
@@ -505,7 +550,10 @@
                 };
                 loop();
             },
-            setVol(id, v) { if(this.nodes[id]) this.nodes[id].gain.gain.value = v; }
+
+            setVol(id, val) {
+                if(this.nodes[id]) this.nodes[id].gain.gain.value = val;
+            }
         };
 
         // --- UI ---
@@ -513,49 +561,48 @@
             const div = document.createElement('div');
             div.className = 'user-card';
             div.id = `card-${id}`;
-            const admBadge = data.role === 'admin' ? '<div class="admin-badge"><i class="fas fa-check"></i></div>' : '';
+
+            const adminBadge = data.role === 'admin' ? '<div class="admin-badge"><i class="fas fa-check"></i></div>' : '';
             
+            // Admin Controls
             let ctrls = '';
             if(state.isAdmin && !isLocal) {
-                ctrls = `<div style="display:flex; gap:5px; margin-top:5px;">
-                            <button class="danger" style="padding:4px 8px; font-size:0.7rem;" onclick="window.kick('${id}')">Kick</button>
-                            <button style="padding:4px 8px; font-size:0.7rem;" onclick="window.adminMute('${id}')">Mute</button>
-                         </div>`;
+                ctrls = `
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <button class="danger" style="padding:4px 8px; font-size:0.7rem;" onclick="window.kick('${id}')">Kick</button>
+                        <button style="padding:4px 8px; font-size:0.7rem;" onclick="window.mute('${id}')">Mute</button>
+                    </div>
+                `;
             }
-            let slider = !isLocal ? `<div style="width:100%; display:flex; gap:5px; opacity:0.6; margin-top:5px;">
-                                        <i class="fas fa-volume-down" style="font-size:0.7rem;"></i>
-                                        <input type="range" min="0" max="2" step="0.1" value="1" oninput="window.setVol('${id}', this.value)" style="height:4px; margin:0;">
-                                     </div>` : '';
 
-            // Mic Icon Status
-            const micIcon = data.micOn ? '' : 'muted';
-            const micHtml = `<div class="mic-badge ${micIcon}" id="mic-icon-${id}"><i class="fas fa-microphone${data.micOn?'':'-slash'}"></i></div>`;
+            let slider = !isLocal ? `
+                <div class="slider-container">
+                    <i class="fas fa-volume-down" style="font-size:0.7rem;"></i>
+                    <input type="range" min="0" max="2" step="0.1" value="1" oninput="window.setVol('${id}', this.value)">
+                </div>
+            ` : '';
 
             div.innerHTML = `
                 <div class="avatar" style="background:${stringToColor(data.name)}">
                     ${data.name[0].toUpperCase()}
-                    ${admBadge}
-                    ${micHtml}
+                    ${adminBadge}
                     <div id="float-${id}" style="position:absolute;"></div>
                 </div>
                 <div class="card-name">${data.name} ${isLocal?'(You)':''}</div>
-                ${slider} ${ctrls}
+                <div class="card-timer" id="time-${id}">0:00</div>
+                ${slider}
+                ${ctrls}
             `;
             document.getElementById('grid-container').appendChild(div);
-        }
-
-        function updateCardState(id, data) {
-            // Update Mic Icon
-            const badge = document.getElementById(`mic-icon-${id}`);
-            if(badge) {
-                if(data.micOn) {
-                    badge.classList.remove('muted');
-                    badge.innerHTML = '<i class="fas fa-microphone"></i>';
-                } else {
-                    badge.classList.add('muted');
-                    badge.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-                }
-            }
+            
+            // Speaking Timer Logic
+            setInterval(() => {
+                const el = document.getElementById(`time-${id}`);
+                if(!el || !document.getElementById(`card-${id}`).classList.contains('talking')) return;
+                let [m, s] = el.innerText.split(':').map(Number);
+                s++; if(s>=60){s=0;m++;}
+                el.innerText = `${m}:${s<10?'0'+s:s}`;
+            }, 1000);
         }
 
         function removeCard(id) {
@@ -567,102 +614,140 @@
         function renderMsg(data) {
             const div = document.createElement('div');
             div.className = `msg ${data.type||''}`;
-            const t = new Date(data.timestamp?.toMillis()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-            div.innerHTML = `<div class="msg-header"><span>${data.sender}</span> <span>${t}</span></div><div>${data.text}</div>`;
-            const box = document.getElementById('chat-feed');
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
+            const time = new Date(data.timestamp?.toMillis()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            div.innerHTML = `
+                <div class="msg-header"><span>${data.sender}</span> <span>${time}</span></div>
+                <div>${data.text}</div>
+            `;
+            const feed = document.getElementById('chat-feed');
+            feed.appendChild(div);
+            feed.scrollTop = feed.scrollHeight;
         }
 
         function showFloat(id, emoji) {
-            const r = document.getElementById(`float-${id}`);
-            if(!r) return;
+            const root = document.getElementById(`float-${id}`);
+            if(!root) return;
             const el = document.createElement('div');
-            el.className = 'reaction-float'; el.innerText = emoji;
-            r.appendChild(el); setTimeout(()=>el.remove(), 1500);
+            el.className = 'reaction-float';
+            el.innerText = emoji;
+            root.appendChild(el);
+            setTimeout(()=>el.remove(), 1500);
         }
 
-        // --- SHARED FUNCTIONS ---
-        window.setVol = (id,v) => AudioEngine.setVol(id,v);
-        window.kick = async(id) => { if(confirm("Kick?")) await updateDoc(doc(db,'group_calls',state.room,'participants',id),{kicked:true}); };
-        window.adminMute = async(id) => { await updateDoc(doc(db,'group_calls',state.room,'participants',id),{mutedByAdmin:true}); };
-        window.react = (e) => { addDoc(collection(db,'group_calls',state.room,'reactions'),{from:state.uid,emoji:e,timestamp:serverTimestamp()}); showFloat(state.uid,e); };
+        // --- GLOBAL ACTIONS ---
+        window.setVol = (id, v) => AudioEngine.setVol(id, v);
+        window.kick = async (id) => {
+            if(confirm("Kick user?")) await updateDoc(doc(db, 'group_calls', state.room, 'participants', id), { kicked: true });
+        };
+        window.mute = async (id) => {
+            await updateDoc(doc(db, 'group_calls', state.room, 'participants', id), { mutedByAdmin: true });
+        };
+        window.react = (emoji) => {
+            addDoc(collection(db, 'group_calls', state.room, 'reactions'), { from:state.uid, emoji, timestamp:serverTimestamp() });
+            showFloat(state.uid, emoji);
+        };
 
         // --- CONTROLS ---
-        
-        // SHARE BUTTON
-        document.getElementById('share-link-btn').onclick = () => {
-            const url = window.location.origin + window.location.pathname + '?room=' + state.room;
-            navigator.clipboard.writeText(url);
-            toast("Link Copied! 📋", "success");
+        document.getElementById('mic-btn').onclick = () => {
+            state.isMicOn = !state.isMicOn;
+            state.localStream.getAudioTracks()[0].enabled = state.isMicOn;
+            updateBtn('mic-btn', state.isMicOn, 'microphone', 'microphone-slash');
         };
-
-        // MUTE BUTTON
-        document.getElementById('mic-btn').onclick = () => toggleMic();
-
-        async function toggleMic(forceState) {
-            // Logic: Toggle local var -> Toggle Track -> Update UI -> Update DB
-            state.isMicOn = forceState !== undefined ? forceState : !state.isMicOn;
-            
-            if(state.localStream) {
-                state.localStream.getAudioTracks()[0].enabled = state.isMicOn;
-            }
-
-            // Update Local Button
-            const btn = document.getElementById('mic-btn');
-            if(state.isMicOn) {
-                btn.classList.add('active'); btn.classList.remove('danger');
-                btn.innerHTML = '<i class="fas fa-microphone"></i>';
-            } else {
-                btn.classList.remove('active'); btn.classList.add('danger');
-                btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-            }
-
-            // Update My Card UI
-            updateCardState(state.uid, { micOn: state.isMicOn });
-
-            // Update Database so others see it
-            if(state.room) {
-                await updateDoc(doc(db, 'group_calls', state.room, 'participants', state.uid), {
-                    micOn: state.isMicOn
-                });
-            }
-        }
 
         document.getElementById('sound-btn').onclick = () => {
-            const btn = document.getElementById('sound-btn');
-            btn.classList.toggle('danger');
-            btn.classList.toggle('active');
-            toast("Sound Toggled");
+            // Mute all remote audio logic would go here
+            toast("Deafen toggled (Visual only in demo)");
+            document.getElementById('sound-btn').classList.toggle('danger');
         };
+
+        // PTT
+        document.getElementById('ptt-btn').onclick = () => {
+            state.pttMode = !state.pttMode;
+            const badge = document.getElementById('ptt-badge');
+            const btn = document.getElementById('ptt-btn');
+            
+            if(state.pttMode) {
+                badge.classList.remove('hidden');
+                btn.classList.add('active');
+                state.isMicOn = false;
+                state.localStream.getAudioTracks()[0].enabled = false;
+                updateBtn('mic-btn', false, 'microphone', 'microphone-slash');
+            } else {
+                badge.classList.add('hidden');
+                btn.classList.remove('active');
+                state.isMicOn = true;
+                state.localStream.getAudioTracks()[0].enabled = true;
+                updateBtn('mic-btn', true, 'microphone', 'microphone-slash');
+            }
+        };
+
+        window.addEventListener('keydown', e => {
+            if(state.pttMode && e.code === 'Space' && !state.spacePressed) {
+                state.spacePressed = true;
+                state.localStream.getAudioTracks()[0].enabled = true;
+                document.getElementById('ptt-badge').style.background = 'var(--success)';
+            }
+        });
+        window.addEventListener('keyup', e => {
+            if(state.pttMode && e.code === 'Space') {
+                state.spacePressed = false;
+                state.localStream.getAudioTracks()[0].enabled = false;
+                document.getElementById('ptt-badge').style.background = 'var(--primary)';
+            }
+        });
 
         // Chat
         document.getElementById('send-btn').onclick = sendChat;
-        document.getElementById('chat-msg').onkeypress = e => { if(e.key==='Enter') sendChat(); };
+        document.getElementById('chat-msg').onkeypress = e => { if(e.key === 'Enter') sendChat(); };
+
         async function sendChat() {
-            const txt = document.getElementById('chat-msg').value.trim();
+            const inp = document.getElementById('chat-msg');
+            const txt = inp.value.trim();
             if(!txt) return;
-            const type = (txt.startsWith('/announce') && state.isAdmin) ? 'admin' : '';
-            const cleanTxt = type ? txt.replace('/announce ','') : txt;
-            await addDoc(collection(db,'group_calls',state.room,'messages'),{sender:state.name, text:cleanTxt, type, timestamp:serverTimestamp()});
-            document.getElementById('chat-msg').value = '';
+
+            // Admin Command Check
+            if(txt.startsWith('/announce') && state.isAdmin) {
+                await addDoc(collection(db, 'group_calls', state.room, 'messages'), {
+                    sender: 'ADMIN', text: txt.replace('/announce ', ''), type: 'admin', timestamp: serverTimestamp()
+                });
+            } else {
+                await addDoc(collection(db, 'group_calls', state.room, 'messages'), {
+                    sender: state.name, text: txt, timestamp: serverTimestamp()
+                });
+            }
+            inp.value = '';
         }
 
-        document.getElementById('leave-btn').onclick = async () => {
-            if(state.room) await deleteDoc(doc(db,'group_calls',state.room,'participants',state.uid));
+        document.getElementById('leave-btn').onclick = leave;
+        async function leave() {
+            if(state.room) await deleteDoc(doc(db, 'group_calls', state.room, 'participants', state.uid));
             window.location.reload();
-        };
+        }
 
-        function toast(msg, type='norm') {
+        // Utils
+        function updateBtn(id, active, iconOn, iconOff) {
+            const btn = document.getElementById(id);
+            btn.innerHTML = `<i class="fas fa-${active?iconOn:iconOff}"></i>`;
+            if(active) { btn.classList.add('active'); btn.classList.remove('danger'); }
+            else { btn.classList.remove('active'); btn.classList.add('danger'); }
+        }
+
+        function toast(msg, type='normal') {
             const t = document.createElement('div');
-            t.className = 'toast'; t.style.borderColor = type==='error'?'var(--danger)':'var(--primary)';
-            t.innerText = msg; document.getElementById('toast-container').appendChild(t);
-            setTimeout(()=>t.remove(),3000);
+            t.className = 'toast';
+            t.style.borderColor = type==='error' ? 'var(--danger)' : 'var(--primary)';
+            t.innerText = msg;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(()=>t.remove(), 3000);
         }
+
         function stringToColor(str) {
-            let h=0; for(let i=0;i<str.length;i++) h=str.charCodeAt(i)+((h<<5)-h);
-            return '#'+("00000"+(h&0x00FFFFFF).toString(16).toUpperCase()).substr(-6);
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            return '#' + "00000".substring(0, 6 - c.length) + c;
         }
+
     </script>
 </body>
 </html>
