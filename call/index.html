@@ -24,6 +24,24 @@
             --glass: rgba(30, 41, 59, 0.8);
         }
 
+
+
+        body::after {
+    content: "";
+    display: block;
+    height: 40px; /* Ekhane 20px gap + button height dhora hoyeche */
+    width: 100%;
+}
+
+/* Footer-er jonno best solution hocche eta */
+.footer-class-name { /* Apnar footer class ekhane din */
+    position: fixed;
+    bottom: 20px !important; /* Nich theke 20px upore thakbe */
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    z-index: 9999;
+}
 footer, .footer-container { /* Apnar footer-er class name ekhane din */
     position: fixed;
     bottom: 20px; /* Nich theke 20px upore thakbe */
