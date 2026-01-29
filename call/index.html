@@ -21,58 +21,32 @@
             --text-secondary: #cbd5e1;
             --text-muted: #64748b;
             --border: #475569;
-            --glass: rgba(30, 41, 59, 0.8);
+            --glass: rgba(30, 41, 59, 0.95);
+            --msg-mine: #6366f1;
+            --msg-theirs: #334155;
         }
 
+        * { box-sizing: border-box; }
 
-
-        body::after {
-    content: "";
-    display: block;
-    height: 40px; /* Ekhane 20px gap + button height dhora hoyeche */
-    width: 100%;
-}
-
-/* Footer-er jonno best solution hocche eta */
-.footer-class-name { /* Apnar footer class ekhane din */
-    position: fixed;
-    bottom: 20px !important; /* Nich theke 20px upore thakbe */
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-    z-index: 9999;
-}
-footer, .footer-container { /* Apnar footer-er class name ekhane din */
-    position: fixed;
-    bottom: 20px; /* Nich theke 20px upore thakbe */
-    left: 0;
-    right: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Jate onno element-er upore thake */
-}
-
-        
         body {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    height: 100dvh; /* Ekhane height: 100vh chilo, seta 100dvh kore din */
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
         }
 
-        /* --- COMMON UI --- */
         .hidden { display: none !important; }
-        
+
+        /* --- BUTTONS --- */
         button {
             background: var(--primary);
             border: none;
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             font-family: inherit;
             font-weight: 600;
             cursor: pointer;
@@ -80,22 +54,21 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             transition: all 0.2s ease;
             font-size: 14px;
         }
-        button:hover { 
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
+        button:hover { background: var(--primary-dark); transform: translateY(-1px); }
         button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
         
         button.secondary { background: var(--bg-tertiary); }
         button.secondary:hover { background: var(--border); }
         
         button.danger { background: var(--danger); }
-        button.danger:hover { background: #dc2626; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); }
+        button.danger:hover { background: #dc2626; }
         
         button.admin { background: var(--accent); }
         button.admin:hover { background: #db2777; }
 
+        button.warning { background: var(--warning); color: #000; }
+        
         input, select {
             background: var(--bg-secondary);
             border: 2px solid var(--border);
@@ -106,661 +79,381 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             border-radius: 8px;
             font-size: 14px;
             transition: border 0.2s;
+            outline: none;
         }
-        input:focus, select:focus {
-            border-color: var(--primary);
-        }
+        input:focus, select:focus { border-color: var(--primary); }
 
         /* --- SCREENS --- */
         .screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             background: var(--bg-primary);
             z-index: 10;
             padding: 20px;
         }
 
         .auth-card {
-            width: 100%;
-            max-width: 420px;
+            width: 100%; max-width: 420px;
             background: var(--glass);
-            backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
-        .auth-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
+        .auth-header { text-align: center; margin-bottom: 24px; }
         .auth-header h1 {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 28px; margin: 0 0 8px 0;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-
-        .auth-header p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .input-group button {
-            padding: 12px 16px;
-            flex-shrink: 0;
-        }
-
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 24px 0;
-        }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        .input-group { display: flex; gap: 8px; }
 
         .auth-status {
             background: var(--bg-secondary);
-            padding: 12px 16px;
+            padding: 10px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+        .badge.guest { background: var(--danger); }
+        .badge.admin { background: var(--accent); }
+
+        /* --- DASHBOARD (NEW) --- */
+        #dashboard-panel {
+            width: 100%; margin-top: 20px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+        .room-list-item {
+            background: var(--bg-tertiary);
+            padding: 10px; margin-bottom: 8px;
             border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            font-size: 13px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .badge.guest { background: var(--danger); color: white; }
-        .badge.admin { background: var(--accent); color: white; }
+        .room-meta { font-size: 13px; }
+        .room-actions { display: flex; gap: 5px; }
 
         /* --- MAIN APP --- */
         #app-layout {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
-            position: relative;
+            display: flex; flex-direction: column; height: 100vh; width: 100vw;
         }
 
-        /* Top Bar */
         #top-bar {
-            height: 60px;
-            background: var(--bg-secondary);
+            height: 60px; background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            flex-shrink: 0;
-        }
-
-        .room-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; flex-shrink: 0;
         }
 
         .room-badge {
-            background: var(--primary);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: var(--primary); padding: 6px 12px;
+            border-radius: 6px; font-weight: 700; font-size: 14px;
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .top-actions {
-            display: flex;
-            gap: 8px;
+        /* Admin Controls in Top Bar */
+        .admin-room-controls {
+            display: flex; gap: 8px; margin-right: 8px;
         }
 
         .icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; background: var(--bg-tertiary);
             padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background: var(--bg-tertiary);
-            font-size: 16px;
         }
 
-        /* Main Content Area */
-        #main-content {
-            flex: 1;
-            overflow-y: auto;
-            position: relative;
-        }
-
+        #main-content { flex: 1; overflow-y: auto; position: relative; }
+        
         #grid-container {
             padding: 16px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 16px;
-            min-height: 100%;
-        }
-
-        @media (max-width: 768px) {
-            #grid-container {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 12px;
-                padding: 12px;
-            }
+            align-content: flex-start;
         }
 
         /* User Card */
         .user-node {
             background: var(--bg-secondary);
+            border-radius: 12px; padding: 16px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; aspect-ratio: 1;
             border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: all 0.3s ease;
-            aspect-ratio: 1;
+            transition: all 0.2s;
         }
-
-        .user-node:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-
-        .user-node.speaking { 
-            border-color: var(--success);
-            box-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
-        }
-
-        .user-node.admin-user {
-            border-top: 3px solid var(--accent);
-        }
+        .user-node.speaking { border-color: var(--success); box-shadow: 0 0 15px rgba(16,185,129,0.3); }
+        .user-node.admin-user { border-top: 4px solid var(--accent); }
         
         .avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
+            width: 60px; height: 60px; border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 700; margin-bottom: 10px;
             position: relative;
-            text-transform: uppercase;
         }
 
-        @media (max-width: 768px) {
-            .avatar {
-                width: 52px;
-                height: 52px;
-                font-size: 22px;
-            }
-        }
-        
         .status-indicators {
-            position: absolute;
-            bottom: -4px;
-            right: -4px;
-            display: flex;
-            gap: 4px;
+            position: absolute; bottom: -2px; right: -2px;
+            display: flex; gap: 2px;
         }
-
         .status-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--bg-primary);
-            border: 2px solid var(--bg-secondary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
+            width: 22px; height: 22px; background: var(--bg-primary);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; border: 2px solid var(--bg-secondary);
         }
-
         .status-icon.muted { color: var(--danger); }
-        .status-icon.hand { 
-            color: var(--warning);
-            animation: pulse 1s infinite;
-        }
+        .status-icon.hand { color: var(--warning); animation: pulse 1s infinite; }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+        .admin-controls-overlay {
+            position: absolute; top: 5px; right: 5px;
+            display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s;
         }
+        .user-node:hover .admin-controls-overlay { opacity: 1; }
 
-        .user-name {
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-secondary);
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .mini-btn { width: 24px; height: 24px; font-size: 10px; padding: 0; }
 
-        .admin-controls {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: flex;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .user-node:hover .admin-controls {
-            opacity: 1;
-        }
-
-        .mini-btn {
-            width: 28px;
-            height: 28px;
-            padding: 0;
-            font-size: 11px;
-            border-radius: 6px;
-        }
-
-        /* Bottom Controls */
+        /* --- CONTROL DECK --- */
         #control-deck {
-    height: auto; /* Purono fixed height-ta muche auto korun */
-    background: var(--bg-secondary);
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    padding: 15px 16px; /* Vertical padding ektu bariye deya hoyeche */
-    padding-bottom: calc(20px + env(safe-area-inset-bottom)); /* Niche 20px gap thakbe */
-    flex-shrink: 0;
-    z-index: 100;
-            }
-
+            background: var(--bg-secondary); border-top: 1px solid var(--border);
+            display: flex; justify-content: center; align-items: center; gap: 16px;
+            padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        }
         .control-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            font-size: 20px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            width: 50px; height: 50px; border-radius: 50%; font-size: 18px;
+            padding: 0; display: flex; align-items: center; justify-content: center;
         }
+        .control-btn.active { background: var(--bg-tertiary); color: var(--text-primary); }
+        .control-btn.on { background: var(--success); color: white; }
+        .control-btn.off { background: var(--danger); color: white; }
 
-        .control-btn.active {
-            background: var(--success);
-        }
-
-        .control-btn.muted {
-            background: var(--danger);
-        }
-
-        @media (max-width: 768px) {
-            .control-btn {
-                width: 52px;
-                height: 52px;
-                font-size: 18px;
-            }
-        }
-
-        /* Chat Overlay */
+        /* --- SMART CHAT --- */
         #chat-overlay {
-            position: fixed;
-            bottom: 96px;
-            right: 16px;
-            width: 360px;
-            max-width: calc(100vw - 32px);
-            height: 400px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
+            position: fixed; bottom: 90px; right: 20px;
+            width: 350px; height: 450px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
             z-index: 100;
-            transform: translateY(calc(100% + 96px));
-            transition: transform 0.3s ease;
+            transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        #chat-overlay.open {
-            transform: translateY(0);
-        }
-
-        @media (max-width: 768px) {
-            #chat-overlay {
-                bottom: 96px;
-                right: 12px;
-                width: calc(100vw - 24px);
-                height: 350px;
-            }
+        #chat-overlay.open { transform: translateY(0); }
+        @media(max-width: 600px) {
+            #chat-overlay { width: 100%; right: 0; bottom: 0; height: 60vh; border-radius: 16px 16px 0 0; }
         }
 
         .chat-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
+            padding: 12px 16px; background: var(--bg-tertiary);
+            border-radius: 12px 12px 0 0;
+            display: flex; justify-content: space-between; align-items: center;
         }
-
-        .chat-header h3 {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
+        
         #chat-feed {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            flex: 1; padding: 16px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 10px;
         }
 
-        .chat-message {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .msg-row { display: flex; flex-direction: column; max-width: 80%; }
+        .msg-row.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-row.theirs { align-self: flex-start; align-items: flex-start; }
+        .msg-row.system { align-self: center; max-width: 100%; align-items: center; }
+
+        .msg-sender { font-size: 10px; margin-bottom: 2px; color: var(--text-muted); padding: 0 4px;}
+        
+        .msg-bubble {
+            padding: 8px 12px; border-radius: 12px;
+            font-size: 13px; line-height: 1.4; position: relative;
+        }
+        .mine .msg-bubble { background: var(--msg-mine); color: white; border-bottom-right-radius: 2px; }
+        .theirs .msg-bubble { background: var(--msg-theirs); color: white; border-bottom-left-radius: 2px; }
+        .system .msg-bubble { background: rgba(255,255,255,0.1); color: var(--text-muted); font-size: 11px; padding: 4px 12px; border-radius: 20px;}
+
+        .msg-time {
+            font-size: 9px; opacity: 0.7; margin-top: 2px; text-align: right;
         }
 
-        .chat-sender {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary);
+        .chat-input {
+            padding: 10px; border-top: 1px solid var(--border);
+            display: flex; gap: 8px;
         }
 
-        .chat-text {
-            background: var(--bg-tertiary);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .chat-input-area {
-            padding: 12px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .chat-input-area input {
-            margin: 0;
-        }
-
-        .chat-input-area button {
-            padding: 12px 20px;
-            flex-shrink: 0;
-        }
-
-        /* Toast */
+        /* --- TOAST --- */
         #toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-width: 320px;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 2000; display: flex; flex-direction: column; gap: 10px;
         }
-
-        @media (max-width: 768px) {
-            #toast-container {
-                left: 12px;
-                right: 12px;
-                max-width: none;
-            }
-        }
-
         .toast {
-            background: var(--bg-secondary);
-            border-left: 4px solid var(--primary);
-            padding: 12px 16px;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideIn 0.3s ease;
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 8px;
+            animation: fadeIn 0.3s;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .toast.success { border-left-color: var(--success); }
-        .toast.error { border-left-color: var(--danger); }
-        .toast.warning { border-left-color: var(--warning); }
-
-        .toast-icon {
-            font-size: 20px;
-        }
-
-        .toast-message {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-
-        /* Loading animation */
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .spinner {
-            animation: spin 1s linear infinite;
-        }
     </style>
 </head>
 <body>
 
     <div id="toast-container"></div>
 
-    <!-- 1. LOGIN / LOBBY SCREEN -->
+    <!-- 1. LOBBY SCREEN -->
     <div id="lobby-screen" class="screen">
         <div class="auth-card">
             <div class="auth-header">
-                <h1>🎙️ VoiceHub Pro</h1>
-                <p>Secure Group Voice Rooms</p>
+                <h1><i class="fas fa-microphone-lines"></i> VoiceHub Pro</h1>
+                <p>Secure Enterprise Voice Rooms</p>
             </div>
             
-            <!-- Auth Status -->
             <div class="auth-status">
                 <div>
-                    <span style="color: var(--text-muted); font-size: 11px;">STATUS:</span>
+                    <span style="color:var(--text-muted); font-size:10px;">IDENTITY</span>
                     <span class="badge guest" id="auth-badge">GUEST</span>
                 </div>
-                <button class="secondary" id="toggle-auth-btn" style="padding: 6px 12px; font-size: 12px;">
-                    Admin Login
-                </button>
+                <button class="secondary" id="toggle-login" style="padding:6px 10px; font-size:11px;">Admin Access</button>
             </div>
 
-            <!-- Login Form (Hidden by default) -->
+            <!-- Admin Login Form -->
             <div id="login-form" class="hidden">
                 <div class="form-group">
                     <label>Admin Email</label>
-                    <input type="email" id="adm-email" placeholder="admin@example.com">
+                    <input type="email" id="adm-email" placeholder="admin@voicehub.com">
                 </div>
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" id="adm-pass" placeholder="••••••••">
                 </div>
-                <button class="admin" id="do-login-btn" style="width:100%">
-                    <i class="fas fa-sign-in-alt"></i> Authenticate
-                </button>
-                <div class="divider"></div>
+                <button class="admin" id="do-login-btn" style="width:100%">Authenticate</button>
+                <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
             </div>
 
-            <!-- Join/Create Form -->
+            <!-- Join Form -->
             <div class="form-group">
-                <label>👤 Username</label>
-                <input type="text" id="username" placeholder="Enter your name..." maxlength="12">
+                <label>Display Name</label>
+                <input type="text" id="username" placeholder="Enter your name..." maxlength="15">
             </div>
             
             <div class="form-group">
-                <label>🔑 Room ID</label>
+                <label>Room ID</label>
                 <div class="input-group">
-                    <input type="text" id="room-id" placeholder="Ex: 8X92B">
-                    <button class="secondary" id="gen-id-btn" title="Generate Random">
-                        <i class="fas fa-dice"></i>
-                    </button>
+                    <input type="text" id="room-id" placeholder="EX: A1B2C">
+                    <button class="secondary" id="gen-id-btn" title="Random ID"><i class="fas fa-random"></i></button>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>🔒 Security Level</label>
+                <label>Security</label>
                 <select id="security-level">
                     <option value="public">Public (Open)</option>
-                    <option value="private">Private (Password Protected)</option>
+                    <option value="private">Private (Password)</option>
                 </select>
             </div>
 
             <div id="password-field" class="form-group hidden">
-                <label>🗝️ Room Password</label>
-                <input type="password" id="room-pass" placeholder="Enter password...">
+                <label>Room Password</label>
+                <input type="password" id="room-pass" placeholder="Secret Key...">
             </div>
 
-            <button id="connect-btn" style="width:100%; margin-top:8px;">
-                <i class="fas fa-plug"></i> Connect to Room
+            <button id="connect-btn" style="width:100%; margin-top:10px;">
+                <i class="fas fa-satellite-dish"></i> Connect to Room
             </button>
+
+            <!-- Super Admin Dashboard Button -->
+            <div id="dashboard-trigger" class="hidden">
+                <button class="secondary" id="show-dashboard-btn" style="width:100%; margin-top:10px; border: 1px dashed var(--accent); color: var(--accent);">
+                    <i class="fas fa-tachometer-alt"></i> View Active Rooms (Super Admin)
+                </button>
+            </div>
+
+            <!-- Super Admin Dashboard Panel -->
+            <div id="dashboard-panel" class="hidden">
+                <h3 style="margin-top:0; font-size:14px; text-transform:uppercase; color:var(--text-muted);">Active Rooms</h3>
+                <div id="rooms-list">
+                    <!-- Loaded via JS -->
+                    <div style="text-align:center; padding:10px; color:var(--text-muted); font-size:12px;">Loading...</div>
+                </div>
+                <button class="secondary" id="close-dashboard" style="width:100%; margin-top:10px; font-size:12px;">Close List</button>
+            </div>
         </div>
     </div>
 
     <!-- 2. MAIN APP -->
     <div id="app-layout" class="hidden">
         <div id="top-bar">
-            <div class="room-info">
+            <div style="display:flex; align-items:center; gap:10px;">
                 <div class="room-badge">
-                    <i class="fas fa-satellite-dish"></i>
                     <span id="room-display">---</span>
-                    <i class="fas fa-lock hidden" id="lock-icon" style="font-size: 12px;"></i>
+                    <i class="fas fa-lock hidden" id="room-locked-indicator" title="Room Locked"></i>
                 </div>
+                <span id="timer" style="font-size:12px; font-family:monospace; color:var(--text-muted);">00:00</span>
             </div>
-            <div class="top-actions">
-                <button class="icon-btn" id="copy-link" title="Copy Room ID">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-                <button class="icon-btn" id="toggle-chat" title="Toggle Chat">
-                    <i class="fas fa-comment-alt"></i>
-                </button>
+            
+            <div style="display:flex; align-items:center;">
+                <!-- Admin Only Controls -->
+                <div id="admin-actions" class="admin-room-controls hidden">
+                    <button class="icon-btn warning" id="toggle-lock-btn" title="Lock/Unlock Room">
+                        <i class="fas fa-lock-open"></i>
+                    </button>
+                    <button class="icon-btn danger" id="end-room-btn" title="End Call for All">
+                        <i class="fas fa-skull"></i>
+                    </button>
+                </div>
+
+                <div style="display:flex; gap:8px;">
+                    <button class="icon-btn" id="copy-link" title="Copy ID"><i class="fas fa-copy"></i></button>
+                    <button class="icon-btn" id="toggle-chat" title="Chat"><i class="fas fa-comment-dots"></i></button>
+                </div>
             </div>
         </div>
 
         <div id="main-content">
             <div id="grid-container">
-                <!-- User Nodes go here -->
+                <!-- Users injected here -->
             </div>
         </div>
 
         <div id="control-deck">
-            <button class="control-btn active" id="mic-btn" title="Toggle Mic">
-                <i class="fas fa-microphone"></i>
-            </button>
-            <button class="control-btn active" id="sound-btn" title="Toggle Sound">
-                <i class="fas fa-volume-up"></i>
-            </button>
-            <button class="control-btn" id="hand-btn" title="Raise Hand">
-                <i class="fas fa-hand-paper"></i>
-            </button>
-            <button class="control-btn danger" id="leave-btn" title="Disconnect">
-                <i class="fas fa-power-off"></i>
-            </button>
+            <button class="control-btn on" id="mic-btn"><i class="fas fa-microphone"></i></button>
+            <button class="control-btn on" id="sound-btn"><i class="fas fa-volume-up"></i></button>
+            <button class="control-btn active" id="hand-btn"><i class="fas fa-hand"></i></button>
+            <button class="control-btn danger" id="leave-btn"><i class="fas fa-phone-slash"></i></button>
         </div>
 
-        <!-- Chat Overlay -->
+        <!-- Smart Chat -->
         <div id="chat-overlay">
             <div class="chat-header">
-                <h3>💬 Chat</h3>
-                <button class="icon-btn" id="close-chat" style="width: 32px; height: 32px; font-size: 14px;">
-                    <i class="fas fa-times"></i>
-                </button>
+                <span style="font-weight:700;">Live Chat</span>
+                <i class="fas fa-times" id="close-chat" style="cursor:pointer;"></i>
             </div>
-            <div id="chat-feed"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-msg" placeholder="Type a message...">
-                <button id="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <div id="chat-feed">
+                <!-- Messages -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-msg" placeholder="Type message..." style="margin:0;">
+                <button id="send-btn" style="width:auto; padding:0 16px;"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { 
-            getFirestore, collection, doc, setDoc, getDoc, onSnapshot, 
+            getFirestore, collection, doc, setDoc, getDoc, onSnapshot, getDocs,
             updateDoc, deleteDoc, serverTimestamp, query, orderBy, addDoc 
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        /* --- CONFIGURATION --- */
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
             authDomain: "voice-call-demo-1201b.firebaseapp.com",
@@ -774,25 +467,25 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        /* --- STATE --- */
+        // STATE
         let state = {
             localStream: null,
             pcs: {},
             uid: Math.random().toString(36).substr(2, 9),
             room: null,
             name: 'User',
-            isAdmin: false,
-            isMicOn: true,
-            isDeaf: false,
-            isHandRaised: false
+            isSystemAdmin: false, // Logged in via Firebase
+            isRoomAdmin: false,   // Created the room
+            micOn: true,
+            audioOn: true,
+            handRaised: false,
+            callTimer: null
         };
 
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-        /* --- UI HANDLERS --- */
-        
-        // Auth Toggle
-        document.getElementById('toggle-auth-btn').onclick = () => {
+        // --- AUTH & LOBBY --- //
+        document.getElementById('toggle-login').onclick = () => {
             document.getElementById('login-form').classList.toggle('hidden');
         };
 
@@ -801,147 +494,247 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             const p = document.getElementById('adm-pass').value;
             try {
                 await signInWithEmailAndPassword(auth, e, p);
-                toast("Admin access granted", "success");
+                toast("System Admin Access Granted", "success");
                 document.getElementById('login-form').classList.add('hidden');
-            } catch(err) { 
-                toast("Access denied: " + err.code, "error"); 
-            }
+            } catch(err) { toast("Auth Failed: " + err.code, "error"); }
         };
 
         onAuthStateChanged(auth, user => {
             const badge = document.getElementById('auth-badge');
+            const dashBtn = document.getElementById('dashboard-trigger');
             if(user) {
-                badge.textContent = 'ADMIN';
-                badge.className = 'badge admin';
-                state.isAdmin = true;
+                badge.innerText = "SYSTEM ADMIN";
+                badge.className = "badge admin";
+                state.isSystemAdmin = true;
+                dashBtn.classList.remove('hidden');
             } else {
-                badge.textContent = 'GUEST';
-                badge.className = 'badge guest';
-                state.isAdmin = false;
+                badge.innerText = "GUEST";
+                badge.className = "badge guest";
+                state.isSystemAdmin = false;
+                dashBtn.classList.add('hidden');
             }
         });
 
-        // Room Setup
+        // --- DASHBOARD (SUPER ADMIN) --- //
+        document.getElementById('show-dashboard-btn').onclick = () => {
+            document.getElementById('dashboard-panel').classList.remove('hidden');
+            loadActiveRooms();
+        };
+        document.getElementById('close-dashboard').onclick = () => {
+            document.getElementById('dashboard-panel').classList.add('hidden');
+        };
+
+        async function loadActiveRooms() {
+            const list = document.getElementById('rooms-list');
+            list.innerHTML = '<div style="text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+            
+            const q = query(collection(db, 'group_calls')); // In real app, maybe filter by active
+            const snapshot = await getDocs(q);
+            
+            list.innerHTML = '';
+            if(snapshot.empty) {
+                list.innerHTML = '<div style="text-align:center; font-size:12px; opacity:0.6;">No active rooms found.</div>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room-list-item';
+                roomDiv.innerHTML = `
+                    <div class="room-meta">
+                        <strong>${doc.id}</strong> <small>(${data.type})</small><br>
+                        <span style="font-size:10px; color:var(--text-muted)">Created: ${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleTimeString() : 'N/A'}</span>
+                        ${data.isLocked ? '<i class="fas fa-lock" style="color:var(--warning); margin-left:5px;"></i>' : ''}
+                    </div>
+                    <div class="room-actions">
+                        <button class="mini-btn admin" onclick="window.joinAsAdmin('${doc.id}')" title="Join"><i class="fas fa-sign-in-alt"></i></button>
+                        <button class="mini-btn danger" onclick="window.forceEndRoom('${doc.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                list.appendChild(roomDiv);
+            });
+        }
+
+        window.joinAsAdmin = (roomId) => {
+            document.getElementById('room-id').value = roomId;
+            document.getElementById('username').value = "SuperAdmin";
+            document.getElementById('connect-btn').click();
+        };
+
+        window.forceEndRoom = async (roomId) => {
+            if(!confirm(`Delete room ${roomId} and kick everyone?`)) return;
+            // First mark as ended so clients disconnect
+            await updateDoc(doc(db, 'group_calls', roomId), { status: 'ended' });
+            // Then delete (cleanup handled by clients or cloud function ideally)
+            toast(`Room ${roomId} terminated.`);
+            loadActiveRooms();
+        };
+
+        // --- ROOM SETUP --- //
         document.getElementById('gen-id-btn').onclick = () => {
-            document.getElementById('room-id').value = Math.random().toString(36).substr(2, 6).toUpperCase();
+            document.getElementById('room-id').value = Math.random().toString(36).substr(2, 5).toUpperCase();
         };
 
         document.getElementById('security-level').onchange = (e) => {
-            if(e.target.value === 'private') {
-                document.getElementById('password-field').classList.remove('hidden');
-            } else {
-                document.getElementById('password-field').classList.add('hidden');
-            }
+            document.getElementById('password-field').className = e.target.value === 'private' ? 'form-group' : 'form-group hidden';
         };
 
-        // Connect
         document.getElementById('connect-btn').onclick = async () => {
-            const name = document.getElementById('username').value.trim();
+            const name = document.getElementById('username').value.trim() || 'User';
             const room = document.getElementById('room-id').value.toUpperCase().trim();
             const type = document.getElementById('security-level').value;
             const pwd = document.getElementById('room-pass').value;
 
-            if(!name || !room) return toast("Please fill all fields", "error");
-            if(type === 'private' && !pwd) return toast("Password required", "error");
+            if(!room) return toast("Enter a Room ID", "error");
+            if(type === 'private' && !pwd) return toast("Password Required", "error");
 
             state.name = name;
             state.room = room;
 
             const btn = document.getElementById('connect-btn');
-            btn.innerHTML = '<i class="fas fa-spinner spinner"></i> Connecting...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
             btn.disabled = true;
-            
+
             try {
                 state.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                await joinRoom(room, type, pwd);
+                await joinRoomLogic(room, type, pwd);
             } catch(e) {
                 console.error(e);
-                toast("Microphone access denied", "error");
-                btn.innerHTML = '<i class="fas fa-plug"></i> Connect to Room';
+                toast("Mic Access Denied or Error", "error");
+                btn.innerHTML = 'Connect to Room';
                 btn.disabled = false;
             }
         };
 
-        /* --- CORE LOGIC --- */
-
-        async function joinRoom(roomId, type, password) {
+        async function joinRoomLogic(roomId, type, password) {
             const roomRef = doc(db, 'group_calls', roomId);
             const roomSnap = await getDoc(roomRef);
-
-            let isRoomAdmin = false;
+            let isCreator = false;
 
             if (!roomSnap.exists()) {
-                const roomData = {
-                    type: type,
-                    password: type === 'private' ? password : null,
+                // Create Room
+                await setDoc(roomRef, {
+                    type, password, 
                     createdAt: serverTimestamp(),
-                    adminUid: auth.currentUser ? auth.currentUser.uid : null
-                };
-                if(auth.currentUser) isRoomAdmin = true;
-                await setDoc(roomRef, roomData);
-                toast(`Room created (${type})`, "success");
+                    createdBy: state.uid,
+                    status: 'active',
+                    isLocked: false
+                });
+                isCreator = true;
+                toast("Room Created", "success");
             } else {
                 const data = roomSnap.data();
                 
-                if (data.type === 'private' && data.password !== password) {
-                    const btn = document.getElementById('connect-btn');
-                    btn.innerHTML = '<i class="fas fa-plug"></i> Connect to Room';
-                    btn.disabled = false;
-                    return toast("Wrong password", "error");
+                // 1. Check if Ended
+                if(data.status === 'ended') {
+                    throw new Error("Room has ended");
                 }
 
-                if (auth.currentUser && data.adminUid === auth.currentUser.uid) {
-                    isRoomAdmin = true;
-                    toast("Welcome back, Commander", "success");
+                // 2. Check Lock (Super Admin bypasses lock)
+                if(data.isLocked && !state.isSystemAdmin) {
+                     // Allow rejoin if already participant? (Simplification: No)
+                     const btn = document.getElementById('connect-btn');
+                     btn.innerHTML = 'Connect'; btn.disabled = false;
+                     return toast("Room is LOCKED by Admin", "error");
+                }
+
+                // 3. Check Password
+                if (data.type === 'private' && data.password !== password && !state.isSystemAdmin) {
+                    const btn = document.getElementById('connect-btn');
+                    btn.innerHTML = 'Connect'; btn.disabled = false;
+                    return toast("Wrong Password", "error");
                 }
             }
 
-            state.isAdmin = isRoomAdmin;
+            state.isRoomAdmin = isCreator || state.isSystemAdmin;
 
+            // UI Switch
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('app-layout').classList.remove('hidden');
             document.getElementById('room-display').innerText = roomId;
-            if(type === 'private') document.getElementById('lock-icon').classList.remove('hidden');
+            
+            // Show Admin Controls
+            if(state.isRoomAdmin) {
+                document.getElementById('admin-actions').classList.remove('hidden');
+            }
 
+            // Join Participant List
             await setDoc(doc(db, 'group_calls', roomId, 'participants', state.uid), {
                 name: state.name,
                 micOn: true,
                 handRaised: false,
-                role: isRoomAdmin ? 'admin' : 'user',
+                role: state.isRoomAdmin ? 'admin' : 'user',
                 joinedAt: serverTimestamp()
             });
-
-            addSelfToGrid();
-            startListeners();
             
-            window.addEventListener('beforeunload', () => leaveCall());
+            addSystemMessage(`${state.name} joined the room.`);
+
+            // Init Grid
+            addSelfToGrid();
+            startRoomListeners();
+            startTimer();
+            
+            // Prevent accidental back
+            window.history.pushState(null, null, window.location.href);
+            window.onpopstate = () => window.history.forward();
+            window.addEventListener('beforeunload', () => cleanup());
         }
 
-        function startListeners() {
-            // Participant Sync
+        function startRoomListeners() {
+            // 1. Listen to Room Meta (End Call / Lock)
+            onSnapshot(doc(db, 'group_calls', state.room), (snap) => {
+                if(!snap.exists()) return;
+                const data = snap.data();
+                
+                // End Call Logic
+                if(data.status === 'ended') {
+                    alert("The Host has ended this meeting.");
+                    cleanup(true); // Force reload
+                }
+
+                // Lock Logic
+                const lockIcon = document.getElementById('room-locked-indicator');
+                const lockBtn = document.getElementById('toggle-lock-btn');
+                
+                if(data.isLocked) {
+                    lockIcon.classList.remove('hidden');
+                    lockBtn.innerHTML = '<i class="fas fa-lock"></i>';
+                    lockBtn.title = "Unlock Room";
+                    if(!state.isRoomAdmin) addSystemMessage("Room was locked by Admin");
+                } else {
+                    lockIcon.classList.add('hidden');
+                    lockBtn.innerHTML = '<i class="fas fa-lock-open"></i>';
+                    lockBtn.title = "Lock Room";
+                }
+            });
+
+            // 2. Listen to Participants
             onSnapshot(collection(db, 'group_calls', state.room, 'participants'), snap => {
                 snap.docChanges().forEach(change => {
                     const d = change.doc.data();
                     const pid = change.doc.id;
+                    
                     if(pid === state.uid) {
-                        if(d.kicked) leaveCall(true);
-                        if(d.mutedByAdmin && state.isMicOn) toggleMic(false);
+                        if(d.kicked) { alert("You were kicked."); cleanup(true); }
+                        if(d.mutedByAdmin && state.micOn) toggleMic(false);
                         return;
                     }
+
                     if(change.type === 'added') {
                         addPeerNode(pid, d);
-                        connectPeer(pid, state.uid > pid);
-                        toast(`${d.name} joined`);
+                        connectPeer(pid, state.uid > pid); // initiator logic
+                        addSystemMessage(`${d.name} joined.`);
                     }
                     if(change.type === 'modified') updatePeerNode(pid, d);
                     if(change.type === 'removed') {
                         removePeer(pid);
-                        toast(`${d.name} left`, "warning");
+                        addSystemMessage(`${d.name} left.`);
                     }
                 });
             });
 
-            // Chat Sync
+            // 3. Listen to Chat
             const q = query(collection(db, 'group_calls', state.room, 'messages'), orderBy('timestamp'));
             onSnapshot(q, snap => {
                 snap.docChanges().forEach(change => {
@@ -949,7 +742,7 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
                 });
             });
 
-            // Signaling
+            // 4. Listen to WebRTC Signals
             onSnapshot(collection(db, 'group_calls', state.room, 'participants', state.uid, 'inbox'), snap => {
                 snap.docChanges().forEach(change => {
                     if(change.type === 'added') handleSignal(change.doc.data(), change.doc.id);
@@ -957,21 +750,57 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             });
         }
 
-        /* --- WEBRTC --- */
+        // --- ADMIN CONTROLS --- //
+        document.getElementById('end-room-btn').onclick = async () => {
+            if(confirm("Are you sure you want to END this meeting for everyone?")) {
+                await updateDoc(doc(db, 'group_calls', state.room), { status: 'ended' });
+                // Clean up happens via listener for admin too
+            }
+        };
+
+        document.getElementById('toggle-lock-btn').onclick = async () => {
+            const roomRef = doc(db, 'group_calls', state.room);
+            const snap = await getDoc(roomRef);
+            if(snap.exists()) {
+                const currentLock = snap.data().isLocked || false;
+                await updateDoc(roomRef, { isLocked: !currentLock });
+                toast(!currentLock ? "Room Locked" : "Room Unlocked");
+            }
+        };
+
+        window.kickUser = async (id) => {
+            if(confirm("Kick this user?")) {
+                await updateDoc(doc(db, 'group_calls', state.room, 'participants', id), { kicked: true });
+            }
+        };
+
+        window.muteUser = async (id) => {
+            await updateDoc(doc(db, 'group_calls', state.room, 'participants', id), { mutedByAdmin: true });
+            toast("User muted");
+        };
+
+        // --- WEBRTC CORE --- //
         async function connectPeer(remoteId, initiator) {
             const pc = new RTCPeerConnection(rtcConfig);
             state.pcs[remoteId] = pc;
-
+            
+            // Add local tracks
             state.localStream.getTracks().forEach(t => pc.addTrack(t, state.localStream));
 
+            // Remote tracks
             pc.ontrack = e => {
-                const audio = document.getElementById(`audio-${remoteId}`);
-                if(audio) {
-                    audio.srcObject = e.streams[0];
-                    visualizeAudio(e.streams[0], remoteId);
-                }
+                const existing = document.getElementById(`audio-${remoteId}`);
+                if(existing) return;
+                const audio = document.createElement('audio');
+                audio.id = `audio-${remoteId}`;
+                audio.srcObject = e.streams[0];
+                audio.autoplay = true;
+                if(!state.audioOn) audio.muted = true;
+                document.body.appendChild(audio);
+                visualizeAudio(e.streams[0], remoteId);
             };
 
+            // ICE
             pc.onicecandidate = e => {
                 if(e.candidate) sendSignal(remoteId, { type: 'candidate', candidate: e.candidate.toJSON() });
             };
@@ -984,21 +813,24 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
         }
 
         async function handleSignal(data, docId) {
+            // Delete processed signal
             deleteDoc(doc(db, 'group_calls', state.room, 'participants', state.uid, 'inbox', docId));
 
             const pc = state.pcs[data.from];
             if(!pc) return;
 
-            if(data.type === 'offer') {
-                await pc.setRemoteDescription(new RTCSessionDescription(data));
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                sendSignal(data.from, { type: 'answer', sdp: answer.sdp });
-            } else if (data.type === 'answer') {
-                if(!pc.currentRemoteDescription) await pc.setRemoteDescription(new RTCSessionDescription(data));
-            } else if (data.type === 'candidate') {
-                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
+            try {
+                if(data.type === 'offer') {
+                    await pc.setRemoteDescription(new RTCSessionDescription(data));
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    sendSignal(data.from, { type: 'answer', sdp: answer.sdp });
+                } else if (data.type === 'answer') {
+                    if(!pc.currentRemoteDescription) await pc.setRemoteDescription(new RTCSessionDescription(data));
+                } else if (data.type === 'candidate') {
+                    await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            } catch(e) { console.log("Signal Error", e); }
         }
 
         async function sendSignal(target, payload) {
@@ -1006,26 +838,21 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             await addDoc(collection(db, 'group_calls', state.room, 'participants', target, 'inbox'), payload);
         }
 
-        /* --- UI RENDERING --- */
-        const grid = document.getElementById('grid-container');
-
+        // --- UI RENDERING --- //
         function addSelfToGrid() {
             const div = document.createElement('div');
-            div.className = `user-node ${state.isAdmin ? 'admin-user' : ''}`;
+            div.className = `user-node ${state.isRoomAdmin ? 'admin-user' : ''}`;
             div.id = 'node-self';
             div.innerHTML = `
-                <div class="avatar">
-                    ${state.name[0]}
+                <div class="avatar">${state.name[0]}
                     <div class="status-indicators">
                         <div class="status-icon hand hidden" id="self-hand">✋</div>
-                        <div class="status-icon muted hidden" id="self-mute">
-                            <i class="fas fa-microphone-slash"></i>
-                        </div>
+                        <div class="status-icon muted hidden" id="self-mute"><i class="fas fa-microphone-slash"></i></div>
                     </div>
                 </div>
-                <div class="user-name">${state.name} (You)</div>
+                <div style="font-size:12px; font-weight:600;">${state.name} (You)</div>
             `;
-            grid.appendChild(div);
+            document.getElementById('grid-container').appendChild(div);
             visualizeAudio(state.localStream, 'self');
         }
 
@@ -1034,64 +861,110 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             div.className = `user-node ${data.role==='admin' ? 'admin-user' : ''}`;
             div.id = `node-${id}`;
             
-            let adminBtns = '';
-            if(state.isAdmin) {
-                adminBtns = `
-                    <div class="admin-controls">
-                        <button class="mini-btn danger" onclick="window.kick('${id}')" title="Kick">
-                            <i class="fas fa-user-times"></i>
-                        </button>
-                        <button class="mini-btn" onclick="window.mute('${id}')" title="Mute">
-                            <i class="fas fa-microphone-slash"></i>
-                        </button>
-                    </div>
-                `;
+            let adminHTML = '';
+            if(state.isRoomAdmin) {
+                adminHTML = `
+                    <div class="admin-controls-overlay">
+                        <button class="mini-btn danger" onclick="window.kickUser('${id}')"><i class="fas fa-ban"></i></button>
+                        <button class="mini-btn warning" onclick="window.muteUser('${id}')"><i class="fas fa-microphone-slash"></i></button>
+                    </div>`;
             }
 
             div.innerHTML = `
-                ${adminBtns}
-                <div class="avatar">
-                    ${data.name[0]}
+                ${adminHTML}
+                <div class="avatar">${data.name[0]}
                     <div class="status-indicators">
                         <div class="status-icon hand ${data.handRaised?'':'hidden'}" id="hand-${id}">✋</div>
-                        <div class="status-icon muted ${data.micOn?'hidden':''}" id="mute-${id}">
-                            <i class="fas fa-microphone-slash"></i>
-                        </div>
+                        <div class="status-icon muted ${data.micOn?'hidden':''}" id="mute-${id}"><i class="fas fa-microphone-slash"></i></div>
                     </div>
                 </div>
-                <div class="user-name">${data.name}</div>
-                <audio id="audio-${id}" autoplay></audio>
+                <div style="font-size:12px; font-weight:600;">${data.name}</div>
             `;
-            grid.appendChild(div);
+            document.getElementById('grid-container').appendChild(div);
         }
 
         function updatePeerNode(id, data) {
             const node = document.getElementById(`node-${id}`);
             if(!node) return;
-            
-            const mIcon = document.getElementById(`mute-${id}`);
-            if(mIcon) {
-                if(data.micOn) mIcon.classList.add('hidden'); 
-                else mIcon.classList.remove('hidden');
-            }
-
-            const hIcon = document.getElementById(`hand-${id}`);
-            if(hIcon) {
-                if(data.handRaised) hIcon.classList.remove('hidden'); 
-                else hIcon.classList.add('hidden');
-            }
+            const mic = document.getElementById(`mute-${id}`);
+            const hand = document.getElementById(`hand-${id}`);
+            if(mic) data.micOn ? mic.classList.add('hidden') : mic.classList.remove('hidden');
+            if(hand) data.handRaised ? hand.classList.remove('hidden') : hand.classList.add('hidden');
         }
 
         function removePeer(id) {
             const el = document.getElementById(`node-${id}`);
             if(el) el.remove();
-            if(state.pcs[id]) { 
-                state.pcs[id].close(); 
-                delete state.pcs[id]; 
-            }
+            const au = document.getElementById(`audio-${id}`);
+            if(au) au.remove();
+            if(state.pcs[id]) { state.pcs[id].close(); delete state.pcs[id]; }
         }
 
+        // --- CONTROLS --- //
+        document.getElementById('mic-btn').onclick = () => toggleMic();
+        async function toggleMic(forceVal) {
+            state.micOn = forceVal !== undefined ? forceVal : !state.micOn;
+            state.localStream.getAudioTracks()[0].enabled = state.micOn;
+            
+            const btn = document.getElementById('mic-btn');
+            const icon = document.getElementById('self-mute');
+            
+            if(state.micOn) {
+                btn.classList.replace('off', 'on');
+                btn.innerHTML = '<i class="fas fa-microphone"></i>';
+                icon.classList.add('hidden');
+            } else {
+                btn.classList.replace('on', 'off');
+                btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                icon.classList.remove('hidden');
+            }
+            await updateDoc(doc(db, 'group_calls', state.room, 'participants', state.uid), { micOn: state.micOn });
+        }
+
+        document.getElementById('sound-btn').onclick = () => {
+            state.audioOn = !state.audioOn;
+            document.querySelectorAll('audio').forEach(a => a.muted = !state.audioOn);
+            const btn = document.getElementById('sound-btn');
+            if(state.audioOn) {
+                btn.classList.replace('off', 'on');
+                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                toast("Audio Output On");
+            } else {
+                btn.classList.replace('on', 'off');
+                btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                toast("Audio Output Muted", "warning");
+            }
+        };
+
+        document.getElementById('hand-btn').onclick = async () => {
+            state.handRaised = !state.handRaised;
+            const btn = document.getElementById('hand-btn');
+            const icon = document.getElementById('self-hand');
+            if(state.handRaised) {
+                btn.classList.add('on');
+                icon.classList.remove('hidden');
+            } else {
+                btn.classList.remove('on');
+                icon.classList.add('hidden');
+            }
+            await updateDoc(doc(db, 'group_calls', state.room, 'participants', state.uid), { handRaised: state.handRaised });
+        };
+
+        document.getElementById('leave-btn').onclick = () => cleanup(true);
+
+        async function cleanup(reload = false) {
+            if(state.room) {
+                // remove participant
+                try {
+                    await deleteDoc(doc(db, 'group_calls', state.room, 'participants', state.uid));
+                } catch(e) {}
+            }
+            if(reload) window.location.reload();
+        }
+
+        // --- AUDIO VISUALIZER --- //
         function visualizeAudio(stream, id) {
+            if(!stream.active) return;
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const src = ctx.createMediaStreamSource(stream);
             const anl = ctx.createAnalyser();
@@ -1101,170 +974,102 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
             
             const loop = () => {
                 const el = document.getElementById(id === 'self' ? 'node-self' : `node-${id}`);
-                if(!el) return;
+                if(!el) return; // stop if element removed
                 anl.getByteFrequencyData(data);
                 const vol = data.reduce((a,b)=>a+b)/data.length;
-                if(vol > 20) el.classList.add('speaking');
+                if(vol > 15) el.classList.add('speaking');
                 else el.classList.remove('speaking');
                 requestAnimationFrame(loop);
             }
             loop();
         }
 
-        /* --- CONTROLS --- */
+        // --- SMART CHAT --- //
+        document.getElementById('toggle-chat').onclick = () => document.getElementById('chat-overlay').classList.add('open');
+        document.getElementById('close-chat').onclick = () => document.getElementById('chat-overlay').classList.remove('open');
         
-        document.getElementById('mic-btn').onclick = () => toggleMic();
-        async function toggleMic(force) {
-            state.isMicOn = force !== undefined ? force : !state.isMicOn;
-            state.localStream.getAudioTracks()[0].enabled = state.isMicOn;
-            
-            const btn = document.getElementById('mic-btn');
-            const icon = document.getElementById('self-mute');
-            
-            if(state.isMicOn) {
-                btn.classList.add('active');
-                btn.classList.remove('muted');
-                btn.innerHTML = '<i class="fas fa-microphone"></i>';
-                icon.classList.add('hidden');
-            } else {
-                btn.classList.remove('active');
-                btn.classList.add('muted');
-                btn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-                icon.classList.remove('hidden');
-            }
-            
-            await updateDoc(doc(db, 'group_calls', state.room, 'participants', state.uid), { micOn: state.isMicOn });
-        }
-
-        document.getElementById('sound-btn').onclick = () => {
-            state.isDeaf = !state.isDeaf;
-            const btn = document.getElementById('sound-btn');
-            document.querySelectorAll('audio').forEach(a => a.muted = state.isDeaf);
-            
-            if(!state.isDeaf) {
-                btn.classList.add('active');
-                btn.classList.remove('muted');
-                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                toast("Audio enabled");
-            } else {
-                btn.classList.remove('active');
-                btn.classList.add('muted');
-                btn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                toast("Audio muted", "warning");
-            }
-        };
-
-        document.getElementById('hand-btn').onclick = async () => {
-            state.isHandRaised = !state.isHandRaised;
-            const btn = document.getElementById('hand-btn');
-            const icon = document.getElementById('self-hand');
-            
-            if(state.isHandRaised) {
-                btn.classList.add('active');
-                icon.classList.remove('hidden');
-                toast("Hand raised");
-            } else {
-                btn.classList.remove('active');
-                icon.classList.add('hidden');
-            }
-            
-            await updateDoc(doc(db, 'group_calls', state.room, 'participants', state.uid), { handRaised: state.isHandRaised });
-        };
-
-        document.getElementById('leave-btn').onclick = () => leaveCall();
-
-        async function leaveCall(kicked = false) {
-            if(state.room) {
-                await deleteDoc(doc(db, 'group_calls', state.room, 'participants', state.uid));
-            }
-            if(kicked) alert("You were removed by the admin");
-            window.location.reload();
-        }
-
-        /* --- ADMIN --- */
-        window.kick = async (id) => {
-            if(!confirm("Remove this user?")) return;
-            await updateDoc(doc(db, 'group_calls', state.room, 'participants', id), { kicked: true });
-        };
-
-        window.mute = async (id) => {
-            await updateDoc(doc(db, 'group_calls', state.room, 'participants', id), { mutedByAdmin: true });
-            toast("User muted");
-        };
-
-        /* --- CHAT --- */
-        const chatOverlay = document.getElementById('chat-overlay');
-        
-        document.getElementById('toggle-chat').onclick = () => {
-            chatOverlay.classList.toggle('open');
-        };
-
-        document.getElementById('close-chat').onclick = () => {
-            chatOverlay.classList.remove('open');
-        };
-
         document.getElementById('send-btn').onclick = sendChat;
-        document.getElementById('chat-msg').onkeypress = e => { 
-            if(e.key === 'Enter') sendChat() 
-        };
+        document.getElementById('chat-msg').onkeypress = (e) => { if(e.key === 'Enter') sendChat() };
 
         async function sendChat() {
             const txt = document.getElementById('chat-msg').value.trim();
             if(!txt) return;
-            
             await addDoc(collection(db, 'group_calls', state.room, 'messages'), {
                 sender: state.name,
+                uid: state.uid,
                 text: txt,
-                timestamp: serverTimestamp()
+                timestamp: serverTimestamp(),
+                type: 'user'
             });
-            
             document.getElementById('chat-msg').value = '';
         }
 
-        function renderChat(data) {
+        function addSystemMessage(text) {
+            const feed = document.getElementById('chat-feed');
             const div = document.createElement('div');
-            div.className = 'chat-message';
+            div.className = 'msg-row system';
+            div.innerHTML = `<div class="msg-bubble">${text}</div>`;
+            feed.appendChild(div);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function renderChat(data) {
+            if(data.type === 'system') return; // handled locally or via dedicated type
+            
+            const isMe = data.uid === state.uid;
+            const div = document.createElement('div');
+            div.className = `msg-row ${isMe ? 'mine' : 'theirs'}`;
+            
+            let timeStr = '';
+            if(data.timestamp) {
+                const d = new Date(data.timestamp.seconds * 1000);
+                timeStr = d.getHours().toString().padStart(2,0) + ':' + d.getMinutes().toString().padStart(2,0);
+            }
+
             div.innerHTML = `
-                <div class="chat-sender">${data.sender}</div>
-                <div class="chat-text">${data.text}</div>
+                ${!isMe ? `<div class="msg-sender">${data.sender}</div>` : ''}
+                <div class="msg-bubble">
+                    ${data.text}
+                    <div class="msg-time">${timeStr}</div>
+                </div>
             `;
             
             const feed = document.getElementById('chat-feed');
             feed.appendChild(div);
             feed.scrollTop = feed.scrollHeight;
+            
+            // Notification dot if closed
+            const overlay = document.getElementById('chat-overlay');
+            if(!overlay.classList.contains('open') && !isMe) {
+                toast(`New msg from ${data.sender}`);
+            }
         }
 
+        // --- UTILS --- //
         document.getElementById('copy-link').onclick = () => {
             navigator.clipboard.writeText(state.room);
-            toast("Room ID copied!");
+            toast("Room ID Copied!");
         };
 
-        /* --- TOAST --- */
-        function toast(msg, type='info') {
-            const icons = {
-                info: '💡',
-                success: '✅',
-                error: '❌',
-                warning: '⚠️'
-            };
-
-            const t = document.createElement('div');
-            t.className = `toast ${type}`;
-            t.innerHTML = `
-                <div class="toast-icon">${icons[type] || icons.info}</div>
-                <div class="toast-message">${msg}</div>
-            `;
-            
-            document.getElementById('toast-container').appendChild(t);
-            
-            setTimeout(() => {
-                t.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => t.remove(), 300);
-            }, 3000);
+        function startTimer() {
+            let s = 0;
+            const el = document.getElementById('timer');
+            state.callTimer = setInterval(() => {
+                s++;
+                const m = Math.floor(s/60).toString().padStart(2,'0');
+                const sec = (s%60).toString().padStart(2,'0');
+                el.innerText = `${m}:${sec}`;
+            }, 1000);
         }
 
+        function toast(msg, type='info') {
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.style.borderLeft = `4px solid ${type==='error' ? 'var(--danger)' : type==='success' ? 'var(--success)' : 'var(--primary)'}`;
+            t.innerHTML = `<span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
     </script>
 </body>
 </html>
-
-Add some feature, admin can end the call, all user will out the call when admin end the call, add a button for admin the button to control new user join on off, admin can see all running roomes, and acceps all room, and can end all calls, and chat system create more smart
