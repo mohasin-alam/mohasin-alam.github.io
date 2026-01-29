@@ -85,22 +85,19 @@
             display: grid;
             gap: 1rem;
             align-content: center;
-            /* Auto-responsive grid */
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             transition: all 0.3s ease;
         }
 
-        /* Mobile specific grid tweak */
         @media (max-width: 768px) {
             #video-grid-container {
-                grid-template-columns: 1fr; /* Stack vertically on mobile */
+                grid-template-columns: 1fr;
                 padding: 10px;
-                padding-bottom: 80px; /* Space for bottom nav */
+                padding-bottom: 80px;
             }
             .video-card { min-height: 250px; }
         }
 
-        /* Video Card Styling */
         .video-card {
             position: relative;
             background: #000;
@@ -136,15 +133,7 @@
             display: flex; justify-content: center; align-items: center; font-size: 12px;
         }
 
-        /* Floating Reactions */
-        .floating-reaction {
-            position: absolute; bottom: 50%; left: 50%;
-            transform: translate(-50%, 50%);
-            font-size: 3rem; animation: floatUp 2s ease-out forwards;
-        }
-        @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -100px); } }
-
-        /* --- 4. CHAT SIDEBAR / SHEET --- */
+        /* --- 4. CHAT SIDEBAR --- */
         #chat-panel {
             width: 320px;
             background: var(--bg-panel);
@@ -154,12 +143,11 @@
             z-index: 50;
         }
 
-        /* Mobile Chat Transformation */
         @media (max-width: 768px) {
             #chat-panel {
                 position: absolute;
                 top: 0; right: 0; width: 85%; height: 100%;
-                transform: translateX(100%); /* Hidden by default */
+                transform: translateX(100%);
                 box-shadow: -5px 0 15px rgba(0,0,0,0.5);
             }
             #chat-panel.open { transform: translateX(0); }
@@ -172,7 +160,7 @@
         .msg-meta { font-size: 0.7rem; opacity: 0.7; margin-bottom: 2px; }
         .chat-input-area { padding: 15px; border-top: 1px solid #334155; display: flex; gap: 10px; }
         
-        /* --- 5. CONTROLS BAR (Bottom) --- */
+        /* --- 5. CONTROLS BAR --- */
         #controls-bar {
             height: var(--nav-height);
             background: #1e293b;
@@ -192,26 +180,26 @@
             transition: all 0.2s;
         }
         .ctrl-btn:active { transform: scale(0.9); }
-        .ctrl-btn.active { background: var(--primary); } /* For toggles like Hand Raise */
-        .ctrl-btn.off { background: var(--danger); }     /* For Mute/Video Off */
+        .ctrl-btn.active { background: var(--primary); }
+        .ctrl-btn.off { background: var(--danger); }
         .ctrl-btn.leave { background: #ef4444; color: white; width: 60px; border-radius: 20px; }
 
         .hidden { display: none !important; }
 
-        /* Notification Toast */
         #toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
             background: #333; padding: 10px 20px; border-radius: 20px;
             z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none;
         }
+
+        /* Kick Button */
+        .kick-btn { background: var(--danger); border: none; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- Notification -->
     <div id="toast">Notification</div>
 
-    <!-- Lobby / Login -->
     <div id="lobby-overlay">
         <div class="lobby-card">
             <h2 style="color: var(--primary); margin-top:0;"><i class="fas fa-video"></i> NexCall</h2>
@@ -223,34 +211,23 @@
                 <label>Room ID (Auto-generated if empty)</label>
                 <input type="text" id="room-input" placeholder="e.g. daily-standup">
             </div>
-            <div class="input-group">
-                <label>Room Password (Optional)</label>
-                <input type="password" id="room-pass" placeholder="Secret key">
-            </div>
             <button class="btn btn-primary" id="join-btn">Join / Create Room</button>
             <p id="lobby-msg" style="color: var(--danger); font-size: 0.8rem; margin-top: 10px;"></p>
         </div>
     </div>
 
-    <!-- Main App -->
     <div id="app-container" class="hidden">
-        <!-- Video Grid -->
         <div id="video-grid-container">
-            <!-- Local User Video (Always first) -->
             <div id="local-video-wrapper" class="video-card">
                 <video id="local-video" autoplay muted playsinline></video>
                 <div class="user-info">
                     <span class="connection-dot"></span>
                     <span id="local-name-display">You</span>
                 </div>
-                <div class="status-icons" id="local-status">
-                    <!-- Icons injected via JS -->
-                </div>
+                <div class="status-icons" id="local-status"></div>
             </div>
-            <!-- Remote videos injected here -->
         </div>
 
-        <!-- Chat Sidebar -->
         <div id="chat-panel">
             <div class="chat-header">
                 <span>Chat</span>
@@ -264,29 +241,25 @@
         </div>
     </div>
 
-    <!-- Bottom Controls -->
     <div id="controls-bar" class="hidden">
         <button class="ctrl-btn" id="mic-btn"><i class="fas fa-microphone"></i></button>
         <button class="ctrl-btn" id="cam-btn"><i class="fas fa-video"></i></button>
         <button class="ctrl-btn" id="hand-btn"><i class="fas fa-hand-paper"></i></button>
+        <button class="ctrl-btn" id="invite-btn" title="Copy Invite Link"><i class="fas fa-link"></i></button>
         <button class="ctrl-btn" id="chat-toggle-btn"><i class="fas fa-comment-alt"></i></button>
         
-        <!-- Admin Only Button -->
         <button class="ctrl-btn hidden" id="admin-menu-btn" style="background: #eab308;"><i class="fas fa-crown"></i></button>
         
         <button class="ctrl-btn leave" id="leave-btn"><i class="fas fa-phone-slash"></i></button>
     </div>
 
-    <!-- Admin Modal -->
-    <dialog id="admin-modal" style="background: var(--bg-panel); color: white; border: 1px solid #444; border-radius: 12px;">
+    <dialog id="admin-modal" style="background: var(--bg-panel); color: white; border: 1px solid #444; border-radius: 12px; padding: 20px;">
         <h3>Admin Controls</h3>
         <button class="btn btn-primary" style="background: var(--danger); margin-bottom: 5px;" id="admin-mute-all">Mute Everyone</button>
         <button class="btn btn-primary" style="background: #444;" onclick="document.getElementById('admin-modal').close()">Close</button>
     </dialog>
 
-    <!-- SCRIPTS -->
     <script type="module">
-        // --- FIREBASE IMPORT ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
         import { 
@@ -294,27 +267,21 @@
             updateDoc, deleteDoc, getDoc, serverTimestamp, query, orderBy, limit 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        // !!! REPLACE WITH YOUR CONFIG !!!
-     
-const firebaseConfig = {
-  apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
-  authDomain: "voice-call-demo-1201b.firebaseapp.com",
-  projectId: "voice-call-demo-1201b",
-  storageBucket: "voice-call-demo-1201b.firebasestorage.app",
-  messagingSenderId: "611354192250",
-  appId: "1:611354192250:web:bac02535d65ca6565fcec3",
-  measurementId: "G-TDD0343N6G"
-};
-
-
-
-
+        // Firebase Config (Apnar Dewa Details)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8rID7RGFq4iLkueeJsoYYyJ_aAh7qBHs",
+            authDomain: "voice-call-demo-1201b.firebaseapp.com",
+            projectId: "voice-call-demo-1201b",
+            storageBucket: "voice-call-demo-1201b.firebasestorage.app",
+            messagingSenderId: "611354192250",
+            appId: "1:611354192250:web:bac02535d65ca6565fcec3",
+            measurementId: "G-TDD0343N6G"
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- GLOBAL STATE ---
         const state = {
             localStream: null,
             uid: null,
@@ -323,16 +290,9 @@ const firebaseConfig = {
             isAdmin: false,
             audioEnabled: true,
             videoEnabled: true,
-            handRaised: false,
-            peerConnections: {}, // { remoteUid: RTCPeerConnection }
-            iceServers: {
-                iceServers: [
-                    { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
-                ]
-            }
+            handRaised: false
         };
 
-        // --- UI ELEMENTS ---
         const els = {
             lobby: document.getElementById('lobby-overlay'),
             app: document.getElementById('app-container'),
@@ -345,445 +305,143 @@ const firebaseConfig = {
             camBtn: document.getElementById('cam-btn'),
             handBtn: document.getElementById('hand-btn'),
             leaveBtn: document.getElementById('leave-btn'),
-            adminBtn: document.getElementById('admin-menu-btn')
+            adminBtn: document.getElementById('admin-menu-btn'),
+            inviteBtn: document.getElementById('invite-btn')
         };
 
-        // --- 1. INITIALIZATION & URL PARSING ---
+        // Parse Direct Invite Link
         window.addEventListener('load', () => {
             const params = new URLSearchParams(window.location.search);
             if(params.has('room')) document.getElementById('room-input').value = params.get('room');
-            if(params.has('pass')) document.getElementById('room-pass').value = params.get('pass');
         });
 
-        document.getElementById('join-btn').addEventListener('click', async () => {
-            const userIn = document.getElementById('username').value;
-            const roomIn = document.getElementById('room-input').value;
-            const passIn = document.getElementById('room-pass').value;
-
+        document.getElementById('join-btn').onclick = async () => {
+            const userIn = document.getElementById('username').value.trim();
             if(!userIn) return showToast("Enter a name");
-
-            document.getElementById('join-btn').innerText = "Joining...";
-            
-            // 1. Auth
+            state.username = userIn;
             await signInAnonymously(auth);
-        });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 state.uid = user.uid;
-                const userIn = document.getElementById('username').value;
-                const roomIn = document.getElementById('room-input').value || generateId();
-                const passIn = document.getElementById('room-pass').value;
-
-                if(!document.getElementById('lobby-overlay').style.display === 'none') return; // Already joined
-
-                state.username = userIn;
-                state.roomId = roomIn;
+                state.roomId = document.getElementById('room-input').value.trim() || Math.random().toString(36).substr(2, 9);
                 
-                // 2. Room Logic (Create/Join)
                 const roomRef = doc(db, "rooms", state.roomId);
                 const roomSnap = await getDoc(roomRef);
 
                 if (!roomSnap.exists()) {
-                    // Create Room
                     state.isAdmin = true;
-                    await setDoc(roomRef, {
-                        createdBy: state.uid,
-                        password: passIn,
-                        locked: false,
-                        createdAt: serverTimestamp()
-                    });
-                } else {
-                    // Join Room (Check Password/Lock)
-                    const data = roomSnap.data();
-                    if(data.locked) {
-                        alert("Room is locked by admin.");
-                        window.location.reload();
-                        return;
-                    }
-                    if(data.password && data.password !== passIn) {
-                        alert("Incorrect Password.");
-                        window.location.reload();
-                        return;
-                    }
-                    if(data.createdBy === state.uid) state.isAdmin = true;
+                    await setDoc(roomRef, { creator: state.uid, muteAllTrigger: 0 });
+                } else if(roomSnap.data().creator === state.uid) {
+                    state.isAdmin = true;
                 }
 
                 startCall();
             }
         });
 
-        // --- 2. START CALL LOGIC ---
         async function startCall() {
-            try {
-                // Get Media
-                state.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                els.localVideo.srcObject = state.localStream;
-                document.getElementById('local-name-display').innerText = state.username + (state.isAdmin ? " (Host)" : "");
+            state.localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            els.localVideo.srcObject = state.localStream;
+            
+            els.lobby.classList.add('hidden');
+            els.app.classList.remove('hidden');
+            els.controls.classList.remove('hidden');
+            document.getElementById('local-name-display').innerText = state.username + (state.isAdmin ? " (Admin)" : "");
 
-                // UI Transition
-                els.lobby.classList.add('hidden');
-                els.app.classList.remove('hidden');
-                els.controls.classList.remove('hidden');
-                
-                if(window.innerWidth < 768) {
-                    document.getElementById('close-chat-mobile').style.display = 'block';
-                }
+            if(state.isAdmin) els.adminBtn.classList.remove('hidden');
 
-                if(state.isAdmin) els.adminBtn.classList.remove('hidden');
+            await setDoc(doc(db, "rooms", state.roomId, "participants", state.uid), {
+                name: state.username,
+                mic: true,
+                hand: false
+            });
 
-                // Firestore Presence
-                const participantRef = doc(db, "rooms", state.roomId, "participants", state.uid);
-                await setDoc(participantRef, {
-                    name: state.username,
-                    mic: true,
-                    camera: true,
-                    handRaised: false,
-                    joinedAt: serverTimestamp()
-                });
-
-                // Listeners
-                setupRoomListeners();
-                
-                // Handle Disconnect
-                window.addEventListener('beforeunload', cleanup);
-                els.leaveBtn.addEventListener('click', () => { cleanup(); window.location.reload(); });
-
-            } catch (err) {
-                console.error(err);
-                alert("Camera/Mic access denied.");
-            }
+            setupListeners();
         }
 
-        // --- 3. FIRESTORE LISTENERS (Signaling & Chat) ---
-        function setupRoomListeners() {
-            // A. Participants Listener (Mesh Network Logic)
-            const participantsRef = collection(db, "rooms", state.roomId, "participants");
-            
-            onSnapshot(participantsRef, (snapshot) => {
-                snapshot.docChanges().forEach(async (change) => {
+        function setupListeners() {
+            // Kick Out Listener
+            onSnapshot(doc(db, "rooms", state.roomId, "participants", state.uid), (snap) => {
+                if(!snap.exists()) { alert("You have been kicked by Admin."); location.reload(); }
+            });
+
+            // Mute All Listener
+            onSnapshot(doc(db, "rooms", state.roomId), (snap) => {
+                const data = snap.data();
+                if(data.muteAllTrigger > 0 && !state.isAdmin) {
+                    const track = state.localStream.getAudioTracks()[0];
+                    track.enabled = false;
+                    state.audioEnabled = false;
+                    els.micBtn.classList.add('off');
+                    showToast("Admin muted everyone");
+                }
+            });
+
+            // Participant Grid Sync
+            onSnapshot(collection(db, "rooms", state.roomId, "participants"), (snap) => {
+                snap.docChanges().forEach(change => {
+                    const id = change.doc.id;
                     const data = change.doc.data();
-                    const remoteUid = change.doc.id;
-                    if (remoteUid === state.uid) return;
+                    if(id === state.uid) return;
 
-                    if (change.type === "added") {
-                        // Create UI Card
-                        createVideoCard(remoteUid, data.name);
-                        
-                        // WebRTC Signaling: 
-                        // To avoid collision, let the "newer" user (or alphanumeric sort) initiate the offer.
-                        // Here: If I am already in the room, and someone joins, I initiate?
-                        // Simple mesh strategy: If state.uid < remoteUid => I call you.
-                        // But simpler for this demo: New joiner calls everyone already there? 
-                        // Implementation: We'll wait for the 'added' event. 
-                        // Logic: User A and B. A is in. B joins.
-                        // A sees B added. B sees A added.
-                        // We use ID comparison to decide who offers.
-                        if (state.uid < remoteUid) {
-                            createPeerConnection(remoteUid, true); // Initiator
-                        } else {
-                            createPeerConnection(remoteUid, false); // Receiver
-                        }
-
-                    } else if (change.type === "modified") {
-                        // Update UI Icons (Mic/Cam/Hand)
-                        updateRemoteStatus(remoteUid, data);
-                        // Hand Raise Toast
-                        if(data.handRaised) showToast(`${data.name} raised hand ✋`);
-                        
-                    } else if (change.type === "removed") {
-                        // Cleanup Peer
-                        if(state.peerConnections[remoteUid]) {
-                            state.peerConnections[remoteUid].close();
-                            delete state.peerConnections[remoteUid];
-                        }
-                        const card = document.getElementById(`card-${remoteUid}`);
-                        if(card) card.remove();
-                    }
-                });
-                
-                // Check if *I* was removed (Kicked)
-                const myDoc = snapshot.docs.find(d => d.id === state.uid);
-                if (!myDoc && snapshot.size > 0) {
-                    // Logic: If doc is gone but I didn't leave -> Kicked
-                    // (Simplified check)
-                }
-            });
-
-            // B. Kicked Listener (Specific check)
-            onSnapshot(doc(db, "rooms", state.roomId, "participants", state.uid), (doc) => {
-                if(!doc.exists()) {
-                    alert("You have been kicked/disconnected.");
-                    location.reload();
-                }
-            });
-
-            // C. Chat Listener
-            const chatRef = query(collection(db, "rooms", state.roomId, "messages"), orderBy("createdAt"), limit(50));
-            onSnapshot(chatRef, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") renderMessage(change.doc.data());
-                });
-            });
-
-            // D. Mute All Listener (Admin Action)
-            onSnapshot(doc(db, "rooms", state.roomId), (doc) => {
-                if(doc.data()?.muteAllTrigger > 0 && !state.isAdmin) {
-                   toggleMic(false); // Force mute
-                   showToast("Host muted everyone");
-                }
-            });
-        }
-
-        // --- 4. WEBRTC CORE ---
-        async function createPeerConnection(remoteUid, isInitiator) {
-            if (state.peerConnections[remoteUid]) return;
-
-            const pc = new RTCPeerConnection(state.iceServers);
-            state.peerConnections[remoteUid] = pc;
-
-            // Add Local Tracks
-            state.localStream.getTracks().forEach(track => pc.addTrack(track, state.localStream));
-
-            // On Ice Candidate
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    const coll = collection(db, "rooms", state.roomId, "participants", remoteUid, "candidates");
-                    addDoc(coll, { candidate: event.candidate.toJSON(), sender: state.uid });
-                }
-            };
-
-            // On Track (Remote Stream)
-            pc.ontrack = (event) => {
-                const videoEl = document.getElementById(`video-${remoteUid}`);
-                if (videoEl) videoEl.srcObject = event.streams[0];
-            };
-
-            // Connection State (Strength Indicator mock)
-            pc.onconnectionstatechange = () => {
-                const dot = document.querySelector(`#card-${remoteUid} .connection-dot`);
-                if(dot) {
-                    if(pc.connectionState === 'connected') dot.style.background = 'var(--success)';
-                    else if(pc.connectionState === 'disconnected') dot.style.background = 'orange';
-                    else dot.style.background = 'red';
-                }
-            };
-
-            // Signaling Paths
-            const offerRef = collection(db, "rooms", state.roomId, "participants", remoteUid, "offers");
-            const answerRef = collection(db, "rooms", state.roomId, "participants", state.uid, "offers"); // Listen for answers sent TO me
-            
-            // Note: In a mesh, signaling structure can be complex. 
-            // Simplified: Write to target's subcollection.
-            
-            if (isInitiator) {
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                
-                // Send Offer to Remote's subcollection
-                await addDoc(offerRef, { 
-                    type: 'offer', 
-                    sdp: offer.sdp, 
-                    sender: state.uid 
-                });
-            }
-
-            // Listen for Signaling messages directed at ME from REMOTE
-            const mySignals = collection(db, "rooms", state.roomId, "participants", state.uid, "offers");
-            const q = query(mySignals); 
-            
-            // This listener needs to be specific to the remoteUid to avoid processing others' signals here
-            // For a single file demo, we attach a global listener for signals elsewhere or filter here.
-            // Better approach for Mesh in single file: 
-            // Listen to *all* offers/answers sent to me, filter by sender.
-        }
-
-        // Dedicated Signaling Listener (Separate from CreatePeerConnection to avoid duplicate listeners)
-        function listenToSignaling() {
-            // This function would be called once at startup.
-            // Implementing simplified "Wait for Offer" logic inside createPeerConnection for specific pair is tricky.
-            // Standard Pattern:
-            const mySignals = collection(db, "rooms", state.roomId, "participants", state.uid, "offers");
-            onSnapshot(mySignals, (snapshot) => {
-                snapshot.docChanges().forEach(async (change) => {
-                    if(change.type === 'added') {
-                        const data = change.doc.data();
-                        const pc = state.peerConnections[data.sender];
-                        if(!pc && data.type === 'offer') {
-                            // Valid offer from new person (I am receiver)
-                            await createPeerConnection(data.sender, false); // Create PC
-                            const newPC = state.peerConnections[data.sender];
-                            await newPC.setRemoteDescription(new RTCSessionDescription(data));
-                            const answer = await newPC.createAnswer();
-                            await newPC.setLocalDescription(answer);
-                            // Send Answer back
-                            const targetRef = collection(db, "rooms", state.roomId, "participants", data.sender, "offers");
-                            await addDoc(targetRef, { type: 'answer', sdp: answer.sdp, sender: state.uid });
-                        } else if(pc && data.type === 'answer') {
-                            // Answer to my offer
-                            if(!pc.currentRemoteDescription) {
-                                await pc.setRemoteDescription(new RTCSessionDescription(data));
-                            }
-                        }
-                    }
-                });
-            });
-
-            // Listen for Candidates
-            const myCandidates = collection(db, "rooms", state.roomId, "participants", state.uid, "candidates");
-            onSnapshot(myCandidates, (snap) => {
-                snap.docChanges().forEach((change) => {
-                    if(change.type === 'added') {
-                        const data = change.doc.data();
-                        const pc = state.peerConnections[data.sender];
-                        if(pc) pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-                    }
+                    if(change.type === "added") renderParticipant(id, data.name);
+                    if(change.type === "removed") document.getElementById(`card-${id}`)?.remove();
                 });
             });
         }
 
-        // --- 5. DOM & CONTROLS HELPER ---
-        
-        function createVideoCard(uid, name) {
+        function renderParticipant(id, name) {
             const div = document.createElement('div');
             div.className = 'video-card';
-            div.id = `card-${uid}`;
+            div.id = `card-${id}`;
             div.innerHTML = `
-                <video id="video-${uid}" autoplay playsinline></video>
-                <div class="user-info">
-                    <span class="connection-dot"></span>
-                    <span>${name}</span>
-                </div>
-                <div class="status-icons" id="status-${uid}"></div>
+                <video id="video-${id}" autoplay playsinline></video>
+                <div class="user-info"><span>${name}</span></div>
+                ${state.isAdmin ? `<button class="kick-btn" onclick="kickUser('${id}')">Kick User</button>` : ''}
             `;
             els.videoGrid.appendChild(div);
         }
 
-        function updateRemoteStatus(uid, data) {
-            const container = document.getElementById(`status-${uid}`);
-            if(!container) return;
-            
-            const card = document.getElementById(`card-${uid}`);
-            
-            // Hand Raise Visual
-            if(data.handRaised) {
-                card.classList.add('hand-raised');
-                if(!container.innerHTML.includes('fa-hand-paper')) 
-                    container.innerHTML += `<div class="status-badge"><i class="fas fa-hand-paper"></i></div>`;
-            } else {
-                card.classList.remove('hand-raised');
-                const handIcon = container.querySelector('.fa-hand-paper');
-                if(handIcon) handIcon.parentElement.remove();
-            }
+        // Logic for Buttons
+        window.kickUser = async (id) => {
+            if(confirm("Kick this user?")) await deleteDoc(doc(db, "rooms", state.roomId, "participants", id));
+        };
 
-            // Mic Muted
-            const existingMic = container.querySelector('.fa-microphone-slash');
-            if(!data.mic) {
-                 if(!existingMic) container.innerHTML += `<div class="status-badge" style="background:#ef4444"><i class="fas fa-microphone-slash"></i></div>`;
-            } else {
-                if(existingMic) existingMic.parentElement.remove();
-            }
-        }
+        els.inviteBtn.onclick = () => {
+            const url = `${window.location.origin}${window.location.pathname}?room=${state.roomId}`;
+            navigator.clipboard.writeText(url);
+            showToast("Direct link copied!");
+        };
 
-        // Controls Logic
-        els.micBtn.onclick = () => toggleMic();
-        els.camBtn.onclick = () => toggleCam();
-        
-        function toggleMic(forceState = null) {
+        els.micBtn.onclick = () => {
             const track = state.localStream.getAudioTracks()[0];
-            const newState = forceState !== null ? forceState : !state.audioEnabled;
-            track.enabled = newState;
-            state.audioEnabled = newState;
-            
-            els.micBtn.classList.toggle('off', !newState);
-            els.micBtn.innerHTML = newState ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
-            
-            updateDoc(doc(db, "rooms", state.roomId, "participants", state.uid), { mic: newState });
-        }
+            track.enabled = !track.enabled;
+            state.audioEnabled = track.enabled;
+            els.micBtn.classList.toggle('off', !track.enabled);
+        };
 
-        function toggleCam() {
+        els.camBtn.onclick = () => {
             const track = state.localStream.getVideoTracks()[0];
-            track.enabled = !state.videoEnabled;
-            state.videoEnabled = track.enabled;
-            
-            els.camBtn.classList.toggle('off', !state.videoEnabled);
-            els.camBtn.innerHTML = state.videoEnabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
-            
-            updateDoc(doc(db, "rooms", state.roomId, "participants", state.uid), { camera: state.videoEnabled });
-        }
-
-        els.handBtn.onclick = async () => {
-            state.handRaised = !state.handRaised;
-            els.handBtn.classList.toggle('active', state.handRaised);
-            await updateDoc(doc(db, "rooms", state.roomId, "participants", state.uid), { handRaised: state.handRaised });
+            track.enabled = !track.enabled;
+            els.camBtn.classList.toggle('off', !track.enabled);
         };
 
-        // Chat Logic
-        document.getElementById('chat-toggle-btn').onclick = () => {
-            els.chatPanel.classList.toggle('open');
-            // On desktop, this might toggle display, on mobile it slides
-        };
-        document.getElementById('close-chat-mobile').onclick = () => els.chatPanel.classList.remove('open');
-
-        document.getElementById('send-msg').onclick = sendChat;
-        document.getElementById('chat-msg').onkeypress = (e) => { if(e.key === 'Enter') sendChat(); }
-
-        async function sendChat() {
-            const input = document.getElementById('chat-msg');
-            const text = input.value.trim();
-            if(!text) return;
-            
-            await addDoc(collection(db, "rooms", state.roomId, "messages"), {
-                sender: state.username,
-                text: text,
-                createdAt: serverTimestamp()
-            });
-            input.value = '';
-        }
-
-        function renderMessage(data) {
-            const div = document.createElement('div');
-            const isMe = data.sender === state.username;
-            div.className = `message ${isMe ? 'self' : ''}`;
-            div.innerHTML = `
-                <div class="msg-meta">${isMe ? 'You' : data.sender}</div>
-                ${data.text}
-            `;
-            els.chatFeed.appendChild(div);
-            els.chatFeed.scrollTop = els.chatFeed.scrollHeight;
-        }
-
-        // Admin Logic
+        els.chatToggleBtn.onclick = () => els.chatPanel.classList.toggle('open');
         els.adminBtn.onclick = () => document.getElementById('admin-modal').showModal();
         document.getElementById('admin-mute-all').onclick = async () => {
             await updateDoc(doc(db, "rooms", state.roomId), { muteAllTrigger: Math.random() });
             document.getElementById('admin-modal').close();
         };
 
-        // Cleanup
-        async function cleanup() {
-            state.localStream.getTracks().forEach(t => t.stop());
-            await deleteDoc(doc(db, "rooms", state.roomId, "participants", state.uid));
-        }
+        els.leaveBtn.onclick = () => location.reload();
 
-        function generateId() { return Math.random().toString(36).substr(2, 9); }
         function showToast(msg) {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.opacity = 1;
+            t.innerText = msg; t.style.opacity = 1;
             setTimeout(() => t.style.opacity = 0, 3000);
         }
-
-        // Initialize Signaling Listeners immediately so we are ready
-        // But we need roomId first. So we call this inside startCall, but actually
-        // logic 4 (listenToSignaling) relies on state.roomId being set.
-        // We will invoke it inside startCall.
-        const _origStartCall = startCall;
-        startCall = async function() {
-            await _origStartCall(); // Call original
-            listenToSignaling(); // Attach listeners
-        }
-
     </script>
 </body>
 </html>
