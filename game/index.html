@@ -678,5 +678,32 @@
             .then(() => console.log('Service Worker Registered'));
     }
 </script>
+
+<style>
+  body.blur {
+    filter: blur(12px);
+    user-select: none;
+  }
+</style>
+
+<script>
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      document.body.classList.add("blur");
+    } else {
+      document.body.classList.remove("blur");
+    }
+  });
+
+  window.addEventListener("blur", () => {
+    document.body.classList.add("blur");
+  });
+
+  window.addEventListener("focus", () => {
+    document.body.classList.remove("blur");
+  });
+</script>
+
+    
 </body>
 </html>
