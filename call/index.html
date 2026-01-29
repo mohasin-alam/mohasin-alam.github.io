@@ -56,23 +56,13 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
 
         
         body {
-    padding-bottom: 80px; /* Footer-er height ebong 20px gap mile jototuku lage */
-    box-sizing: border-box;
-}
-        * { 
-            box-sizing: border-box; 
-            outline: none; 
-            -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            height: 100vh;
-            overflow: hidden;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    height: 100dvh; /* Ekhane height: 100vh chilo, seta 100dvh kore din */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
         }
 
         /* --- COMMON UI --- */
@@ -415,16 +405,18 @@ footer, .footer-container { /* Apnar footer-er class name ekhane din */
 
         /* Bottom Controls */
         #control-deck {
-            height: 80px;
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            padding: 0 16px;
-            flex-shrink: 0;
-        }
+    height: auto; /* Purono fixed height-ta muche auto korun */
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 16px; /* Vertical padding ektu bariye deya hoyeche */
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)); /* Niche 20px gap thakbe */
+    flex-shrink: 0;
+    z-index: 100;
+            }
 
         .control-btn {
             width: 56px;
