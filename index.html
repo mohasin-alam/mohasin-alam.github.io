@@ -1,312 +1,312 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ROOT_ACCESS :: Ultra Hacker Terminal by CSM</title>
 
-
-</html>
-<script>
-fetch("https://ipapi.co/json/")
-.then(res => res.json())
-.then(data => {
-  if (data.country === "IN") {
-    document.body.innerHTML =
-      "<h2 style='text-align:center;margin-top:50px;'>Access not allowed from India</h2>";
-  }
-});
-</script>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ওয়েবসাইট সোর্স কোড ভিউয়ার</title>
-    
 <style>
-/* --- Embedded CSS from https://mohasin-alam.github.io/style.css --- */
-/* -------------------------------------- */
-/* ১. ফন্ট ইমপোর্ট এবং বেস স্টাইল (টার্মিনাল লুক) */
-/* -------------------------------------- */
-
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&display=swap');
+/* ==================================================
+   ULTRA PRO HACKER TERMINAL THEME
+   ================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&family=VT323&display=swap');
 
 :root {
-    --color-dark-bg: #0d121c;         /* প্রধান ব্যাকগ্রাউন্ড */
-    --color-text: #39ff14;            /* নিয়ন গ্রিন টেক্সট */
-    --color-accent: #00ff00;          /* উজ্জ্বল অ্যাকসেন্ট (নিয়ন গ্রিন) */
-    --color-border: #008000;          /* গাঢ় সবুজ বর্ডার */
-    --color-error: #ff5757;           /* ত্রুটি রং */
-    --shadow-glow: 0 0 5px var(--color-accent), 0 0 10px var(--color-accent);
+  --bg: #020508;
+  --panel: #060e0b;
+  --text: #39ff14;
+  --accent: #00ff41;
+  --accent2: #00ffe5;
+  --magenta: #ff00c8;
+  --amber: #ffb000;
+  --red: #ff3b3b;
+  --border: rgba(0,255,65,.45);
+  --glow: 0 0 8px rgba(0,255,65,.7), 0 0 20px rgba(0,255,65,.3);
 }
 
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
 body {
-    font-family: 'Share Tech Mono', monospace;
-    background-color: var(--color-dark-bg);
-    color: var(--color-text);
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    overflow-x: hidden;
+  margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; position: relative;
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
 }
+
+/* matrix & scanline overlays */
+#matrixCanvas { position: fixed; inset: 0; z-index: 0; opacity: 0.15; pointer-events: none; }
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(to bottom, rgba(0,255,65,.04), rgba(0,255,65,.04) 1px, transparent 2px, transparent 4px);
+  mix-blend-mode: screen; animation: scan 8s linear infinite;
+}
+@keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(30px); } }
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+}
+
+@keyframes flicker {
+  0%, 100% { filter: brightness(1); } 
+  92% { filter: brightness(1); } 93% { filter: brightness(1.2); } 
+  94% { filter: brightness(0.9); } 95% { filter: brightness(1.1); }
+}
+@keyframes borderPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,255,65,.2), inset 0 0 30px rgba(0,255,65,.05); }
+  50% { box-shadow: 0 0 40px rgba(0,255,65,.4), inset 0 0 50px rgba(0,255,65,.1); }
+}
+@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+.wrap { position: relative; z-index: 2; max-width: 980px; margin: 0 auto; padding: 15px; }
 
 .container {
-    background: #060b14; 
-    padding: 30px 40px;
-    border-radius: 0; 
-    box-shadow: 0 0 15px var(--color-border); 
-    border: 1px solid var(--color-border);
-    width: 100%;
-    max-width: 900px;
-    animation: neon-pulse 4s infinite ease-in-out; /* স্লো পালস অ্যানিমেশন */
+  background: rgba(2, 6, 4, 0.92);
+  border: 1px solid var(--border);
+  padding: 18px;
+  animation: flicker 8s infinite, borderPulse 3s ease-in-out infinite, fadeSlideIn 0.5s ease both;
+  backdrop-filter: blur(5px);
 }
+
+/* boot overlay */
+#bootOverlay {
+  position: fixed; inset: 0; z-index: 50; background: #000; color: var(--accent);
+  font-size: 14px; padding: 20px; white-space: pre-wrap; overflow: hidden; transition: opacity 0.5s;
+}
+#bootOverlay.hide { opacity: 0; pointer-events: none; }
+
+/* top bar */
+.terminal-bar {
+  display: flex; align-items: center; gap: 10px; padding: 10px 15px;
+  border: 1px solid var(--border); background: rgba(0,30,15,.5);
+  box-shadow: inset 0 0 15px rgba(0,255,65,.15); margin-bottom: 12px; flex-wrap: wrap;
+}
+.terminal-dots { display: flex; gap: 8px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.dot.red { background: #ff3b3b; box-shadow: 0 0 10px #ff3b3b; }
+.dot.yellow { background: #ffb000; box-shadow: 0 0 10px #ffb000; }
+.dot.green { background: #39ff14; box-shadow: 0 0 10px #39ff14; }
+.terminal-title { 
+  flex: 1; color: var(--accent); text-shadow: var(--glow); 
+  letter-spacing: 2px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+}
+.terminal-signal { 
+  font-size: 12px; color: var(--accent2); text-shadow: 0 0 8px var(--accent2);
+  border: 1px solid var(--accent2); padding: 3px 10px; 
+}
+.terminal-signal.live { color: var(--red); border-color: var(--red); animation: blinkSig 1s step-end infinite; }
+@keyframes blinkSig { 50% { opacity: 0.2; } }
+
+/* symbol bar added per instruction */
+.symbol-bar {
+  display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
+  padding: 8px; margin-bottom: 12px;
+  background: rgba(0,255,229,0.05); border: 1px dashed var(--accent2);
+  color: var(--accent2); font-weight: bold; font-size: 16px; text-shadow: 0 0 5px var(--accent2);
+  user-select: none;
+}
+.symbol-bar span { animation: glitch 5s infinite alternate; opacity: 0.8; }
+
+.stats-strip {
+  display: flex; gap: 15px; flex-wrap: wrap; font-size: 11px; color: rgba(0,255,229,.8);
+  border: 1px dashed var(--border); padding: 8px 12px; margin-bottom: 15px; letter-spacing: 1px;
+}
+.stats-strip span b { color: var(--accent); }
 
 h1 {
-    color: var(--color-accent);
-    text-align: center;
-    margin-bottom: 30px;
-    text-shadow: var(--shadow-glow);
-    letter-spacing: 3px;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 10px;
+  color: var(--accent); text-align: center; margin: 10px 0 5px; text-shadow: var(--glow);
+  letter-spacing: 3px; font-size: 22px; text-transform: uppercase;
+}
+.subtitle {
+  text-align: center; color: var(--accent2); font-size: 13px; letter-spacing: 4px; text-transform: uppercase;
+  margin: 0 0 15px; opacity: 0.8; border-bottom: 1px dashed var(--border); padding-bottom: 15px;
 }
 
-/* ইনপুট এবং বাটন স্টাইল */
+@keyframes glitch {
+  0%, 100% { text-shadow: 1px 0 0 var(--accent), -1px 0 0 var(--magenta); transform: translate(0,0); }
+  10% { text-shadow: -1px 0 0 var(--magenta), 1px 0 0 var(--accent); transform: translate(-1px,0); }
+  20% { text-shadow: 2px 0 0 var(--accent), -2px 0 0 var(--magenta); transform: translate(1px,0); }
+  30% { text-shadow: -2px 0 0 var(--magenta), 2px 0 0 var(--accent); transform: translate(0,0); }
+}
+.glitch-text { animation: glitch 3s infinite alternate step-end; }
+
+.terminal-prompt {
+  display: flex; align-items: center; gap: 10px; border: 1px solid var(--border);
+  background: rgba(0,20,10,.7); padding: 12px 15px; margin: 15px 0;
+  box-shadow: inset 0 0 15px rgba(0,255,65,.15);
+}
+.prompt-label { color: var(--accent2); text-shadow: 0 0 8px var(--accent2); font-size: 14px; }
 input[type="url"] {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid var(--color-border);
-    border-radius: 0;
-    box-sizing: border-box;
-    font-size: 16px;
-    background-color: #030508;
-    color: var(--color-text);
-    box-shadow: inset 0 0 5px rgba(0, 128, 0, 0.5);
-    font-family: 'Share Tech Mono', monospace;
+  width: 100%; border: none; outline: none; background: transparent; padding: 0;
+  font-size: 16px; color: var(--text); font-family: 'Share Tech Mono', monospace; caret-color: var(--accent);
 }
-
-input[type="url"]:focus {
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-glow);
-    outline: none;
-}
+input[type="url"]::placeholder { color: rgba(57,255,20,.4); }
 
 #viewSourceBtn {
-    background-color: transparent;
-    color: var(--color-accent);
-    padding: 12px 20px;
-    border: 2px solid var(--color-accent);
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    width: 100%;
-    margin-bottom: 30px;
-    text-transform: uppercase;
-    box-shadow: var(--shadow-glow);
+  background: rgba(0,255,65,.05); color: var(--accent); padding: 15px; border: 2px solid var(--accent);
+  cursor: pointer; font-size: 18px; transition: all 0.2s; width: 100%; margin: 5px 0 15px;
+  text-transform: uppercase; box-shadow: var(--glow); letter-spacing: 4px;
+  font-family: 'Share Tech Mono', monospace; position: relative; font-weight: bold;
 }
+#viewSourceBtn::before { content: "> "; opacity: 0.8; }
+#viewSourceBtn:hover:not(:disabled) { background: rgba(0,255,65,.2); box-shadow: 0 0 30px rgba(0,255,65,.6); }
+#viewSourceBtn:active:not(:disabled) { transform: scale(0.98); }
+#viewSourceBtn:disabled { cursor: not-allowed; opacity: 0.5; }
 
-#viewSourceBtn:hover:not(:disabled) {
-    background-color: rgba(0, 255, 0, 0.1);
-    box-shadow: 0 0 20px var(--color-accent);
+.terminal-options {
+  display: flex; gap: 20px; flex-wrap: wrap; padding: 10px 15px;
+  margin: 0 0 15px; border: 1px dashed var(--border); background: rgba(0,15,8,.5);
 }
-#viewSourceBtn:disabled { 
-    cursor: not-allowed;
-    opacity: 0.7;
+.chk { display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: uppercase; font-size: 13px; }
+.chk input {
+  appearance: none; width: 18px; height: 18px; border: 1px solid var(--border);
+  background: rgba(0,0,0,.8); box-shadow: 0 0 10px rgba(0,255,65,.2); position: relative;
 }
+.chk input:checked { background: rgba(57,255,20,.2); }
+.chk input:checked::after { content: ""; position: absolute; inset: 3px; background: var(--accent); }
 
-/* -------------------------------------- */
-/* ২. কোড এরিয়া (টার্মিনাল লুক) */
-/* -------------------------------------- */
+#statusMessage { color: var(--amber); font-weight: bold; margin: 10px 0; font-size: 14px; text-shadow: 0 0 5px var(--amber); }
+#statusMessage:before { content: "[PROCESS]>"; color: var(--red); margin-right: 8px; }
+
+.scan-bar { height: 3px; width: 100%; background: rgba(0,255,65,.1); overflow: hidden; margin: 5px 0 15px; position: relative; }
+.scan-bar::before {
+  content: ""; position: absolute; top: 0; left: -50%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scanMove 1s linear infinite;
+}
+@keyframes scanMove { 0% { left: -50%; } 100% { left: 100%; } }
 
 .code-area {
-    margin-top: 20px;
-    background: #000000; /* খাঁটি কালো ব্যাকগ্রাউন্ড */
-    border: 1px dashed var(--color-border); 
-    border-radius: 0;
-    padding: 15px;
-    max-height: 500px;
-    overflow: auto;
-    font-size: 14px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
-    line-height: 1.4;
-    position: relative;
+  margin-top: 15px; background: #000; border: 1px solid var(--border); padding: 18px;
+  max-height: 55vh; overflow: auto; font-size: 13px; line-height: 1.6; position: relative;
+  box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 20px rgba(0,255,65,.15);
+  -webkit-overflow-scrolling: touch; word-break: break-all;
 }
+.code-area::-webkit-scrollbar { width: 6px; height: 6px; }
+.code-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.code-area::-webkit-scrollbar-track { background: #000; }
 
-/* স্ট্যাটাস মেসেজ - টার্মিনাল প্রম্পট */
-#statusMessage {
-    text-align: left;
-    color: var(--color-text);
-    font-weight: bold;
-    display: none;
-    margin-bottom: 15px;
-    padding-left: 10px;
-    font-family: 'Share Tech Mono', monospace;
+.code-area .beam {
+  position: absolute; left: 0; right: 0; height: 25px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,255,65,.25), transparent);
+  opacity: 0; transition: opacity 0.2s;
 }
-#statusMessage:before {
-    content: "[ATTEMPTING ACCESS]>"; /* টার্মিনাল প্রম্পট */
-    color: var(--color-error);
-    margin-right: 5px;
-}
+.code-area.writing .beam { opacity: 1; animation: beamSweep 1.5s ease-in-out infinite; }
+@keyframes beamSweep { 0% { top: 0; } 100% { top: 100%; } }
 
-.hidden {
-    display: none !important;
-}
-.code-area code {
-    display: block; 
-}
+.code-area code { display: block; color: var(--text); white-space: pre-wrap; word-wrap: break-word; }
 
-/* -------------------------------------- */
-/* ৩. সিনট্যাক্স হাইলাইটিং ফিক্স (Prism.js Override) */
-/* -------------------------------------- */
+/* Mobile Responsive Syntax Highlighting Colors */
+.hl-tag { color: #ff3b3b; font-weight: bold; } /* Tags - Red */
+.hl-attr { color: #00ffe5; font-style: italic; } /* Attributes - Cyan */
+.hl-str { color: #ffb000; } /* Strings - Yellow */
+.hl-cmt { color: #5f7a6b; } /* Comments - Grey/Green */
 
-.code-area code {
-    color: var(--color-text) !important; 
-}
+.hidden { display: none !important; }
 
-.token.tag, .token.attr-name, .token.selector {
-    color: #00ffff !important; /* সায়ান ট্যাগ/অ্যাট্রিবিউট */
-    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+@keyframes blinkCaret { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+.terminal-loader {
+  position: absolute; inset: 0; padding: 20px; background: rgba(0,0,0,.95); color: var(--accent);
+  white-space: pre-wrap; overflow: hidden; z-index: 5; font-size: 14px;
 }
-.token.punctuation, .token.operator {
-    color: #ff00ff !important; /* ম্যাজেন্টা চিহ্ণ */
-}
-.token.attr-value, .token.string {
-    color: #39ff14 !important; /* উজ্জ্বল সবুজ স্ট্রিং */
-}
-.token.comment {
-    color: #008000 !important; /* গাঢ় সবুজ কমেন্ট */
-}
-.token.doctype, .token.prolog {
-    color: #ffa500 !important; /* কমলা ডকটাইপ */
-}
+#sourceCodeOutput.is-typing::after { content: " █"; color: var(--accent2); animation: blinkCaret 0.8s step-end infinite; }
 
-/* -------------------------------------- */
-/* ৪. বাটন এরিয়া স্টাইল (FINAL) */
-/* -------------------------------------- */
-.action-buttons {
-    display: flex;
-    justify-content: flex-end; /* বাটনগুলি ডানদিকে থাকবে */
-    gap: 15px; 
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
+.action-buttons { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
 .action-buttons button {
-    background-color: transparent;
-    color: var(--color-accent);
-    padding: 10px 15px;
-    border: 1px solid var(--color-accent);
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    text-transform: uppercase;
-    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
-    font-family: 'Share Tech Mono', monospace;
+  background: rgba(0,255,65,.05); color: var(--accent); padding: 12px 20px; border: 1px dashed var(--accent);
+  cursor: pointer; font-size: 14px; transition: all 0.3s; text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(0,255,65,.2); font-family: 'Share Tech Mono', monospace; flex: 1; min-width: 150px;
 }
+.action-buttons button:hover { background: rgba(0,255,65,.15); box-shadow: 0 0 20px rgba(0,255,65,.4); }
 
-.action-buttons button:hover {
-    background-color: rgba(0, 255, 0, 0.15);
-    box-shadow: 0 0 10px var(--color-accent);
+.footer-note { margin-top: 20px; font-size: 12px; color: rgba(0,255,65,.5); text-align: center; letter-spacing: 2px; }
+
+/* Mobile Optimization */
+@media (max-width: 600px) {
+  .wrap { padding: 10px; }
+  .container { padding: 15px 12px; }
+  h1 { font-size: 17px; letter-spacing: 1.5px; }
+  .symbol-bar { font-size: 13px; gap: 8px; padding: 5px; }
+  .subtitle { font-size: 11px; }
+  .stats-strip { font-size: 10px; justify-content: center; gap: 10px; }
+  .terminal-prompt { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
+  input[type="url"] { font-size: 14px; }
+  #viewSourceBtn { font-size: 16px; padding: 12px; }
+  .code-area { font-size: 11.5px; max-height: 50vh; padding: 12px; }
 }
-
-.action-buttons button:active {
-    background-color: rgba(0, 255, 0, 0.3);
-}
-
-
-/* -------------------------------------- */
-/* ৫. অ্যানিমেশন এবং ইফেক্ট */
-/* -------------------------------------- */
-
-/* A. ধীর গতির গ্লিচ ইফেক্ট (কম দৃশ্যমান) */
-@keyframes glitch {
-    0%, 100% { text-shadow: 1px 0 0 var(--color-accent), -1px 0 0 #ff00ff; }
-    10% { text-shadow: -1px 0 0 #ff00ff, 1px 0 0 var(--color-accent); }
-    12% { text-shadow: 2px 0 0 var(--color-accent), -2px 0 0 #ff00ff; }
-    20% { text-shadow: -2px 0 0 #ff00ff, 2px 0 0 var(--color-accent); }
-}
-
-.glitch-text {
-    animation: glitch 4s infinite alternate step-end; 
-}
-
-/* B. কীবোর্ড কার্সার অ্যানিমেশন (লোডিং এর জন্য) */
-@keyframes blink-caret {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
-}
-
-/* কীবোর্ড কার্সার স্টাইল - লোডিং এর সময় দেখাবে */
-.code-area.loading code:after {
-    content: '_'; 
-    display: inline;
-    animation: blink-caret .75s step-end infinite;
-}
-
-/* C. কন্টেইনার পালস */
-@keyframes neon-pulse {
-    0% { box-shadow: 0 0 5px var(--color-border); }
-    50% { box-shadow: 0 0 15px var(--color-accent), 0 0 30px var(--color-accent); }
-    100% { box-shadow: 0 0 5px var(--color-border); }
-}
-
-/* ------------------------------------- */
 </style>
-    </head>
+</head>
 <body>
-    <div class="container">
-        <h1 class="glitch-text">Website Source Code Hacker by Csm Mohasin Alam</h1>
-        
-        <input type="url" id="websiteUrl" placeholder="এখানে ওয়েবসাইটের URL দিন (যেমন: https://google.com)" required>
-        <button id="viewSourceBtn">সোর্স কোড দেখুন</button>
-        
-        <p id="statusMessage" class="hidden"></p>
-        
-        <pre class="code-area"><code id="sourceCodeOutput" class="language-html">এখানে আউটপুট দেখা যাবে...</code></pre>
-        
-        <div class="action-buttons hidden" id="actionButtons">
-            <button id="copyCodeBtn">কোড কপি করুন</button>
-            <button id="downloadCodeBtn">HTML ডাউনলোড করুন</button>
-        </div>
-        
+<div id="bootOverlay">INITIALIZING CSM ULTRA KERNEL...</div>
+<canvas id="matrixCanvas"></canvas>
+
+<div class="wrap">
+  <div class="container" id="mainContainer">
+    <div class="terminal-bar">
+      <div class="terminal-dots">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      </div>
+      <div class="terminal-title">root@csm-mohasin:~ / ULTRA_DUMP</div>
+      <div class="terminal-signal" id="terminalSignal">[SYSTEM IDLE]</div>
     </div>
 
-    
+    <div class="symbol-bar">
+      <span>{ }</span> <span>[ ]</span> <span>&lt; &gt;</span> <span>/</span> <span>\</span> <span>|</span> <span>#</span> <span>@</span> <span>$</span> <span>%</span> <span>*</span>
+    </div>
+
+    <div class="stats-strip" id="statsStrip">
+      <span>CPU: <b id="statCpu">--%</b></span>
+      <span>RAM: <b id="statMem">--%</b></span>
+      <span>PING: <b id="statPing">--ms</b></span>
+      <span>UPTIME: <b id="statUptime">00:00:00</b></span>
+    </div>
+
+    <h1 class="glitch-text">Website Source Code Hacker</h1>
+    <div class="subtitle">Developed by CSM Mohasin Alam</div>
+
+    <div class="terminal-prompt">
+      <span class="prompt-label">root@target:~$</span>
+      <input type="url" id="websiteUrl" placeholder="Enter Target URL (ex: https://google.com)" required>
+    </div>
+
+    <button id="viewSourceBtn">EXECUTE EXPLOIT</button>
+
+    <div class="terminal-options">
+      <label class="chk"><input type="checkbox" id="modeInstant"><span>INSTANT DUMP</span></label>
+      <label class="chk"><input type="checkbox" id="modeType" checked><span>HACKER TYPING MODE</span></label>
+    </div>
+
+    <p id="statusMessage" class="hidden"></p>
+    <div id="scanBar" class="scan-bar hidden"></div>
+
+    <pre class="code-area" id="terminalScreen"><span class="beam"></span><span id="terminalLoader" class="terminal-loader hidden"></span><code id="sourceCodeOutput">Waiting for target...</code></pre>
+
+    <div class="action-buttons hidden" id="actionButtons">
+      <button id="copyCodeBtn">COPY PAYLOAD</button>
+      <button id="downloadCodeBtn">DOWNLOAD HTML</button>
+    </div>
+
+    <div class="footer-note">// UNAUTHORIZED ACCESS IS LOGGED //</div>
+  </div>
+</div>
+
 <script>
-// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js ---
-var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(l){var n=/(?:^|\s)lang(?:uage)?-([\w-]+)(?=\s|$)/i,t=0,e={},j={manual:l.Prism&&l.Prism.manual,disableWorkerMessageHandler:l.Prism&&l.Prism.disableWorkerMessageHandler,util:{encode:function e(t){return t instanceof C?new C(t.type,e(t.content),t.alias):Array.isArray(t)?t.map(e):t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).slice(8,-1)},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function n(e,a){var r,t;switch(a=a||{},j.util.type(e)){case"Object":if(t=j.util.objId(e),a[t])return a[t];for(var s in r={},a[t]=r,e)e.hasOwnProperty(s)&&(r[s]=n(e[s],a));return r;case"Array":return(t=j.util.objId(e),a[t])?a[t]:(r=[],a[t]=r,e.forEach(function(e,t){r[t]=n(e[t],a)}),r);default:return e}},getLanguage:function(e){for(;e;){var t=n.exec(e.className);if(t)return t[1].toLowerCase();e=e.parentElement}return"none"},setLanguage:function(e,t){e.className=e.className.replace(RegExp(n,"gi"),""),e.classList.add("language-"+t)},currentScript:function(){if("undefined"==typeof document)return null;if("currentScript"in document)return document.currentScript;try{throw new Error}catch(e){var t=(/at [^(\r\n]*\((.*):[^:]+:[^:]+\)$/i.exec(e.stack)||[])[1];if(t){var n,a=document.getElementsByTagName("script");for(n in a)if(a[n].src==t)return a[n]}return null}},isActive:function(e,t,n){for(var a="no-"+t;e;){var r=e.classList;if(r.contains(t))return!0;if(r.contains(a))return!1;e=e.parentElement}return!!n}},languages:{plain:e,plaintext:e,text:e,txt:e,extend:function(e,t){var n,a=j.util.clone(j.languages[e]);for(n in t)a[n]=t[n];return a},insertBefore:function(n,e,t,a){var r,s=(a=a||j.languages)[n],i={};for(r in s)if(s.hasOwnProperty(r)){if(r==e)for(var o in t)t.hasOwnProperty(o)&&(i[o]=t[o]);t.hasOwnProperty(r)||(i[r]=s[r])}var l=a[n];return a[n]=i,j.languages.DFS(j.languages,function(e,t){t===l&&e!=n&&(this[e]=i)}),i},DFS:function e(t,n,a,r){r=r||{};var s,i,o,l=j.util.objId;for(s in t)t.hasOwnProperty(s)&&(n.call(t,s,t[s],a||s),i=t[s],"Object"!==(o=j.util.type(i))||r[l(i)]?"Array"!==o||r[l(i)]||(r[l(i)]=!0,e(i,n,s,r)):(r[l(i)]=!0,e(i,n,null,r)))}},plugins:{},highlightAll:function(e,t){j.highlightAllUnder(document,e,t)},highlightAllUnder:function(e,t,n){var a={callback:n,container:e,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};j.hooks.run("before-highlightall",a),a.elements=Array.prototype.slice.apply(a.container.querySelectorAll(a.selector)),j.hooks.run("before-all-elements-highlight",a);for(var r,s=0;r=a.elements[s++];)j.highlightElement(r,!0===t,a.callback)},highlightElement:function(e,t,n){var a=j.util.getLanguage(e),r=j.languages[a],s=(j.util.setLanguage(e,a),e.parentElement);s&&"pre"===s.nodeName.toLowerCase()&&j.util.setLanguage(s,a);var i={element:e,language:a,grammar:r,code:e.textContent};function o(e){i.highlightedCode=e,j.hooks.run("before-insert",i),i.element.innerHTML=i.highlightedCode,j.hooks.run("after-highlight",i),j.hooks.run("complete",i),n&&n.call(i.element)}if(j.hooks.run("before-sanity-check",i),(s=i.element.parentElement)&&"pre"===s.nodeName.toLowerCase()&&!s.hasAttribute("tabindex")&&s.setAttribute("tabindex","0"),!i.code)return j.hooks.run("complete",i),void(n&&n.call(i.element));j.hooks.run("before-highlight",i),i.grammar?t&&l.Worker?((a=new Worker(j.filename)).onmessage=function(e){o(e.data)},a.postMessage(JSON.stringify({language:i.language,code:i.code,immediateClose:!0}))):o(j.highlight(i.code,i.grammar,i.language)):o(j.util.encode(i.code))},highlight:function(e,t,n){e={code:e,grammar:t,language:n};if(j.hooks.run("before-tokenize",e),e.grammar)return e.tokens=j.tokenize(e.code,e.grammar),j.hooks.run("after-tokenize",e),C.stringify(j.util.encode(e.tokens),e.language);throw new Error('The language "'+e.language+'" has no grammar.')},tokenize:function(e,t){var n=t.rest;if(n){for(var a in n)t[a]=n[a];delete t.rest}for(var r=new u,s=(z(r,r.head,e),!function e(t,n,a,r,s,i){for(var o in a)if(a.hasOwnProperty(o)&&a[o]){var l=a[o];l=Array.isArray(l)?l:[l];for(var u=0;u<l.length;++u){if(i&&i.cause==o+","+u)return;for(var g,c=l[u],d=c.inside,p=!!c.lookbehind,m=!!c.greedy,h=c.alias,f=(m&&!c.pattern.global&&(g=c.pattern.toString().match(/[imsuy]*$/)[0],c.pattern=RegExp(c.pattern.source,g+"g")),c.pattern||c),b=r.next,y=s;b!==n.tail&&!(i&&y>=i.reach);y+=b.value.length,b=b.next){var v=b.value;if(n.length>t.length)return;if(!(v instanceof C)){var F,x=1;if(m){if(!(F=L(f,y,t,p))||F.index>=t.length)break;var k=F.index,w=F.index+F[0].length,A=y;for(A+=b.value.length;A<=k;)b=b.next,A+=b.value.length;if(A-=b.value.length,y=A,b.value instanceof C)continue;for(var P=b;P!==n.tail&&(A<w||"string"==typeof P.value);P=P.next)x++,A+=P.value.length;x--,v=t.slice(y,A),F.index-=y}else if(!(F=L(f,0,v,p)))continue;var k=F.index,$=F[0],S=v.slice(0,k),E=v.slice(k+$.length),v=y+v.length,_=(i&&v>i.reach&&(i.reach=v),b.prev),S=(S&&(_=z(n,_,S),y+=S.length),O(n,_,x),new C(o,d?j.tokenize($,d):$,h,$));b=z(n,_,S),E&&z(n,b,E),1<x&&($={cause:o+","+u,reach:v},e(t,n,a,b.prev,y,$),i&&$.reach>i.reach&&(i.reach=$.reach))}}}}}(e,r,t,r.head,0),r),i=[],o=s.head.next;o!==s.tail;)i.push(o.value),o=o.next;return i},hooks:{all:{},add:function(e,t){var n=j.hooks.all;n[e]=n[e]||[],n[e].push(t)},run:function(e,t){var n=j.hooks.all[e];if(n&&n.length)for(var a,r=0;a=n[r++];)a(t)}},Token:C};function C(e,t,n,a){this.type=e,this.content=t,this.alias=n,this.length=0|(a||"").length}function L(e,t,n,a){e.lastIndex=t;t=e.exec(n);return t&&a&&t[1]&&(e=t[1].length,t.index+=e,t[0]=t[0].slice(e)),t}function u(){var e={value:null,prev:null,next:null},t={value:null,prev:e,next:null};e.next=t,this.head=e,this.tail=t,this.length=0}function z(e,t,n){var a=t.next,n={value:n,prev:t,next:a};return t.next=n,a.prev=n,e.length++,n}function O(e,t,n){for(var a=t.next,r=0;r<n&&a!==e.tail;r++)a=a.next;(t.next=a).prev=t,e.length-=r}if(l.Prism=j,C.stringify=function t(e,n){if("string"==typeof e)return e;var a;if(Array.isArray(e))return a="",e.forEach(function(e){a+=t(e,n)}),a;var r,s={type:e.type,content:t(e.content,n),tag:"span",classes:["token",e.type],attributes:{},language:n},e=e.alias,i=(e&&(Array.isArray(e)?Array.prototype.push.apply(s.classes,e):s.classes.push(e)),j.hooks.run("wrap",s),"");for(r in s.attributes)i+=" "+r+'="'+(s.attributes[r]||"").replace(/"/g,"&quot;")+'"';return"<"+s.tag+' class="'+s.classes.join(" ")+'"'+i+">"+s.content+"</"+s.tag+">"},!l.document)return l.addEventListener&&(j.disableWorkerMessageHandler||l.addEventListener("message",function(e){var e=JSON.parse(e.data),t=e.language,n=e.code,e=e.immediateClose;l.postMessage(j.highlight(n,j.languages[t],t)),e&&l.close()},!1)),j;var a,e=j.util.currentScript();function r(){j.manual||j.highlightAll()}return e&&(j.filename=e.src,e.hasAttribute("data-manual")&&(j.manual=!0)),j.manual||("loading"===(a=document.readyState)||"interactive"===a&&e&&e.defer?document.addEventListener("DOMContentLoaded",r):window.requestAnimationFrame?window.requestAnimationFrame(r):window.setTimeout(r,16)),j}(_self);
-// -------------------------------------
+document.addEventListener('DOMContentLoaded', () => {
+  fetch("https://ipapi.co/json/")
+    .then(res => res.json())
+    .then(data => {
+      if (data.country === "IN") {
+        document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;color:#39ff14;font-family:monospace;'>Access Denied</h2>";
+      }
+    }).catch(() => {});
+});
 </script>
-    
+
 <script>
-// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js ---
-Prism.languages.markup={comment:{pattern://,greedy:!0},prolog:{pattern:/<\?[\s\S]+?\?>/,greedy:!0},doctype:{pattern:/<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:[^<"'\]]|"[^"]*"|'[^']*'|<(?!!--)|)*\]\s*)?>/i,greedy:!0,inside:{"internal-subset":{pattern:/(^[^\[]*\[)[\s\S]+(?=\]>$)/,lookbehind:!0,greedy:!0,inside:null},string:{pattern:/"[^"]*"|'[^']*'/,greedy:!0},punctuation:/^<!|>$|[[\]]/,"doctype-tag":/^DOCTYPE/i,name:/[^\s<>'"]+/}},cdata:{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,greedy:!0},tag:{pattern:/<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/,greedy:!0,inside:{tag:{pattern:/^<\/?[^\s>\/]+/,inside:{punctuation:/^<\/?/,namespace:/^[^\s>\/:]+:/}},"special-attr":[],"attr-value":{pattern:/=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,inside:{punctuation:[{pattern:/^=/,alias:"attr-equals"},{pattern:/^(\s*)["']|["']$/,lookbehind:!0}]}},punctuation:/\/?>/,"attr-name":{pattern:/[^\s>\/]+/,inside:{namespace:/^[^\s>\/:]+:/}}}},entity:[{pattern:/&[\da-z]{1,8};/i,alias:"named-entity"},/&#x?[\da-f]{1,8};/i]},Prism.languages.markup.tag.inside["attr-value"].inside.entity=Prism.languages.markup.entity,Prism.languages.markup.doctype.inside["internal-subset"].inside=Prism.languages.markup,Prism.hooks.add("wrap",(function(a){"entity"===a.type&&(a.attributes.title=a.content.replace(/&amp;/,"&"))})),Object.defineProperty(Prism.languages.markup.tag,"addInlined",{value:function(a,e){var s={};s["language-"+e]={pattern:/(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,lookbehind:!0,inside:Prism.languages[e]},s.cdata=/^<!\[CDATA\[|\]\]>$/i;var t={"included-cdata":{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,inside:s}};t["language-"+e]={pattern:/[\s\S]+/,inside:Prism.languages[e]};var n={};n[a]={pattern:RegExp("(<__[^>]*>)(?:<!\\[CDATA\\[(?:[^\\]]|\\](?!\\]>))*\\]\\]>|(?!<!\\[CDATA\\[)[^])*?(?=</__>)".replace(/__/g,(function(){return a})),"i"),lookbehind:!0,greedy:!0,inside:t},Prism.languages.insertBefore("markup","cdata",n)}}),Object.defineProperty(Prism.languages.markup.tag,"addAttribute",{value:function(a,e){Prism.languages.markup.tag.inside["special-attr"].push({pattern:RegExp("(^|[\"'\\s])(?:"+a+")\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s'\">=]+(?=[\\s>]))","i"),lookbehind:!0,inside:{"attr-name":/^[^\s=]+/,"attr-value":{pattern:/=[\s\S]+/,inside:{value:{pattern:/(^=\s*(["']|(?!["'])))\S[\s\S]*(?=\2$)/,lookbehind:!0,alias:[e,"language-"+e],inside:Prism.languages[e]},punctuation:[{pattern:/^=/,alias:"attr-equals"},/"|'/]}}}})}}),Prism.languages.html=Prism.languages.markup,Prism.languages.mathml=Prism.languages.markup,Prism.languages.svg=Prism.languages.markup,Prism.languages.xml=Prism.languages.extend("markup",{}),Prism.languages.ssml=Prism.languages.xml,Prism.languages.atom=Prism.languages.xml,Prism.languages.rss=Prism.languages.xml;
-// -------------------------------------
-</script>
-    
-<script>
-// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js ---
-!function(s){var e=/(?:"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"|'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n])*')/;s.languages.css={comment:/\/\*[\s\S]*?\*\//,atrule:{pattern:RegExp("@[\\w-](?:[^;{\\s\"']|\\s+(?!\\s)|"+e.source+")*?(?:;|(?=\\s*\\{))"),inside:{rule:/^@[\w-]+/,"selector-function-argument":{pattern:/(\bselector\s*\(\s*(?![\s)]))(?:[^()\s]|\s+(?![\s)])|\((?:[^()]|\([^()]*\))*\))+(?=\s*\))/,lookbehind:!0,alias:"selector"},keyword:{pattern:/(^|[^\w-])(?:and|not|only|or)(?![\w-])/,lookbehind:!0}}},url:{pattern:RegExp("\\burl\\((?:"+e.source+"|(?:[^\\\\\r\n()\"']|\\\\[^])*)\\)","i"),greedy:!0,inside:{function:/^url/i,punctuation:/^\(|\)$/,string:{pattern:RegExp("^"+e.source+"$"),alias:"url"}}},selector:{pattern:RegExp("(^|[{}\\s])[^{}\\s](?:[^{};\"'\\s]|\\s+(?![\\s{])|"+e.source+")*(?=\\s*\\{)"),lookbehind:!0},string:{pattern:e,greedy:!0},property:{pattern:/(^|[^-\w\xA0-\uFFFF])(?!\s)[-_a-z\xA0-\uFFFF](?:(?!\s)[-\w\xA0-\uFFFF])*(?=\s*:)/i,lookbehind:!0},important:/!important\b/i,function:{pattern:/(^|[^-a-z0-9])[-a-z0-9]+(?=\()/i,lookbehind:!0},punctuation:/[(){};:,]/},s.languages.css.atrule.inside.rest=s.languages.css;var t=s.languages.markup;t&&(t.tag.addInlined("style","css"),t.tag.addAttribute("style","css"))}(Prism);
-// -------------------------------------
-</script>
-    
-<script>
-// --- Embedded JS from https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js ---
-Prism.languages.javascript=Prism.languages.extend("clike",{"class-name":[Prism.languages.clike["class-name"],{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$A-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\.(?:constructor|prototype))/,lookbehind:!0}],keyword:[{pattern:/((?:^|\})\s*)catch\b/,lookbehind:!0},{pattern:/(^|[^.]|\.\.\.\s*)\b(?:as|assert(?=\s*\{)|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally(?=\s*(?:\{|$))|for|from(?=\s*(?:['"]|$))|function|(?:get|set)(?=\s*(?:[#\[$\w\xA0-\uFFFF]|$))|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,lookbehind:!0}],function:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,number:{pattern:RegExp("(^|[^\\w$])(?:NaN|Infinity|0[bB][01]+(?:_[01]+)*n?|0[oO][0-7]+(?:_[0-7]+)*n?|0[xX][\\dA-Fa-f]+(?:_[\\dA-Fa-f]+)*n?|\\d+(?:_\\d+)*n|(?:\\d+(?:_\\d+)*(?:\\.(?:\\d+(?:_\\d+)*)?)?|\\.\\d+(?:_\\d+)*)(?:[Ee][+-]?\\d+(?:_\\d+)*)?)(?![\\w$])"),lookbehind:!0},operator:/--|\+\+|\*\*=?|=>|&&=?|\|\|=?|[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?\?=?|\?\.?|[~:]/}),Prism.languages.javascript["class-name"][0].pattern=/(\b(?:class|extends|implements|instanceof|interface|new)\s+)[\w.\\]+/,Prism.languages.insertBefore("javascript","keyword",{regex:{pattern:RegExp("((?:^|[^$\\w\\xA0-\uFFFF.\"'\\])\\s]|\\b(?:return|yield))\\s*)/(?:(?:\\[(?:[^\\]\\\\\r\n]|\\\\.)*\\]|\\\\.|[^/\\\\\\[\r\n])+/[dgimyus]{0,7}|(?:\\[(?:[^[\\]\\\\\r\n]|\\\\.|\\[(?:[^[\\]\\\\\r\n]|\\\\.|\\[(?:[^[\\]\\\\\r\n]|\\\\.)*\\])*\\])*\\]|\\\\.|[^/\\\\\\[\r\n])+/[dgimyus]{0,7}v[dgimyus]{0,7})(?=(?:\\s|/\\*(?:[^*]|\\*(?!/))*\\*/)*(?:$|[\r\n,.;:})\\]]|//))"),lookbehind:!0,greedy:!0,inside:{"regex-source":{pattern:/^(\/)[\s\S]+(?=\/[a-z]*$)/,lookbehind:!0,alias:"language-regex",inside:Prism.languages.regex},"regex-delimiter":/^\/|\/$/,"regex-flags":/^[a-z]+$/}},"function-variable":{pattern:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)\s*=>))/,alias:"function"},parameter:[{pattern:/(function(?:\s+(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)?\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\))/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$a-z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*=>)/i,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*=>)/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*\s*)\(\s*|\]\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*\{)/,lookbehind:!0,inside:Prism.languages.javascript}],constant:/\b[A-Z](?:[A-Z_]|\dx?)*\b/}),Prism.languages.insertBefore("javascript","string",{hashbang:{pattern:/^#!.*/,greedy:!0,alias:"comment"},"template-string":{pattern:/`(?:\\[\s\S]|\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}|(?!\$\{)[^\\`])*`/,greedy:!0,inside:{"template-punctuation":{pattern:/^`|`$/,alias:"string"},interpolation:{pattern:/((?:^|[^\\])(?:\\{2})*)\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}/,lookbehind:!0,inside:{"interpolation-punctuation":{pattern:/^\$\{|\}$/,alias:"punctuation"},rest:Prism.languages.javascript}},string:/[\s\S]+/}},"string-property":{pattern:/((?:^|[,{])[ \t]*)(["'])(?:\\(?:\r\n|[\s\S])|(?!\2)[^\\\r\n])*\2(?=\s*:)/m,lookbehind:!0,greedy:!0,alias:"property"}}),Prism.languages.insertBefore("javascript","operator",{"literal-property":{pattern:/((?:^|[,{])[ \t]*)(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*:)/m,lookbehind:!0,alias:"property"}}),Prism.languages.markup&&(Prism.languages.markup.tag.addInlined("script","javascript"),Prism.languages.markup.tag.addAttribute("on(?:abort|blur|change|click|composition(?:end|start|update)|dblclick|error|focus(?:in|out)?|key(?:down|up)|load|mouse(?:down|enter|leave|move|out|over|up)|reset|resize|scroll|select|slotchange|submit|unload|wheel)","javascript")),Prism.languages.js=Prism.languages.javascript;
-// -------------------------------------
-</script>
-    
-    
-<script>
-// --- Embedded JS from https://mohasin-alam.github.io/script.js (FINAL VERSION) ---
 document.getElementById('viewSourceBtn').addEventListener('click', fetchSourceCode);
 document.getElementById('copyCodeBtn').addEventListener('click', copyCode);
 document.getElementById('downloadCodeBtn').addEventListener('click', downloadCode);
 
-// *** আপনার Cloudflare Worker URL (সংশোধিত) এখানে যুক্ত করা হলো ***
-const workerUrl = "https://delicate-tree-21a6.csmmohasinalam.workers.dev/"; 
+const workerUrl = "https://delicate-tree-21a6.csmmohasinalam.workers.dev/";
 
 function fetchSourceCode() {
     const websiteInput = document.getElementById('websiteUrl').value;
@@ -314,138 +314,207 @@ function fetchSourceCode() {
     const outputArea = document.querySelector('.code-area');
     const statusMessage = document.getElementById('statusMessage');
     const viewButton = document.getElementById('viewSourceBtn');
-    const actionButtons = document.getElementById('actionButtons'); 
+    const actionButtons = document.getElementById('actionButtons');
 
-    // ** ব্লক করা ডোমেনগুলির তালিকা এবং চেকিং লজিক **
-    
     const myBlockedDomains = [
-        'mohasin.github.io', 
-        'husneurb.vom', 
-        'mohasin-alam.github.io', 
-        'PLACEHOLDER_4_YOUR_DOMAIN.com', // <-- এখানে আপনার ৪ নম্বর ডোমেনটি বসান
-        'PLACEHOLDER_5_YOUR_DOMAIN.net'  // <-- এখানে আপনার ৫ নম্বর ডোমেনটি বসান
-        // আপনি চাইলে আরও ডোমেন এই তালিকার শেষে যোগ করতে পারেন
+        'mohasin.github.io',
+        'husneurb.vom',
+        'mohasin-alam.github.io',
+        'PLACEHOLDER_4_YOUR_DOMAIN.com'
     ];
 
     try {
-        // ইনপুট URL-কে সঠিকভাবে পার্স করার চেষ্টা
         const inputUrl = new URL(websiteInput.startsWith('http') ? websiteInput : `https://${websiteInput}`);
-        const inputHostname = inputUrl.hostname;
-        
-        // চেক করুন ইনপুট ডোমেনটি ব্লক করা ডোমেনগুলির কোনোটির সাথে মেলে কিনা
-        const isBlocked = myBlockedDomains.some(domain => {
-            // খালি বা PLACEHOLDER ডোমেনগুলি পরীক্ষা করা থেকে বাদ দেওয়া হচ্ছে
-            if (domain.includes('PLACEHOLDER') || domain.length === 0) return false;
-            
-            // ডোমেন চেক: ইনপুট হোস্টনেম-এ ব্লক করা ডোমেন স্ট্রিংটি আছে কিনা
-            return inputHostname.includes(domain);
-        });
-
-        if (isBlocked) {
-            // যদি ব্লক করা হয়, তবে কাস্টম মেসেজ দেখান
+        if (myBlockedDomains.some(domain => domain.length > 0 && inputUrl.hostname.includes(domain))) {
             viewButton.disabled = false;
-            actionButtons.classList.add('hidden'); 
-            statusMessage.classList.add('hidden');
-            outputArea.classList.remove('loading');
-            
-            // কাস্টম বার্তা প্রদর্শন
+            actionButtons.classList.add('hidden');
+            if (window.__cancelRender) window.__cancelRender();
             outputElement.textContent = "শালা আমাকে দিয়ে আমারই কাপড় খোলাতে চাইছির! পারবি না 😡";
-            outputElement.classList.remove('language-html'); 
-            
-            return; 
+            return;
         }
-    } catch (e) {
-        // যদি URL পার্স করা না যায়, তবে সাধারণ প্রসেস চালিয়ে যান
-    }
+    } catch (e) {}
 
-    if (!websiteInput) {
-        alert("অনুগ্রহ করে একটি URL দিন।");
-        return;
-    }
+    if (!websiteInput) { alert("অনুগ্রহ করে একটি URL দিন।"); return; }
 
-    // লোডিং শুরু
     viewButton.disabled = true;
-    actionButtons.classList.add('hidden'); 
+    actionButtons.classList.add('hidden');
+    if (window.__cancelRender) window.__cancelRender();
     outputElement.textContent = '';
-    outputArea.classList.add('loading'); 
-    statusMessage.textContent = 'ওয়েবসাইটের সোর্স কোড আনা হচ্ছে... এনক্রিপশন প্রসেস শুরু হচ্ছে...';
+    outputArea.classList.add('loading');
+    
+    statusMessage.textContent = 'Bypassing Security... Fetching Source Code...';
     statusMessage.classList.remove('hidden');
-    
-    // Worker-কে URL প্যারামিটার সহ কল করার জন্য URL তৈরি
-    const fetchWorkerUrl = `${workerUrl}?url=${encodeURIComponent(websiteInput)}`;
-    
-    fetch(fetchWorkerUrl)
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    try {
-                        const data = JSON.parse(text);
-                        throw new Error(data.error || `Worker ত্রুটি: HTTP ${response.status}`);
-                    } catch (e) {
-                        throw new Error(`নেটওয়ার্ক ত্রুটি: HTTP ${response.status}.`);
-                    }
-                });
-            }
-            return response.text();
+
+    fetch(`${workerUrl}?url=${encodeURIComponent(websiteInput)}`)
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.text();
         })
         .then(htmlCode => {
-            // লোডিং শেষ
             statusMessage.classList.add('hidden');
             outputArea.classList.remove('loading');
             viewButton.disabled = false;
-            actionButtons.classList.remove('hidden'); 
-
-            // কোড দেখানো এবং হাইলাইটিং
-            outputElement.textContent = htmlCode;
-            outputElement.classList.add('language-html');
-            // এই লাইনের কারণেই 'Prism is not defined' আসছিল, তাই নিশ্চিত করা হলো যেন Prism লোড হওয়ার পরই এটি কল হয়।
-            Prism.highlightElement(outputElement); 
+            actionButtons.classList.remove('hidden');
+            window.__renderSource(htmlCode);
         })
         .catch(error => {
-            // ত্রুটি হলে
             statusMessage.classList.add('hidden');
             outputArea.classList.remove('loading');
             viewButton.disabled = false;
-            actionButtons.classList.add('hidden'); 
-            outputElement.textContent = `[ACCESS DENIED]>> কোড লোড করা যায়নি। ত্রুটি: ${error.message}`;
-            console.error('Fetching error:', error);
+            actionButtons.classList.add('hidden');
+            if (window.__cancelRender) window.__cancelRender();
+            outputElement.textContent = `[CONNECTION FAILED] >> Error: ${error.message}`;
         });
 }
 
 function copyCode() {
-    const code = document.getElementById('sourceCodeOutput').textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        alert('কোড সফলভাবে কপি করা হয়েছে!');
-    }).catch(err => {
-        alert('কপি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে ম্যানুয়ালি কপি করুন।');
-        console.error('Copy failed:', err);
-    });
+    navigator.clipboard.writeText(document.getElementById('sourceCodeOutput').textContent)
+        .then(() => alert('Payload Copied Successfully!'))
+        .catch(() => alert('Copy failed!'));
 }
 
 function downloadCode() {
     const code = document.getElementById('sourceCodeOutput').textContent;
-    const urlInput = document.getElementById('websiteUrl').value || 'untitled';
-    
-    // URL থেকে ডোমেইন নাম বের করার চেষ্টা
-    let filename;
-    try {
-        const urlObj = new URL(urlInput.startsWith('http') ? urlInput : `https://${urlInput}`);
-        filename = urlObj.hostname.replace('www.', '').replace(/\./g, '_');
-    } catch (e) {
-        filename = 'source_code';
-    }
-
     const blob = new Blob([code], { type: 'text/html' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `${filename}.html`;
-    
+    link.download = `dumped_source.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    alert(`'${filename}.html' ডাউনলোড করা হচ্ছে...`);
 }
+</script>
+
+<script>
+// Boot Sequence
+setTimeout(() => {
+  const overlay = document.getElementById('bootOverlay');
+  if(overlay) { overlay.classList.add('hide'); setTimeout(()=>overlay.remove(), 500); }
+}, 1500);
+
+// Matrix Background
+const canvas = document.getElementById('matrixCanvas');
+const ctx = canvas.getContext('2d');
+let cols, drops;
+function initMatrix() {
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  cols = Math.floor(canvas.width / 15);
+  drops = Array(cols).fill(0);
+}
+initMatrix();
+window.addEventListener('resize', initMatrix);
+setInterval(() => {
+  ctx.fillStyle = 'rgba(2, 5, 8, 0.15)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41'; ctx.font = '15px monospace';
+  drops.forEach((y, i) => {
+    const text = String.fromCharCode(Math.random() * 128);
+    ctx.fillText(text, i * 15, y * 15);
+    if (y * 15 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}, 50);
+
+// Fake Stats
+setInterval(() => {
+  document.getElementById('statCpu').textContent = Math.floor(Math.random() * 40 + 20) + '%';
+  document.getElementById('statMem').textContent = Math.floor(Math.random() * 50 + 30) + '%';
+  document.getElementById('statPing').textContent = Math.floor(Math.random() * 60 + 10) + 'ms';
+}, 1000);
+</script>
+
+<script>
+(function () {
+  const output = document.getElementById('sourceCodeOutput');
+  const codeArea = document.querySelector('.code-area');
+  const loader = document.getElementById('terminalLoader');
+  const scanBar = document.getElementById('scanBar');
+  const signal = document.getElementById('terminalSignal');
+  
+  let typingInterval = null;
+  let loadingInterval = null;
+
+  // Toggle mode logic
+  document.getElementById('modeInstant').addEventListener('change', function() {
+    if(this.checked) document.getElementById('modeType').checked = false;
+  });
+  document.getElementById('modeType').addEventListener('change', function() {
+    if(this.checked) document.getElementById('modeInstant').checked = false;
+  });
+
+  // Loader Observer
+  new MutationObserver(() => {
+    if (codeArea.classList.contains('loading')) {
+      loader.classList.remove('hidden'); scanBar.classList.remove('hidden');
+      signal.textContent = "[HACKING]"; signal.classList.add('live');
+      let dots = '';
+      loadingInterval = setInterval(() => {
+        dots = dots.length > 3 ? '' : dots + '.';
+        loader.textContent = `[CONNECTING TO TARGET HOST]${dots}\nExtracting nodes...\nBypassing firewall...`;
+      }, 300);
+    } else {
+      clearInterval(loadingInterval);
+      loader.classList.add('hidden'); scanBar.classList.add('hidden');
+      signal.textContent = "[SYSTEM IDLE]"; signal.classList.remove('live');
+    }
+  }).observe(codeArea, { attributes: true, attributeFilter: ['class'] });
+
+  // Mobile Safe Regex Highlighting
+  function applySyntaxHighlighting(text) {
+    if (text.length > 100000) return escapeHTML(text); // Prevent hang on huge files
+    let safeText = escapeHTML(text);
+    return safeText
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-cmt">$1</span>') // Comments
+      .replace(/(&lt;\/?[\w\d:-]+)/g, '<span class="hl-tag">$1</span>') // Tags
+      .replace(/(\/?&gt;)/g, '<span class="hl-tag">$1</span>') // Tag close
+      .replace(/([a-zA-Z\-]+)=/g, '<span class="hl-attr">$1</span>=') // Attributes
+      .replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="hl-str">$1</span>'); // Strings
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // BUG-FREE TYPING ENGINE (No Over-Loop)
+  window.__renderSource = function(rawText) {
+    window.__cancelRender(); // Kill any running instance
+
+    const isTypeMode = document.getElementById('modeType').checked;
+    
+    if (!isTypeMode) {
+      output.innerHTML = applySyntaxHighlighting(rawText);
+      return;
+    }
+
+    output.classList.add('is-typing');
+    codeArea.classList.add('writing');
+    output.textContent = "";
+
+    const len = rawText.length;
+    let index = 0;
+    const duration = 4000; // Complete typing in 4 seconds regardless of size
+    const tickRate = 30;
+    const chunkSize = Math.max(1, Math.ceil(len / (duration / tickRate)));
+
+    typingInterval = setInterval(() => {
+      if (index >= len) {
+        window.__cancelRender(); // Clear styling and intervals properly
+        output.innerHTML = applySyntaxHighlighting(rawText); // Apply color at the end
+        return;
+      }
+      output.textContent += rawText.substring(index, index + chunkSize);
+      index += chunkSize;
+      codeArea.scrollTop = codeArea.scrollHeight;
+    }, tickRate);
+  };
+
+  window.__cancelRender = function() {
+    clearInterval(typingInterval);
+    output.classList.remove('is-typing');
+    codeArea.classList.remove('writing');
+  };
+})();
 </script>
 </body>
 </html>
