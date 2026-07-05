@@ -1,26 +1,17 @@
 /*
  * http://love.hackerzhou.me
+ * (resize-triggered page reload removed — the tree/canvas is now
+ * fully responsive via CSS, so reloading on resize is no longer needed
+ * and would restart the animation every time a mobile user rotates
+ * their phone or the keyboard opens.)
  */
 
-// variables
-var $win = $(window);
-var clientWidth = $win.width();
-var clientHeight = $win.height();
-
-$(window).resize(function() {
-    var newWidth = $win.width();
-    var newHeight = $win.height();
-    if (newWidth != clientWidth && newHeight != clientHeight) {
-        location.replace(location);
-    }
-});
-
-(function($) {
-	$.fn.typewriter = function() {
-		this.each(function() {
+(function ($) {
+	$.fn.typewriter = function () {
+		this.each(function () {
 			var $ele = $(this), str = $ele.html(), progress = 0;
 			$ele.html('');
-			var timer = setInterval(function() {
+			var timer = setInterval(function () {
 				var current = str.substr(progress, 1);
 				if (current == '<') {
 					progress = str.indexOf('>', progress) + 1;
@@ -37,7 +28,7 @@ $(window).resize(function() {
 	};
 })(jQuery);
 
-function timeElapse(date){
+function timeElapse(date) {
 	var current = Date();
 	var seconds = (Date.parse(current) - Date.parse(date)) / 1000;
 	var days = Math.floor(seconds / (3600 * 24));
@@ -55,6 +46,6 @@ function timeElapse(date){
 	if (seconds < 10) {
 		seconds = "0" + seconds;
 	}
-	var result = "No. <span class=\"digit\">" + days + "</span> sky <span class=\"digit\">" + hours + "</span> hours <span class=\"digit\">" + minutes + "</span> minutes <span class=\"digit\">" + seconds + "</span> seconds"; 
+	var result = "No. <span class=\"digit\">" + days + "</span> sky <span class=\"digit\">" + hours + "</span> hours <span class=\"digit\">" + minutes + "</span> minutes <span class=\"digit\">" + seconds + "</span> seconds";
 	$("#clock").html(result);
 }

@@ -1,11 +1,15 @@
-body {
+html, body {
 	margin: 0;
 	padding: 0;
-	background: #ffc0cb;
+	height: 100%;
+}
+
+body {
+	background: radial-gradient(ellipse at 50% 30%, #2a0a1a 0%, #10010a 60%, #050004 100%);
 	font-size: 20px;
-	font-family: '微软雅黑', '宋体', sans-serif;
+	font-family: 'Quicksand', '微软雅黑', '宋体', sans-serif;
 	color: #000000;
-	overflow: auto
+	overflow-x: hidden;
 }
 
 a {
@@ -19,35 +23,38 @@ a {
 
 #wrap {
 	position: relative;
-	margin: 0 auto;
-	width: 1100px;
-	height: 680px;
-	margin-top: 10px;
+	margin: 16px auto;
+	width: 96%;
+	max-width: 1100px;
+	aspect-ratio: 1100 / 680;
 }
 
 #text {
-	width: 400px;
-	height: 425px;
-	left: 60px;
-	top: 80px;
 	position: absolute;
+	left: 5%;
+	top: 10%;
+	width: 38%;
+	max-height: 80%;
+	overflow: hidden;
+	z-index: 2;
 }
 
 #code {
 	display: none;
-	font-size: 16px;
+	font-size: clamp(9px, 1.55vw, 16px);
+	line-height: 1.35;
 }
 
 #clock-box {
 	position: absolute;
-	left: 60px;
-	top: 550px;
-	font-size: 28px;
+	left: 5%;
+	top: 82%;
+	font-size: clamp(12px, 2vw, 28px);
 	display: none;
 }
 
 #clock-box a {
-	font-size: 28px;
+	font-size: inherit;
 	text-decoration: none;
 }
 
@@ -56,13 +63,17 @@ a {
 }
 
 #clock .digit {
-	font-size: 64px;
+	font-size: 2.2em;
 }
 
 #canvas {
-	margin: 0 auto;
-	width: 1100px;
-	height: 680px;
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	touch-action: manipulation;
+	z-index: 1;
 }
 
 #error {
@@ -70,6 +81,8 @@ a {
 	text-align: center;
 	margin-top: 60px;
 	display: none;
+	color: #fff;
+	padding: 0 20px;
 }
 
 .hand {
@@ -85,10 +98,17 @@ a {
 }
 
 .say b {
-    font-weight: 900;
-    font-size: 1.2em;
-    color: #cc0044;
-    text-shadow:
-        0 0 10px rgba(220, 0, 80, 0.6),
-        0 0 20px rgba(180, 0, 60, 0.4);
+	font-weight: 900;
+	font-size: 1.2em;
+	color: #cc0044;
+	text-shadow:
+		0 0 10px rgba(220, 0, 80, 0.6),
+		0 0 20px rgba(180, 0, 60, 0.4);
+}
+
+/* On very narrow phones, let the poem breathe a little wider */
+@media (max-width: 480px) {
+	#text {
+		width: 46%;
+	}
 }
