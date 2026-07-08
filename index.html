@@ -74,8 +74,14 @@ body::after {
   50% { box-shadow: 0 0 40px rgba(0, 242, 255, 0.4), inset 0 0 50px rgba(0, 242, 255, 0.1); }
 }
 @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  10%, 30%, 50%, 70%, 90% { transform: translate(-2px, -1px); }
+  20%, 40%, 60%, 80% { transform: translate(2px, 1px); }
+}
+.shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
 
-.wrap { position: relative; z-index: 2; max-width: 980px; margin: 0 auto; padding: 15px; }
+.wrap { position: relative; z-index: 2; max-width: 980px; margin: 0 auto; padding: 15px; transition: transform 0.3s; }
 
 .container {
   background: var(--panel);
@@ -186,19 +192,39 @@ h1 {
 input[type="url"] {
   width: 100%; border: none; outline: none; background: transparent; padding: 0;
   font-size: 16px; color: var(--text); font-family: 'Share Tech Mono', monospace; caret-color: var(--accent);
+  transition: all 0.3s;
 }
-input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
+input[type="url"]:focus { text-shadow: 0 0 10px var(--accent); letter-spacing: 1px; }
+input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); transition: opacity 0.3s; }
+input[type="url"]:focus::placeholder { opacity: 0.2; }
 
 #viewSourceBtn {
   background: rgba(0, 242, 255, 0.05); color: var(--accent); padding: 15px; border: 2px solid var(--accent);
   cursor: pointer; font-size: 18px; transition: all 0.2s; width: 100%; margin: 5px 0 15px;
   text-transform: uppercase; box-shadow: var(--glow); letter-spacing: 4px;
   font-family: 'Share Tech Mono', monospace; position: relative; font-weight: bold;
+  overflow: hidden;
 }
 #viewSourceBtn::before { content: "> "; opacity: 0.8; }
-#viewSourceBtn:hover:not(:disabled) { background: rgba(0, 242, 255, 0.2); box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); }
-#viewSourceBtn:active:not(:disabled) { transform: scale(0.98); }
-#viewSourceBtn:disabled { cursor: not-allowed; opacity: 0.5; }
+#viewSourceBtn:hover:not(:disabled) {
+  background: rgba(0, 242, 255, 0.2);
+  box-shadow: 0 0 30px rgba(0, 242, 255, 0.6);
+  text-shadow: 0 0 8px var(--accent);
+}
+#viewSourceBtn:active:not(:disabled) { transform: scale(0.95) skewX(-5deg); }
+#viewSourceBtn:disabled { cursor: not-allowed; opacity: 0.5; filter: grayscale(1); }
+
+/* Ultra Animated Button State */
+#viewSourceBtn.submitting {
+  animation: btnPulse 0.5s infinite alternate, glitch 0.2s infinite;
+  background: var(--magenta);
+  border-color: var(--magenta);
+  color: #fff;
+}
+@keyframes btnPulse {
+  from { transform: scale(1); box-shadow: 0 0 10px var(--magenta); }
+  to { transform: scale(1.02); box-shadow: 0 0 30px var(--magenta); }
+}
 
 .terminal-options {
   display: flex; gap: 20px; flex-wrap: wrap; padding: 10px 15px;
@@ -238,16 +264,24 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
   background: linear-gradient(180deg, rgba(0, 242, 255, 0.25), transparent);
   opacity: 0; transition: opacity 0.2s;
 }
-.code-area.writing .beam { opacity: 1; animation: beamSweep 1.5s ease-in-out infinite; }
+.code-area.writing .beam {
+  opacity: 1;
+  animation: beamSweep 1.5s ease-in-out infinite, beamFlicker 0.1s infinite alternate;
+}
 @keyframes beamSweep { 0% { top: 0; } 100% { top: 100%; } }
+@keyframes beamFlicker { from { opacity: 0.3; } to { opacity: 0.8; } }
 
 .code-area code { display: block; color: var(--text); white-space: pre-wrap; word-wrap: break-word; }
+.code-area.writing code { animation: textFlicker 0.05s infinite; }
+@keyframes textFlicker { 0% { opacity: 0.95; } 100% { opacity: 1; } }
 
 /* Mobile Responsive Syntax Highlighting Colors */
-.hl-tag { color: #ff3b3b; font-weight: bold; } /* Tags - Red */
-.hl-attr { color: #00ffe5; font-style: italic; } /* Attributes - Cyan */
-.hl-str { color: #ffb000; } /* Strings - Yellow */
-.hl-cmt { color: #5f7a6b; } /* Comments - Grey/Green */
+.hl-tag { color: #ff3b3b; font-weight: bold; text-shadow: 0 0 5px rgba(255,59,59,0.5); }
+.hl-attr { color: #00ffe5; font-style: italic; text-shadow: 0 0 5px rgba(0,255,229,0.5); }
+.hl-str { color: #ffb000; text-shadow: 0 0 5px rgba(255,176,0,0.5); }
+.hl-cmt { color: #5f7a6b; opacity: 0.7; }
+.hl-num { color: #bc00ff; text-shadow: 0 0 5px rgba(188,0,255,0.4); }
+.hl-func { color: #39ff14; text-shadow: 0 0 5px rgba(57,255,20,0.4); }
 
 .hidden { display: none !important; }
 
@@ -255,7 +289,10 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
 .terminal-loader {
   position: absolute; inset: 0; padding: 20px; background: rgba(0,0,0,.95); color: var(--accent);
   white-space: pre-wrap; overflow: hidden; z-index: 5; font-size: 14px;
+  border: 1px solid var(--magenta);
+  animation: loaderPulse 2s infinite;
 }
+@keyframes loaderPulse { 0%, 100% { border-color: var(--magenta); } 50% { border-color: var(--accent); } }
 #sourceCodeOutput.is-typing::after { content: " █"; color: var(--accent2); animation: blinkCaret 0.8s step-end infinite; }
 
 .action-buttons { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
@@ -400,6 +437,7 @@ function fetchSourceCode() {
     
     statusMessage.textContent = 'Bypassing Security... Fetching Source Code...';
     statusMessage.classList.remove('hidden');
+    viewButton.classList.add('submitting');
 
     fetch(`${workerUrl}?url=${encodeURIComponent(websiteInput)}`)
         .then(res => {
@@ -410,13 +448,22 @@ function fetchSourceCode() {
             statusMessage.classList.add('hidden');
             outputArea.classList.remove('loading');
             viewButton.disabled = false;
+            viewButton.classList.remove('submitting');
             actionButtons.classList.remove('hidden');
+
+            // Success Flash
+            const container = document.getElementById('mainContainer');
+            container.style.transition = 'box-shadow 0.2s';
+            container.style.boxShadow = '0 0 50px var(--accent)';
+            setTimeout(() => container.style.boxShadow = '', 400);
+
             window.__renderSource(htmlCode);
         })
         .catch(error => {
             statusMessage.classList.add('hidden');
             outputArea.classList.remove('loading');
             viewButton.disabled = false;
+            viewButton.classList.remove('submitting');
             actionButtons.classList.add('hidden');
             if (window.__cancelRender) window.__cancelRender();
             outputElement.textContent = `[CONNECTION FAILED] >> Error: ${error.message}`;
@@ -505,13 +552,24 @@ setInterval(() => {
   // Loader Observer
   new MutationObserver(() => {
     if (codeArea.classList.contains('loading')) {
+      document.getElementById('mainContainer').classList.add('shake');
+      setTimeout(() => document.getElementById('mainContainer').classList.remove('shake'), 500);
+
       loader.classList.remove('hidden'); scanBar.classList.remove('hidden');
       signal.textContent = "[HACKING]"; signal.classList.add('live');
-      let dots = '';
+
+      const msgs = [
+        "BYPASSING CLOUDFLARE...", "ESTABLISHING SSH...", "INJECTING EXPLOIT...",
+        "DUMPING DATABASE...", "EXTRACTING SOURCE...", "MAPPING NODES...",
+        "DECRYPTING SSL...", "BYPASSING FIREWALL...", "ACCESS GRANTED..."
+      ];
+      loader.textContent = "";
       loadingInterval = setInterval(() => {
-        dots = dots.length > 3 ? '' : dots + '.';
-        loader.textContent = `[CONNECTING TO TARGET HOST]${dots}\nExtracting nodes...\nBypassing firewall...`;
-      }, 300);
+        const m = msgs[Math.floor(Math.random() * msgs.length)];
+        const line = `[SYSTEM]: ${m}\n`;
+        loader.textContent = line + loader.textContent;
+        if(loader.textContent.length > 500) loader.textContent = loader.textContent.substring(0, 500);
+      }, 150);
     } else {
       clearInterval(loadingInterval);
       loader.classList.add('hidden'); scanBar.classList.add('hidden');
@@ -521,14 +579,16 @@ setInterval(() => {
 
   // Mobile Safe Regex Highlighting
   function applySyntaxHighlighting(text) {
-    if (text.length > 100000) return escapeHTML(text); // Prevent hang on huge files
+    if (text.length > 100000) return escapeHTML(text);
     let safeText = escapeHTML(text);
     return safeText
-      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-cmt">$1</span>') // Comments
-      .replace(/(&lt;\/?[\w\d:-]+)/g, '<span class="hl-tag">$1</span>') // Tags
-      .replace(/(\/?&gt;)/g, '<span class="hl-tag">$1</span>') // Tag close
-      .replace(/([a-zA-Z\-]+)=/g, '<span class="hl-attr">$1</span>=') // Attributes
-      .replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="hl-str">$1</span>'); // Strings
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-cmt">$1</span>')
+      .replace(/(&lt;\/?[\w\d:-]+)/g, '<span class="hl-tag">$1</span>')
+      .replace(/(\/?&gt;)/g, '<span class="hl-tag">$1</span>')
+      .replace(/([a-zA-Z\-]+)=/g, '<span class="hl-attr">$1</span>=')
+      .replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="hl-str">$1</span>')
+      .replace(/\b(\d+)\b/g, '<span class="hl-num">$1</span>')
+      .replace(/\b(function|return|var|let|const|if|else|for|while|switch|case|break)\b/g, '<span class="hl-func">$1</span>');
   }
 
   function escapeHTML(str) {
@@ -553,7 +613,7 @@ setInterval(() => {
 
     const len = rawText.length;
     let index = 0;
-    const duration = 4000; // Complete typing in 4 seconds regardless of size
+    const duration = 10000; // Complete typing in 10 seconds as requested
     const tickRate = 30;
     const chunkSize = Math.max(1, Math.ceil(len / (duration / tickRate)));
 
