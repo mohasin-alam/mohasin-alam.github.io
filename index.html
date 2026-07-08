@@ -138,8 +138,12 @@ body::after {
   font-size: 12px; color: var(--accent2); text-shadow: 0 0 8px var(--accent2);
   border: 1px solid var(--accent2); padding: 3px 10px; 
 }
-.terminal-signal.live { color: var(--red); border-color: var(--red); animation: blinkSig 1s step-end infinite; }
+.terminal-signal.live { color: var(--red); border-color: var(--red); animation: blinkSig 1s step-end infinite, liveGlow 1.2s ease-in-out infinite; }
 @keyframes blinkSig { 50% { opacity: 0.2; } }
+@keyframes liveGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 59, 59, 0.4); }
+  50% { box-shadow: 0 0 18px rgba(255, 59, 59, 0.9); }
+}
 
 /* symbol bar added per instruction */
 .symbol-bar {
@@ -199,6 +203,36 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
 #viewSourceBtn:hover:not(:disabled) { background: rgba(0, 242, 255, 0.2); box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); }
 #viewSourceBtn:active:not(:disabled) { transform: scale(0.98); }
 #viewSourceBtn:disabled { cursor: not-allowed; opacity: 0.5; }
+#viewSourceBtn { overflow: hidden; }
+#viewSourceBtn .ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: rgba(0, 242, 255, 0.55); transform: scale(0); opacity: 1;
+  animation: rippleFx 0.6s ease-out forwards;
+}
+@keyframes rippleFx { to { transform: scale(3.2); opacity: 0; } }
+#viewSourceBtn.launching {
+  animation: launchPulse 0.5s ease-out;
+}
+@keyframes launchPulse {
+  0% { box-shadow: var(--glow); }
+  40% { box-shadow: 0 0 45px rgba(0, 242, 255, 0.9), 0 0 90px rgba(188, 0, 255, 0.5); letter-spacing: 6px; }
+  100% { box-shadow: var(--glow); letter-spacing: 4px; }
+}
+
+/* Input focus glow + invalid shake */
+.terminal-prompt { transition: box-shadow 0.3s, border-color 0.3s; }
+.terminal-prompt.focused {
+  border-color: var(--accent2);
+  box-shadow: inset 0 0 15px rgba(188, 0, 255, 0.25), 0 0 18px rgba(0, 242, 255, 0.35);
+}
+.terminal-prompt.shake-error { animation: shakeError 0.45s ease; border-color: var(--red); }
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
 
 .terminal-options {
   display: flex; gap: 20px; flex-wrap: wrap; padding: 10px 15px;
@@ -212,8 +246,24 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
 .chk input:checked { background: rgba(0, 242, 255, 0.2); }
 .chk input:checked::after { content: ""; position: absolute; inset: 3px; background: var(--accent); }
 
-#statusMessage { color: var(--amber); font-weight: bold; margin: 10px 0; font-size: 14px; text-shadow: 0 0 5px var(--amber); }
-#statusMessage:before { content: "[PROCESS]>"; color: var(--red); margin-right: 8px; }
+#statusMessage { color: var(--amber); font-weight: bold; margin: 10px 0; font-size: 14px; text-shadow: 0 0 5px var(--amber); animation: statusPulse 1s ease-in-out infinite; }
+#statusMessage:before { content: "[PROCESS]>"; color: var(--red); margin-right: 8px; animation: blinkSig 0.6s step-end infinite; }
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; text-shadow: 0 0 5px var(--amber); }
+  50% { opacity: 0.65; text-shadow: 0 0 15px var(--amber), 0 0 25px var(--red); }
+}
+
+.code-area.success-flash { animation: successFlash 0.7s ease; }
+@keyframes successFlash {
+  0% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 60px rgba(57, 255, 20, 0.7); border-color: #39ff14; }
+  100% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 20px rgba(0, 242, 255, 0.15); border-color: var(--border); }
+}
+.code-area.error-flash { animation: errorFlash 0.7s ease; }
+@keyframes errorFlash {
+  0%, 40%, 100% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 60px rgba(255, 59, 59, 0.8); border-color: var(--red); }
+  20%, 60% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 20px rgba(0, 242, 255, 0.15); border-color: var(--border); }
+}
+.code-area { transition: border-color 0.3s; }
 
 .scan-bar { height: 3px; width: 100%; background: rgba(0, 242, 255, 0.1); overflow: hidden; margin: 5px 0 15px; position: relative; }
 .scan-bar::before {
@@ -255,16 +305,27 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
 .terminal-loader {
   position: absolute; inset: 0; padding: 20px; background: rgba(0,0,0,.95); color: var(--accent);
   white-space: pre-wrap; overflow: hidden; z-index: 5; font-size: 14px;
+  animation: loaderGlitch 2.4s infinite;
+}
+@keyframes loaderGlitch {
+  0%, 96%, 100% { transform: translate(0,0); text-shadow: none; }
+  97% { transform: translate(-2px, 1px); text-shadow: 2px 0 var(--accent2), -2px 0 var(--magenta); }
+  98% { transform: translate(2px, -1px); text-shadow: -2px 0 var(--magenta), 2px 0 var(--accent); }
+  99% { transform: translate(0,0); text-shadow: none; }
 }
 #sourceCodeOutput.is-typing::after { content: " █"; color: var(--accent2); animation: blinkCaret 0.8s step-end infinite; }
 
 .action-buttons { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+.action-buttons.pop-in button { animation: popIn 0.45s cubic-bezier(.2,.9,.3,1.3) both; }
+.action-buttons.pop-in button:nth-child(2) { animation-delay: 0.08s; }
+@keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .action-buttons button {
   background: rgba(0, 242, 255, 0.05); color: var(--accent); padding: 12px 20px; border: 1px dashed var(--accent);
   cursor: pointer; font-size: 14px; transition: all 0.3s; text-transform: uppercase;
   box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); font-family: 'Share Tech Mono', monospace; flex: 1; min-width: 150px;
 }
 .action-buttons button:hover { background: rgba(0, 242, 255, 0.15); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
+.action-buttons button:active { transform: scale(0.95); }
 
 .footer-note { margin-top: 20px; font-size: 12px; color: rgba(0, 242, 255, 0.5); text-align: center; letter-spacing: 2px; }
 
@@ -278,8 +339,17 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
   .stats-strip { font-size: 10px; justify-content: center; gap: 10px; }
   .terminal-prompt { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
   input[type="url"] { font-size: 14px; }
-  #viewSourceBtn { font-size: 16px; padding: 12px; }
+  #viewSourceBtn { font-size: 16px; padding: 12px; letter-spacing: 2px; }
+  #viewSourceBtn.launching { animation-duration: 0.4s; }
   .code-area { font-size: 11.5px; max-height: 50vh; padding: 12px; }
+  .action-buttons { gap: 10px; }
+  .action-buttons button { min-width: 120px; font-size: 12px; padding: 10px 14px; }
+  #statusMessage { font-size: 12px; }
+  .terminal-loader { font-size: 12px; padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
 </style>
 </head>
@@ -358,9 +428,31 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
-document.getElementById('viewSourceBtn').addEventListener('click', fetchSourceCode);
+document.getElementById('viewSourceBtn').addEventListener('click', (e) => {
+  spawnRipple(e);
+  fetchSourceCode();
+});
 document.getElementById('copyCodeBtn').addEventListener('click', copyCode);
 document.getElementById('downloadCodeBtn').addEventListener('click', downloadCode);
+
+const urlInput = document.getElementById('websiteUrl');
+const promptBox = document.querySelector('.terminal-prompt');
+urlInput.addEventListener('focus', () => promptBox.classList.add('focused'));
+urlInput.addEventListener('blur', () => promptBox.classList.remove('focused'));
+
+function spawnRipple(e) {
+  const btn = document.getElementById('viewSourceBtn');
+  const rect = btn.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  const size = Math.max(rect.width, rect.height);
+  ripple.className = 'ripple';
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = ((e.clientX ?? rect.left + rect.width / 2) - rect.left - size / 2) + 'px';
+  ripple.style.top = ((e.clientY ?? rect.top + rect.height / 2) - rect.top - size / 2) + 'px';
+  btn.appendChild(ripple);
+  btn.classList.remove('launching'); void btn.offsetWidth; btn.classList.add('launching');
+  setTimeout(() => ripple.remove(), 650);
+}
 
 const workerUrl = "https://delicate-tree-21a6.csmmohasinalam.workers.dev/";
 
@@ -386,11 +478,12 @@ function fetchSourceCode() {
             actionButtons.classList.add('hidden');
             if (window.__cancelRender) window.__cancelRender();
             outputElement.textContent = "[ACCESS DENIED] >> This domain is protected by CSM Shield. 🛡️";
+            triggerShake();
             return;
         }
     } catch (e) {}
 
-    if (!websiteInput) { alert("অনুগ্রহ করে একটি URL দিন।"); return; }
+    if (!websiteInput) { triggerShake(); alert("অনুগ্রহ করে একটি URL দিন।"); return; }
 
     viewButton.disabled = true;
     actionButtons.classList.add('hidden');
@@ -411,7 +504,11 @@ function fetchSourceCode() {
             outputArea.classList.remove('loading');
             viewButton.disabled = false;
             actionButtons.classList.remove('hidden');
-            window.__renderSource(htmlCode);
+            actionButtons.classList.remove('pop-in'); void actionButtons.offsetWidth; actionButtons.classList.add('pop-in');
+            window.__renderSource(htmlCode, () => {
+                outputArea.classList.remove('success-flash'); void outputArea.offsetWidth;
+                outputArea.classList.add('success-flash');
+            });
         })
         .catch(error => {
             statusMessage.classList.add('hidden');
@@ -420,7 +517,16 @@ function fetchSourceCode() {
             actionButtons.classList.add('hidden');
             if (window.__cancelRender) window.__cancelRender();
             outputElement.textContent = `[CONNECTION FAILED] >> Error: ${error.message}`;
+            outputArea.classList.remove('error-flash'); void outputArea.offsetWidth;
+            outputArea.classList.add('error-flash');
         });
+}
+
+function triggerShake() {
+    const promptBox = document.querySelector('.terminal-prompt');
+    promptBox.classList.remove('shake-error'); void promptBox.offsetWidth;
+    promptBox.classList.add('shake-error');
+    setTimeout(() => promptBox.classList.remove('shake-error'), 500);
 }
 
 function copyCode() {
@@ -537,13 +643,14 @@ setInterval(() => {
   }
 
   // BUG-FREE TYPING ENGINE (No Over-Loop)
-  window.__renderSource = function(rawText) {
+  window.__renderSource = function(rawText, onComplete) {
     window.__cancelRender(); // Kill any running instance
 
     const isTypeMode = document.getElementById('modeType').checked;
     
     if (!isTypeMode) {
       output.innerHTML = applySyntaxHighlighting(rawText);
+      if (typeof onComplete === 'function') onComplete();
       return;
     }
 
@@ -553,7 +660,7 @@ setInterval(() => {
 
     const len = rawText.length;
     let index = 0;
-    const duration = 4000; // Complete typing in 4 seconds regardless of size
+    const duration = 10000; // Complete typing in 10 seconds regardless of size
     const tickRate = 30;
     const chunkSize = Math.max(1, Math.ceil(len / (duration / tickRate)));
 
@@ -561,6 +668,7 @@ setInterval(() => {
       if (index >= len) {
         window.__cancelRender(); // Clear styling and intervals properly
         output.innerHTML = applySyntaxHighlighting(rawText); // Apply color at the end
+        if (typeof onComplete === 'function') onComplete();
         return;
       }
       output.textContent += rawText.substring(index, index + chunkSize);
