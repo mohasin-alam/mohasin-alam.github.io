@@ -64,6 +64,29 @@ body::after {
   background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%);
 }
 
+/* CRT Screen Effect Overlay */
+.crt-overlay {
+  position: fixed; inset: 0; z-index: 10; pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 3px 100%;
+  opacity: 0.15;
+}
+.crt-overlay::before {
+  content: " "; display: block; position: absolute; inset: 0;
+  background: rgba(18, 16, 16, 0.1); opacity: 0; z-index: 10;
+  pointer-events: none; animation: crtFlicker 0.15s infinite;
+}
+@keyframes crtFlicker {
+  0% { opacity: 0.27; } 5% { opacity: 0.05; } 10% { opacity: 0.18; }
+  15% { opacity: 0.12; } 20% { opacity: 0.25; } 25% { opacity: 0.08; }
+  30% { opacity: 0.15; } 35% { opacity: 0.04; } 40% { opacity: 0.19; }
+  45% { opacity: 0.11; } 50% { opacity: 0.22; } 55% { opacity: 0.06; }
+  60% { opacity: 0.14; } 65% { opacity: 0.03; } 70% { opacity: 0.17; }
+  75% { opacity: 0.1; } 80% { opacity: 0.2; } 85% { opacity: 0.05; }
+  90% { opacity: 0.13; } 95% { opacity: 0.02; } 100% { opacity: 0.16; }
+}
+
 @keyframes flicker {
   0%, 100% { filter: brightness(1); } 
   92% { filter: brightness(1); } 93% { filter: brightness(1.2); } 
@@ -321,6 +344,7 @@ input[type="url"]:focus::placeholder { opacity: 0.2; }
 </style>
 </head>
 <body>
+<div class="crt-overlay"></div>
 <div id="bootOverlay">INITIALIZING CSM ULTRA KERNEL...</div>
 <div class="perspective-grid"></div>
 <canvas id="matrixCanvas"></canvas>
