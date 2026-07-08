@@ -7,21 +7,23 @@
 
 <style>
 /* ==================================================
-   ULTRA PRO HACKER TERMINAL THEME
+   ULTRA PRO HACKER TERMINAL THEME v3.0 — FULL ANIMATED
    ================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400;700&family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
 
 :root {
-  --bg: #050505;
-  --panel: rgba(10, 10, 15, 0.9);
+  --bg: #02030a;
+  --panel: rgba(6, 8, 18, 0.82);
   --text: #00f2ff;
   --accent: #00f2ff;
-  --accent2: #bc00ff;
-  --magenta: #ff00c8;
+  --accent2: #b026ff;
+  --magenta: #ff2bd6;
   --amber: #ffb000;
-  --red: #ff3b3b;
-  --border: rgba(0, 242, 255, 0.4);
-  --glow: 0 0 10px rgba(0, 242, 255, 0.7), 0 0 20px rgba(0, 242, 255, 0.3);
+  --green: #39ff14;
+  --red: #ff2e57;
+  --border: rgba(0, 242, 255, 0.35);
+  --glow: 0 0 8px rgba(0,242,255,.65), 0 0 22px rgba(0,242,255,.28);
+  --glow2: 0 0 8px rgba(176,38,255,.65), 0 0 22px rgba(176,38,255,.28);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,342 +31,400 @@ html, body { height: 100%; }
 body {
   margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; position: relative;
   font-family: 'Share Tech Mono', monospace;
-  background: var(--bg);
+  background: radial-gradient(ellipse at 50% -10%, #0b1030 0%, var(--bg) 60%);
   color: var(--text);
 }
 
-/* matrix & scanline overlays */
-#matrixCanvas { position: fixed; inset: 0; z-index: 1; opacity: 0.1; pointer-events: none; }
+/* ===== BACKGROUND LAYERS ===== */
+#matrixCanvas { position: fixed; inset: 0; z-index: 1; opacity: 0.14; pointer-events: none; }
+#particleCanvas { position: fixed; inset: 0; z-index: 0; opacity: 0.55; pointer-events: none; }
 
+/* rotating conic nebula */
+.nebula {
+  position: fixed; inset: -40%; z-index: 0; pointer-events: none; filter: blur(90px); opacity: .3;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(0,242,255,.45), transparent 30%),
+    radial-gradient(circle at 78% 68%, rgba(176,38,255,.45), transparent 30%),
+    radial-gradient(circle at 55% 92%, rgba(255,43,214,.35), transparent 28%);
+  animation: nebulaSpin 26s linear infinite, nebulaPulse 9s ease-in-out infinite alternate;
+}
+@keyframes nebulaSpin { to { transform: rotate(360deg); } }
+@keyframes nebulaPulse { 0%{opacity:.22} 100%{opacity:.4} }
+
+/* perspective floor grid */
 .perspective-grid {
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed; inset: 0; z-index: 0; overflow: hidden;
+}
+.perspective-grid::before {
+  content:""; position:absolute; left:-50%; right:-50%; bottom:-20%; height:120%;
   background-image:
-    linear-gradient(to bottom, transparent 0%, rgba(188, 0, 255, 0.1) 50%, transparent 100%),
-    linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-  background-size: 100% 100%, 50px 50px, 50px 50px;
-  background-position: 0 0, center center, center center;
-  perspective: 500px;
-  transform: perspective(500px) rotateX(60deg) translateY(-100px);
-  transform-origin: top;
-  animation: gridMove 20s linear infinite;
+    linear-gradient(rgba(0,242,255,.14) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(176,38,255,.12) 2px, transparent 2px);
+  background-size: 60px 60px;
+  transform: perspective(420px) rotateX(68deg);
+  transform-origin: bottom;
+  animation: gridRun 3.5s linear infinite;
+  mask-image: linear-gradient(to top, #000 10%, transparent 75%);
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 75%);
 }
-@keyframes gridMove {
-  from { background-position: 0 0, 0 0, 0 0; }
-  to { background-position: 0 0, 0 1000px, 0 0; }
-}
+@keyframes gridRun { from { background-position: 0 0; } to { background-position: 0 60px; } }
+
+/* scanlines + vignette */
 body::before {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-  background: repeating-linear-gradient(to bottom, rgba(0, 242, 255, 0.04), rgba(0, 242, 255, 0.04) 1px, transparent 2px, transparent 4px);
-  mix-blend-mode: screen; animation: scan 8s linear infinite;
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:2;
+  background: repeating-linear-gradient(to bottom, rgba(0,242,255,.05) 0 1px, transparent 2px 4px);
+  mix-blend-mode: screen; animation: scan 9s linear infinite;
 }
-@keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(30px); } }
+@keyframes scan { from{transform:translateY(0)} to{transform:translateY(40px)} }
 body::after {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
-  background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:2;
+  background: radial-gradient(circle at center, transparent 34%, rgba(0,0,0,.9) 100%);
 }
 
-@keyframes flicker {
-  0%, 100% { filter: brightness(1); } 
-  92% { filter: brightness(1); } 93% { filter: brightness(1.2); } 
-  94% { filter: brightness(0.9); } 95% { filter: brightness(1.1); }
-}
-@keyframes borderPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 30px rgba(0, 242, 255, 0.05); }
-  50% { box-shadow: 0 0 40px rgba(0, 242, 255, 0.4), inset 0 0 50px rgba(0, 242, 255, 0.1); }
-}
-@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+/* ===== KEYFRAMES ===== */
+@keyframes flicker { 0%,100%{filter:brightness(1)} 93%{filter:brightness(1.22)} 94%{filter:brightness(.85)} 95%{filter:brightness(1.12)} }
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(22px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes blinkCaret { 0%,100%{opacity:0} 50%{opacity:1} }
+@keyframes blinkSig { 50%{opacity:.2} }
 
-.wrap { position: relative; z-index: 2; max-width: 980px; margin: 0 auto; padding: 15px; }
+.wrap { position: relative; z-index: 3; max-width: 980px; margin: 0 auto; padding: 18px; }
 
+/* ===== CONTAINER ===== */
 .container {
   background: var(--panel);
   border: 1px solid var(--border);
-  padding: 18px;
-  animation: flicker 8s infinite, borderPulse 3s ease-in-out infinite, fadeSlideIn 0.5s ease both;
-  backdrop-filter: blur(5px);
+  border-radius: 14px;
+  padding: 22px;
+  backdrop-filter: blur(9px);
   position: relative;
   overflow: hidden;
+  animation: flicker 9s infinite, fadeSlideIn .7s cubic-bezier(.2,.9,.3,1.3) both;
+  box-shadow: 0 0 40px rgba(0,242,255,.12), inset 0 0 40px rgba(0,242,255,.04);
 }
+/* animated gradient border ring */
+.container::before {
+  content:""; position:absolute; inset:-2px; z-index:-1; border-radius:16px;
+  background: conic-gradient(from 0deg, transparent, var(--accent), var(--accent2), var(--magenta), transparent 55%);
+  filter: blur(7px); opacity:.55;
+  animation: ringSpin 6s linear infinite;
+}
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+/* diagonal sheen sweep */
+.container .sheen {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:4; border-radius:14px;
+  background: linear-gradient(115deg, transparent 42%, rgba(0,242,255,.10) 50%, transparent 58%);
+  background-size: 250% 250%;
+  animation: sheen 5s linear infinite;
+}
+@keyframes sheen { 0%{background-position:200% 0} 100%{background-position:-100% 0} }
 
+/* HUD corner brackets */
 .hud-corner {
-  position: absolute; width: 30px; height: 30px; border: 2px solid var(--accent);
-  z-index: 5; pointer-events: none; opacity: 0.8;
-  animation: hudBracketPulse 2s infinite alternate ease-in-out;
+  position:absolute; width:34px; height:34px; border:2px solid var(--accent);
+  z-index:6; pointer-events:none;
+  animation: hudPulse 2.2s infinite alternate ease-in-out;
+  box-shadow: 0 0 14px rgba(0,242,255,.7);
 }
-@keyframes hudBracketPulse {
-  from { opacity: 0.4; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1.05); }
-}
-.hud-corner.top-left { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
-.hud-corner.top-right { top: 10px; right: 10px; border-left: 0; border-bottom: 0; }
-.hud-corner.bottom-left { bottom: 10px; left: 10px; border-right: 0; border-top: 0; }
-.hud-corner.bottom-right { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+@keyframes hudPulse { from{opacity:.35;filter:drop-shadow(0 0 2px var(--accent))} to{opacity:1;filter:drop-shadow(0 0 10px var(--accent))} }
+.hud-corner.top-left{top:8px;left:8px;border-right:0;border-bottom:0;border-top-left-radius:8px}
+.hud-corner.top-right{top:8px;right:8px;border-left:0;border-bottom:0;border-top-right-radius:8px}
+.hud-corner.bottom-left{bottom:8px;left:8px;border-right:0;border-top:0;border-bottom-left-radius:8px}
+.hud-corner.bottom-right{bottom:8px;right:8px;border-left:0;border-top:0;border-bottom-right-radius:8px}
 
+/* roaming scanner beam */
 .scanner-line {
-  position: absolute; inset: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-  z-index: 4; opacity: 0.3; pointer-events: none;
-  animation: scannerAnim 6s linear infinite;
+  position:absolute; left:0; right:0; height:2px; z-index:5; pointer-events:none;
+  background: linear-gradient(90deg, transparent, var(--accent2), var(--magenta), transparent);
+  box-shadow: 0 0 18px var(--accent2); opacity:.5;
+  animation: scannerAnim 5s ease-in-out infinite;
 }
-@keyframes scannerAnim {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(1000%); }
-}
+@keyframes scannerAnim { 0%{top:0} 100%{top:100%} }
 
-/* boot overlay */
+/* ===== BOOT OVERLAY ===== */
 #bootOverlay {
-  position: fixed; inset: 0; z-index: 50; background: #000; color: var(--accent);
-  font-size: 14px; padding: 20px; white-space: pre-wrap; overflow: hidden; transition: opacity 0.5s;
+  position:fixed; inset:0; z-index:80; background:#000; color:var(--accent);
+  font-size:14px; padding:24px; white-space:pre-wrap; overflow:hidden; transition:opacity .6s;
+  font-family:'Share Tech Mono',monospace; text-shadow:0 0 6px var(--accent);
 }
-#bootOverlay.hide { opacity: 0; pointer-events: none; }
+#bootOverlay.hide { opacity:0; pointer-events:none; }
+#bootOverlay::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(to bottom, rgba(0,242,255,.06) 0 1px, transparent 2px 4px);
+}
+#bootOverlay .boot-bar {
+  margin-top:18px; width:100%; max-width:440px; height:16px; border:1px solid var(--border);
+  background:rgba(0,242,255,.05); position:relative; overflow:hidden; border-radius:4px;
+}
+#bootOverlay .boot-bar > i {
+  position:absolute; left:0; top:0; bottom:0; width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--magenta));
+  box-shadow:0 0 16px var(--accent); animation:bootFill 1.5s ease forwards;
+}
+@keyframes bootFill { to{width:100%} }
+.boot-cursor::after { content:"▋"; animation:blinkCaret .6s step-end infinite; }
 
-/* top bar */
+/* ===== TERMINAL BAR ===== */
 .terminal-bar {
-  display: flex; align-items: center; gap: 10px; padding: 10px 15px;
-  border: 1px solid var(--border); background: rgba(0, 20, 30, 0.5);
-  box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.15); margin-bottom: 12px; flex-wrap: wrap;
+  display:flex; align-items:center; gap:10px; padding:11px 15px;
+  border:1px solid var(--border); border-radius:8px; background:rgba(0,20,32,.55);
+  box-shadow: inset 0 0 18px rgba(0,242,255,.14); margin-bottom:14px; flex-wrap:wrap;
+  position:relative; overflow:hidden;
 }
-.terminal-dots { display: flex; gap: 8px; }
-.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-.dot.red { background: #ff3b3b; box-shadow: 0 0 10px #ff3b3b; }
-.dot.yellow { background: #ffb000; box-shadow: 0 0 10px #ffb000; }
-.dot.green { background: #39ff14; box-shadow: 0 0 10px #39ff14; }
-.terminal-title { 
-  flex: 1; color: var(--accent); text-shadow: var(--glow); 
-  letter-spacing: 2px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+.terminal-bar::before {
+  content:""; position:absolute; top:0; left:-30%; width:30%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,242,255,.18),transparent);
+  animation:barSweep 3.5s linear infinite;
 }
-.terminal-signal { 
-  font-size: 12px; color: var(--accent2); text-shadow: 0 0 8px var(--accent2);
-  border: 1px solid var(--accent2); padding: 3px 10px; 
-}
-.terminal-signal.live { color: var(--red); border-color: var(--red); animation: blinkSig 1s step-end infinite, liveGlow 1.2s ease-in-out infinite; }
-@keyframes blinkSig { 50% { opacity: 0.2; } }
-@keyframes liveGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(255, 59, 59, 0.4); }
-  50% { box-shadow: 0 0 18px rgba(255, 59, 59, 0.9); }
-}
+@keyframes barSweep { 0%{left:-30%} 100%{left:130%} }
+.terminal-dots { display:flex; gap:9px; }
+.dot { width:13px; height:13px; border-radius:50%; animation:dotPulse 2s ease-in-out infinite; }
+.dot.red{background:var(--red);box-shadow:0 0 12px var(--red)}
+.dot.yellow{background:var(--amber);box-shadow:0 0 12px var(--amber);animation-delay:.3s}
+.dot.green{background:var(--green);box-shadow:0 0 12px var(--green);animation-delay:.6s}
+@keyframes dotPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.55} }
+.terminal-title { flex:1; color:var(--accent); text-shadow:var(--glow); letter-spacing:2px; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:'Rajdhani',sans-serif; font-weight:600; }
+.terminal-signal { font-size:11px; color:var(--accent2); text-shadow:var(--glow2); border:1px solid var(--accent2); border-radius:4px; padding:4px 11px; letter-spacing:1px; }
+.terminal-signal.live { color:var(--red); border-color:var(--red); animation:blinkSig 1s step-end infinite, liveGlow 1.2s ease-in-out infinite; }
+@keyframes liveGlow { 0%,100%{box-shadow:0 0 6px rgba(255,46,87,.4)} 50%{box-shadow:0 0 20px rgba(255,46,87,.9)} }
 
-/* symbol bar added per instruction */
+/* ===== SYMBOL BAR ===== */
 .symbol-bar {
-  display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
-  padding: 8px; margin-bottom: 12px;
-  background: rgba(188, 0, 255, 0.05); border: 1px dashed var(--accent2);
-  color: var(--accent2); font-weight: bold; font-size: 16px; text-shadow: 0 0 5px var(--accent2);
-  user-select: none;
+  display:flex; justify-content:center; gap:14px; flex-wrap:wrap;
+  padding:9px; margin-bottom:14px; border-radius:8px;
+  background:rgba(176,38,255,.06); border:1px dashed var(--accent2);
+  color:var(--accent2); font-weight:bold; font-size:17px; text-shadow:var(--glow2); user-select:none;
 }
-.symbol-bar span { animation: glitch 5s infinite alternate; opacity: 0.8; }
+.symbol-bar span { animation:symFloat 3s ease-in-out infinite, hueShift 8s linear infinite; opacity:.85; display:inline-block; }
+.symbol-bar span:nth-child(2n){animation-delay:.4s,0s}
+.symbol-bar span:nth-child(3n){animation-delay:.8s,0s}
+@keyframes symFloat { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-5px) rotate(4deg)} }
+@keyframes hueShift { to{filter:hue-rotate(360deg)} }
 
+/* ===== STATS STRIP ===== */
 .stats-strip {
-  display: flex; gap: 15px; flex-wrap: wrap; font-size: 11px; color: var(--accent);
-  border: 1px dashed var(--border); padding: 8px 12px; margin-bottom: 15px; letter-spacing: 1px;
-  background: rgba(0, 242, 255, 0.02);
+  display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--accent);
+  border:1px dashed var(--border); border-radius:8px; padding:9px 13px; margin-bottom:16px; letter-spacing:1px;
+  background:rgba(0,242,255,.03); font-family:'Rajdhani',sans-serif; font-weight:600;
 }
-.stats-strip span b { color: var(--accent); }
+.stats-strip span b { color:var(--accent); text-shadow:0 0 6px currentColor; transition:color .3s; }
 
+/* ===== TITLE ===== */
 h1 {
-  color: var(--accent); text-align: center; margin: 10px 0 5px; text-shadow: var(--glow);
-  letter-spacing: 3px; font-size: 22px; text-transform: uppercase;
+  color:var(--accent); text-align:center; margin:12px 0 6px; text-shadow:var(--glow);
+  letter-spacing:3px; font-size:24px; text-transform:uppercase; font-family:'Orbitron',sans-serif; font-weight:900;
 }
 .subtitle {
-  text-align: center; color: var(--accent2); font-size: 13px; letter-spacing: 4px; text-transform: uppercase;
-  margin: 0 0 15px; opacity: 0.8; border-bottom: 1px dashed var(--border); padding-bottom: 15px;
+  text-align:center; color:var(--accent2); font-size:12px; letter-spacing:4px; text-transform:uppercase;
+  margin:0 0 16px; opacity:.9; border-bottom:1px dashed var(--border); padding-bottom:16px;
+  font-family:'Rajdhani',sans-serif; font-weight:600;
 }
+.subtitle .dev-tag { animation:hueShift 6s linear infinite; font-weight:700; }
 
-@keyframes glitch {
-  0% { transform: translate(0); text-shadow: -2px 0 var(--accent2), 2px 0 var(--magenta); }
-  20% { transform: translate(-2px, 2px); text-shadow: 2px 0 var(--accent), -2px 0 var(--accent2); }
-  40% { transform: translate(2px, -2px); text-shadow: -2px 0 var(--magenta), 2px 0 var(--accent); }
-  60% { transform: translate(-2px, -2px); text-shadow: 2px 0 var(--accent2), -2px 0 var(--magenta); }
-  80% { transform: translate(2px, 2px); text-shadow: -2px 0 var(--accent), 2px 0 var(--accent2); }
-  100% { transform: translate(0); text-shadow: -2px 0 var(--accent), 2px 0 var(--accent2); }
+/* advanced glitch title */
+.glitch-text { position:relative; display:inline-block; }
+.glitch-text::before, .glitch-text::after {
+  content:attr(data-text); position:absolute; left:0; top:0; width:100%; overflow:hidden; pointer-events:none;
 }
-.glitch-text { animation: glitch 3s infinite alternate step-end; }
+.glitch-text::before { color:var(--magenta); animation:glitchTop 2.5s infinite linear alternate-reverse; clip-path:inset(0 0 55% 0); }
+.glitch-text::after { color:var(--accent2); animation:glitchBot 3s infinite linear alternate-reverse; clip-path:inset(55% 0 0 0); }
+@keyframes glitchTop { 0%{transform:translate(0)} 25%{transform:translate(-3px,-1px)} 50%{transform:translate(2px,1px)} 75%{transform:translate(-2px,0)} 100%{transform:translate(3px,-1px)} }
+@keyframes glitchBot { 0%{transform:translate(0)} 25%{transform:translate(3px,1px)} 50%{transform:translate(-2px,-1px)} 75%{transform:translate(2px,0)} 100%{transform:translate(-3px,1px)} }
 
+/* ===== PROMPT ===== */
 .terminal-prompt {
-  display: flex; align-items: center; gap: 10px; border: 1px solid var(--border);
-  background: rgba(0, 20, 30, 0.7); padding: 12px 15px; margin: 15px 0;
-  box-shadow: inset 0 0 15px rgba(0, 242, 255, 0.15);
+  display:flex; align-items:center; gap:10px; border:1px solid var(--border); border-radius:8px;
+  background:rgba(0,20,32,.7); padding:13px 16px; margin:16px 0;
+  box-shadow: inset 0 0 16px rgba(0,242,255,.14); position:relative;
+  transition:box-shadow .3s, border-color .3s;
 }
-.prompt-label { color: var(--accent2); text-shadow: 0 0 8px var(--accent2); font-size: 14px; }
+.prompt-label { color:var(--accent2); text-shadow:var(--glow2); font-size:14px; white-space:nowrap; }
+.prompt-label::after { content:"▋"; color:var(--accent); animation:blinkCaret .9s step-end infinite; margin-left:2px; }
 input[type="url"] {
-  width: 100%; border: none; outline: none; background: transparent; padding: 0;
-  font-size: 16px; color: var(--text); font-family: 'Share Tech Mono', monospace; caret-color: var(--accent);
+  width:100%; border:none; outline:none; background:transparent; padding:0;
+  font-size:16px; color:var(--text); font-family:'Share Tech Mono',monospace; caret-color:var(--accent);
 }
-input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
+input[type="url"]::placeholder { color:rgba(0,242,255,.4); }
+.terminal-prompt.focused { border-color:var(--accent2); box-shadow: inset 0 0 16px rgba(176,38,255,.25), 0 0 20px rgba(0,242,255,.35); }
+.terminal-prompt.focused::after {
+  content:""; position:absolute; left:0; bottom:-1px; height:2px; width:100%; border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);
+  background-size:200% 100%; animation:underlineFlow 1.5s linear infinite;
+}
+@keyframes underlineFlow { 0%{background-position:0 0} 100%{background-position:200% 0} }
+.terminal-prompt.shake-error { animation:shakeError .45s ease; border-color:var(--red); }
+@keyframes shakeError { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
 
+/* ===== EXECUTE BUTTON ===== */
 #viewSourceBtn {
-  background: rgba(0, 242, 255, 0.05); color: var(--accent); padding: 15px; border: 2px solid var(--accent);
-  cursor: pointer; font-size: 18px; transition: all 0.2s; width: 100%; margin: 5px 0 15px;
-  text-transform: uppercase; box-shadow: var(--glow); letter-spacing: 4px;
-  font-family: 'Share Tech Mono', monospace; position: relative; font-weight: bold;
+  background:linear-gradient(135deg, rgba(0,242,255,.08), rgba(176,38,255,.08));
+  color:var(--accent); padding:16px; border:2px solid var(--accent); border-radius:8px;
+  cursor:pointer; font-size:18px; transition:all .25s; width:100%; margin:6px 0 16px;
+  text-transform:uppercase; box-shadow:var(--glow); letter-spacing:4px;
+  font-family:'Orbitron',sans-serif; position:relative; font-weight:800; overflow:hidden;
 }
-#viewSourceBtn::before { content: "> "; opacity: 0.8; }
-#viewSourceBtn:hover:not(:disabled) { background: rgba(0, 242, 255, 0.2); box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); }
-#viewSourceBtn:active:not(:disabled) { transform: scale(0.98); }
-#viewSourceBtn:disabled { cursor: not-allowed; opacity: 0.5; }
-#viewSourceBtn { overflow: hidden; }
-#viewSourceBtn .ripple {
-  position: absolute; border-radius: 50%; pointer-events: none;
-  background: rgba(0, 242, 255, 0.55); transform: scale(0); opacity: 1;
-  animation: rippleFx 0.6s ease-out forwards;
+#viewSourceBtn::before { content:"> "; opacity:.8; }
+#viewSourceBtn > .btn-ring {
+  position:absolute; inset:-2px; z-index:-1; border-radius:9px;
+  background:conic-gradient(from 0deg, transparent, var(--accent), var(--accent2), transparent 60%);
+  filter:blur(5px); opacity:0; transition:opacity .3s; animation:ringSpin 3s linear infinite;
 }
-@keyframes rippleFx { to { transform: scale(3.2); opacity: 0; } }
-#viewSourceBtn.launching {
-  animation: launchPulse 0.5s ease-out;
-}
-@keyframes launchPulse {
-  0% { box-shadow: var(--glow); }
-  40% { box-shadow: 0 0 45px rgba(0, 242, 255, 0.9), 0 0 90px rgba(188, 0, 255, 0.5); letter-spacing: 6px; }
-  100% { box-shadow: var(--glow); letter-spacing: 4px; }
-}
+#viewSourceBtn:hover > .btn-ring { opacity:.9; }
+#viewSourceBtn:hover:not(:disabled) { background:linear-gradient(135deg, rgba(0,242,255,.22), rgba(176,38,255,.2)); box-shadow:0 0 32px rgba(0,242,255,.6), 0 0 52px rgba(176,38,255,.3); }
+#viewSourceBtn:active:not(:disabled) { transform:scale(.98); }
+#viewSourceBtn:disabled { cursor:not-allowed; opacity:.5; }
+#viewSourceBtn .ripple { position:absolute; border-radius:50%; pointer-events:none; background:rgba(0,242,255,.55); transform:scale(0); opacity:1; animation:rippleFx .6s ease-out forwards; }
+@keyframes rippleFx { to{transform:scale(3.2);opacity:0} }
+#viewSourceBtn.launching { animation:launchPulse .5s ease-out; }
+@keyframes launchPulse { 0%{box-shadow:var(--glow)} 40%{box-shadow:0 0 45px rgba(0,242,255,.9),0 0 90px rgba(176,38,255,.5);letter-spacing:6px} 100%{box-shadow:var(--glow);letter-spacing:4px} }
 
-/* Input focus glow + invalid shake */
-.terminal-prompt { transition: box-shadow 0.3s, border-color 0.3s; }
-.terminal-prompt.focused {
-  border-color: var(--accent2);
-  box-shadow: inset 0 0 15px rgba(188, 0, 255, 0.25), 0 0 18px rgba(0, 242, 255, 0.35);
-}
-.terminal-prompt.shake-error { animation: shakeError 0.45s ease; border-color: var(--red); }
-@keyframes shakeError {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
-}
-
+/* ===== OPTIONS ===== */
 .terminal-options {
-  display: flex; gap: 20px; flex-wrap: wrap; padding: 10px 15px;
-  margin: 0 0 15px; border: 1px dashed var(--border); background: rgba(0,15,8,.5);
+  display:flex; gap:20px; flex-wrap:wrap; padding:11px 16px; border-radius:8px;
+  margin:0 0 16px; border:1px dashed var(--border); background:rgba(0,242,255,.03);
 }
-.chk { display: flex; align-items: center; gap: 10px; cursor: pointer; text-transform: uppercase; font-size: 13px; }
+.chk { display:flex; align-items:center; gap:10px; cursor:pointer; text-transform:uppercase; font-size:13px; transition:color .2s; font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:1px; }
+.chk:hover { color:var(--accent2); }
 .chk input {
-  appearance: none; width: 18px; height: 18px; border: 1px solid var(--border);
-  background: rgba(0,0,0,.8); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); position: relative;
+  appearance:none; width:18px; height:18px; border:1px solid var(--border); border-radius:4px;
+  background:rgba(0,0,0,.8); box-shadow:0 0 10px rgba(0,242,255,.2); position:relative; transition:all .2s;
 }
-.chk input:checked { background: rgba(0, 242, 255, 0.2); }
-.chk input:checked::after { content: ""; position: absolute; inset: 3px; background: var(--accent); }
+.chk input:checked { background:rgba(0,242,255,.2); box-shadow:0 0 15px rgba(0,242,255,.5); }
+.chk input:checked::after { content:""; position:absolute; inset:3px; border-radius:2px; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:checkPop .3s ease; }
+@keyframes checkPop { from{transform:scale(0)} to{transform:scale(1)} }
 
-#statusMessage { color: var(--amber); font-weight: bold; margin: 10px 0; font-size: 14px; text-shadow: 0 0 5px var(--amber); animation: statusPulse 1s ease-in-out infinite; }
-#statusMessage:before { content: "[PROCESS]>"; color: var(--red); margin-right: 8px; animation: blinkSig 0.6s step-end infinite; }
-@keyframes statusPulse {
-  0%, 100% { opacity: 1; text-shadow: 0 0 5px var(--amber); }
-  50% { opacity: 0.65; text-shadow: 0 0 15px var(--amber), 0 0 25px var(--red); }
-}
+/* ===== STATUS ===== */
+#statusMessage { color:var(--amber); font-weight:bold; margin:10px 0; font-size:14px; text-shadow:0 0 5px var(--amber); animation:statusPulse 1s ease-in-out infinite; }
+#statusMessage:before { content:"[PROCESS]>"; color:var(--red); margin-right:8px; animation:blinkSig .6s step-end infinite; }
+@keyframes statusPulse { 0%,100%{opacity:1;text-shadow:0 0 5px var(--amber)} 50%{opacity:.65;text-shadow:0 0 15px var(--amber),0 0 25px var(--red)} }
 
-.code-area.success-flash { animation: successFlash 0.7s ease; }
-@keyframes successFlash {
-  0% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 60px rgba(57, 255, 20, 0.7); border-color: #39ff14; }
-  100% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 20px rgba(0, 242, 255, 0.15); border-color: var(--border); }
-}
-.code-area.error-flash { animation: errorFlash 0.7s ease; }
-@keyframes errorFlash {
-  0%, 40%, 100% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 60px rgba(255, 59, 59, 0.8); border-color: var(--red); }
-  20%, 60% { box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 20px rgba(0, 242, 255, 0.15); border-color: var(--border); }
-}
-.code-area { transition: border-color 0.3s; }
-
-.scan-bar { height: 3px; width: 100%; background: rgba(0, 242, 255, 0.1); overflow: hidden; margin: 5px 0 15px; position: relative; }
+/* ===== SCAN BAR ===== */
+.scan-bar { height:5px; width:100%; background:rgba(0,242,255,.1); overflow:hidden; margin:5px 0 15px; position:relative; border-radius:3px; }
 .scan-bar::before {
-  content: ""; position: absolute; top: 0; left: -50%; width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  animation: scanMove 1s linear infinite;
+  content:""; position:absolute; top:0; left:-50%; width:50%; height:100%;
+  background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);
+  box-shadow:0 0 15px var(--accent); animation:scanMove 1s linear infinite;
 }
-@keyframes scanMove { 0% { left: -50%; } 100% { left: 100%; } }
+@keyframes scanMove { 0%{left:-50%} 100%{left:100%} }
 
+/* ===== CODE AREA ===== */
 .code-area {
-  margin-top: 15px; background: #000; border: 1px solid var(--border); padding: 18px;
-  max-height: 55vh; overflow: auto; font-size: 13px; line-height: 1.6; position: relative;
-  box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 20px rgba(0, 242, 255, 0.15);
-  -webkit-overflow-scrolling: touch; word-break: break-all;
+  margin-top:15px; background:#000308; border:1px solid var(--border); border-radius:8px; padding:18px;
+  max-height:55vh; overflow:auto; font-size:13px; line-height:1.65; position:relative;
+  box-shadow: inset 0 0 30px rgba(0,0,0,1), 0 0 22px rgba(0,242,255,.15);
+  -webkit-overflow-scrolling:touch; word-break:break-word; transition:border-color .3s;
 }
-.code-area::-webkit-scrollbar { width: 6px; height: 6px; }
-.code-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.code-area::-webkit-scrollbar-track { background: #000; }
+.code-area::-webkit-scrollbar { width:7px; height:7px; }
+.code-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+.code-area::-webkit-scrollbar-track { background:#000; }
+.code-area.success-flash { animation:successFlash .7s ease; }
+@keyframes successFlash { 0%{box-shadow:inset 0 0 30px rgba(0,0,0,1),0 0 60px rgba(57,255,20,.7);border-color:var(--green)} 100%{box-shadow:inset 0 0 30px rgba(0,0,0,1),0 0 22px rgba(0,242,255,.15);border-color:var(--border)} }
+.code-area.error-flash { animation:errorFlash .7s ease; }
+@keyframes errorFlash { 0%,40%,100%{box-shadow:inset 0 0 30px rgba(0,0,0,1),0 0 60px rgba(255,46,87,.8);border-color:var(--red)} 20%,60%{box-shadow:inset 0 0 30px rgba(0,0,0,1),0 0 22px rgba(0,242,255,.15);border-color:var(--border)} }
 
 .code-area .beam {
-  position: absolute; left: 0; right: 0; height: 25px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(0, 242, 255, 0.25), transparent);
-  opacity: 0; transition: opacity 0.2s;
+  position:absolute; left:0; right:0; height:26px; pointer-events:none; z-index:1;
+  background:linear-gradient(180deg, rgba(0,242,255,.28), transparent);
+  opacity:0; transition:opacity .2s;
 }
-.code-area.writing .beam { opacity: 1; animation: beamSweep 1.5s ease-in-out infinite; }
-@keyframes beamSweep { 0% { top: 0; } 100% { top: 100%; } }
+.code-area.writing .beam { opacity:1; animation:beamSweep 1.5s ease-in-out infinite; }
+@keyframes beamSweep { 0%{top:0} 100%{top:100%} }
+.code-area.writing::before {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.12;
+  background:repeating-linear-gradient(90deg, rgba(0,242,255,.4) 0 1px, transparent 1px 22px);
+  animation:rainShift .5s linear infinite;
+}
+@keyframes rainShift { from{background-position:0 0} to{background-position:0 22px} }
+.code-area code { display:block; color:var(--text); white-space:pre-wrap; word-wrap:break-word; word-break:break-word; position:relative; z-index:2; }
 
-.code-area code { display: block; color: var(--text); white-space: pre-wrap; word-wrap: break-word; }
+/* ===== SYNTAX HIGHLIGHTING ===== */
+.hl-tag { color:#ff3b6b; font-weight:bold; text-shadow:0 0 4px rgba(255,59,107,.4); }
+.hl-attr { color:#00ffe5; font-style:italic; text-shadow:0 0 4px rgba(0,255,229,.3); }
+.hl-str { color:#ffb000; text-shadow:0 0 4px rgba(255,176,0,.3); }
+.hl-cmt { color:#5f7a6b; }
+.hl-num { color:#c25bff; }
+.hl-doctype { color:#39ff14; font-weight:bold; }
 
-/* Mobile Responsive Syntax Highlighting Colors */
-.hl-tag { color: #ff3b3b; font-weight: bold; } /* Tags - Red */
-.hl-attr { color: #00ffe5; font-style: italic; } /* Attributes - Cyan */
-.hl-str { color: #ffb000; } /* Strings - Yellow */
-.hl-cmt { color: #5f7a6b; } /* Comments - Grey/Green */
+.hidden { display:none !important; }
 
-.hidden { display: none !important; }
-
-@keyframes blinkCaret { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 .terminal-loader {
-  position: absolute; inset: 0; padding: 20px; background: rgba(0,0,0,.95); color: var(--accent);
-  white-space: pre-wrap; overflow: hidden; z-index: 5; font-size: 14px;
-  animation: loaderGlitch 2.4s infinite;
+  position:absolute; inset:0; padding:20px; background:rgba(0,0,0,.95); color:var(--accent);
+  white-space:pre-wrap; overflow:hidden; z-index:5; font-size:14px; border-radius:8px;
+  animation:loaderGlitch 2.4s infinite;
 }
-@keyframes loaderGlitch {
-  0%, 96%, 100% { transform: translate(0,0); text-shadow: none; }
-  97% { transform: translate(-2px, 1px); text-shadow: 2px 0 var(--accent2), -2px 0 var(--magenta); }
-  98% { transform: translate(2px, -1px); text-shadow: -2px 0 var(--magenta), 2px 0 var(--accent); }
-  99% { transform: translate(0,0); text-shadow: none; }
-}
-#sourceCodeOutput.is-typing::after { content: " █"; color: var(--accent2); animation: blinkCaret 0.8s step-end infinite; }
+@keyframes loaderGlitch { 0%,96%,100%{transform:translate(0,0);text-shadow:none} 97%{transform:translate(-2px,1px);text-shadow:2px 0 var(--accent2),-2px 0 var(--magenta)} 98%{transform:translate(2px,-1px);text-shadow:-2px 0 var(--magenta),2px 0 var(--accent)} 99%{transform:translate(0,0);text-shadow:none} }
+#sourceCodeOutput.is-typing::after { content:" █"; color:var(--accent2); animation:blinkCaret .8s step-end infinite; }
 
-.action-buttons { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
-.action-buttons.pop-in button { animation: popIn 0.45s cubic-bezier(.2,.9,.3,1.3) both; }
-.action-buttons.pop-in button:nth-child(2) { animation-delay: 0.08s; }
-@keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+/* ===== ACTION BUTTONS ===== */
+.action-buttons { display:flex; gap:15px; margin-top:20px; flex-wrap:wrap; }
+.action-buttons.pop-in button { animation:popIn .45s cubic-bezier(.2,.9,.3,1.3) both; }
+.action-buttons.pop-in button:nth-child(2) { animation-delay:.08s; }
+@keyframes popIn { from{opacity:0;transform:translateY(10px) scale(.9)} to{opacity:1;transform:translateY(0) scale(1)} }
 .action-buttons button {
-  background: rgba(0, 242, 255, 0.05); color: var(--accent); padding: 12px 20px; border: 1px dashed var(--accent);
-  cursor: pointer; font-size: 14px; transition: all 0.3s; text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); font-family: 'Share Tech Mono', monospace; flex: 1; min-width: 150px;
+  background:linear-gradient(135deg, rgba(0,242,255,.06), rgba(176,38,255,.06));
+  color:var(--accent); padding:13px 20px; border:1px dashed var(--accent); border-radius:6px;
+  cursor:pointer; font-size:14px; transition:all .3s; text-transform:uppercase;
+  box-shadow:0 0 10px rgba(0,242,255,.2); font-family:'Share Tech Mono',monospace; flex:1; min-width:150px;
+  position:relative; overflow:hidden; letter-spacing:1px;
 }
-.action-buttons button:hover { background: rgba(0, 242, 255, 0.15); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
-.action-buttons button:active { transform: scale(0.95); }
+.action-buttons button::before { content:""; position:absolute; top:0; left:-60%; width:60%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,242,255,.25),transparent); }
+.action-buttons button:hover::before { animation:btnShine .7s ease; }
+@keyframes btnShine { from{left:-60%} to{left:130%} }
+.action-buttons button:hover { background:linear-gradient(135deg, rgba(0,242,255,.16), rgba(176,38,255,.14)); box-shadow:0 0 20px rgba(0,242,255,.4); border-style:solid; }
+.action-buttons button:active { transform:scale(.95); }
 
-.footer-note { margin-top: 20px; font-size: 12px; color: rgba(0, 242, 255, 0.5); text-align: center; letter-spacing: 2px; }
+.footer-note { margin-top:20px; font-size:12px; color:rgba(0,242,255,.55); text-align:center; letter-spacing:2px; animation:statusPulse 3s ease-in-out infinite; }
 
-/* Mobile Optimization */
-@media (max-width: 600px) {
-  .wrap { padding: 10px; }
-  .container { padding: 15px 12px; }
-  h1 { font-size: 17px; letter-spacing: 1.5px; }
-  .symbol-bar { font-size: 13px; gap: 8px; padding: 5px; }
-  .subtitle { font-size: 11px; }
-  .stats-strip { font-size: 10px; justify-content: center; gap: 10px; }
-  .terminal-prompt { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px; }
-  input[type="url"] { font-size: 14px; }
-  #viewSourceBtn { font-size: 16px; padding: 12px; letter-spacing: 2px; }
-  #viewSourceBtn.launching { animation-duration: 0.4s; }
-  .code-area { font-size: 11.5px; max-height: 50vh; padding: 12px; }
-  .action-buttons { gap: 10px; }
-  .action-buttons button { min-width: 120px; font-size: 12px; padding: 10px 14px; }
-  #statusMessage { font-size: 12px; }
-  .terminal-loader { font-size: 12px; padding: 14px; }
+/* ===== TOAST ===== */
+#toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120%);
+  background:rgba(0,10,18,.96); border:1px solid var(--accent); color:var(--accent); border-radius:8px;
+  padding:13px 22px; z-index:90; font-size:13px; letter-spacing:1px; text-transform:uppercase;
+  box-shadow:0 0 26px rgba(0,242,255,.5); transition:transform .4s cubic-bezier(.2,.9,.3,1.3);
+  font-family:'Share Tech Mono',monospace; max-width:90vw; text-align:center;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
+#toast.err { border-color:var(--red); color:var(--red); box-shadow:0 0 26px rgba(255,46,87,.5); }
+
+/* ===== MOBILE ===== */
+@media (max-width:600px) {
+  .wrap { padding:10px; }
+  .container { padding:16px 13px; border-radius:12px; }
+  h1 { font-size:17px; letter-spacing:1.5px; }
+  .symbol-bar { font-size:13px; gap:8px; padding:6px; }
+  .subtitle { font-size:11px; }
+  .stats-strip { font-size:10px; justify-content:center; gap:10px; }
+  .terminal-prompt { flex-direction:column; align-items:flex-start; gap:8px; padding:11px; }
+  input[type="url"] { font-size:14px; }
+  #viewSourceBtn { font-size:16px; padding:13px; letter-spacing:2px; }
+  #viewSourceBtn.launching { animation-duration:.4s; }
+  .code-area { font-size:11.5px; max-height:50vh; padding:13px; }
+  .action-buttons { gap:10px; }
+  .action-buttons button { min-width:120px; font-size:12px; padding:11px 14px; }
+  #statusMessage { font-size:12px; }
+  .terminal-loader { font-size:12px; padding:14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
 }
 </style>
 </head>
 <body>
-<div id="bootOverlay">INITIALIZING CSM ULTRA KERNEL...</div>
+<div id="bootOverlay"><span id="bootText"></span><span class="boot-cursor"></span><div class="boot-bar"><i></i></div></div>
+<div class="nebula"></div>
 <div class="perspective-grid"></div>
+<canvas id="particleCanvas"></canvas>
 <canvas id="matrixCanvas"></canvas>
 
 <div class="wrap">
   <div class="container" id="mainContainer">
+    <span class="sheen"></span>
     <div class="hud-corner top-left"></div>
     <div class="hud-corner top-right"></div>
     <div class="hud-corner bottom-left"></div>
     <div class="hud-corner bottom-right"></div>
     <div class="scanner-line"></div>
+
     <div class="terminal-bar">
       <div class="terminal-dots">
         <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
@@ -386,15 +446,15 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
       <span>UPTIME: <b id="statUptime">00:00:00</b></span>
     </div>
 
-    <h1 class="glitch-text">Website Source Code Hacker</h1>
-    <div class="subtitle">Developed by CSM Mohasin Alam</div>
+    <h1><span class="glitch-text" data-text="Website Source Code Hacker">Website Source Code Hacker</span></h1>
+    <div class="subtitle">Developed by <span class="dev-tag">CSM Mohasin Alam</span></div>
 
     <div class="terminal-prompt">
       <span class="prompt-label">root@target:~$</span>
       <input type="url" id="websiteUrl" placeholder="Enter Target URL (ex: https://google.com)" required>
     </div>
 
-    <button id="viewSourceBtn">EXECUTE EXPLOIT</button>
+    <button id="viewSourceBtn"><span class="btn-ring"></span>EXECUTE EXPLOIT</button>
 
     <div class="terminal-options">
       <label class="chk"><input type="checkbox" id="modeInstant"><span>INSTANT DUMP</span></label>
@@ -415,13 +475,15 @@ input[type="url"]::placeholder { color: rgba(0, 242, 255, 0.4); }
   </div>
 </div>
 
+<div id="toast"></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   fetch("https://ipapi.co/json/")
     .then(res => res.json())
     .then(data => {
       if (data.country === "IN") {
-        document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;color:var(--accent);font-family:monospace;'>Access Denied</h2>";
+        document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px;color:#00f2ff;font-family:monospace;'>Access Denied</h2>";
       }
     }).catch(() => {});
 });
@@ -439,6 +501,16 @@ const urlInput = document.getElementById('websiteUrl');
 const promptBox = document.querySelector('.terminal-prompt');
 urlInput.addEventListener('focus', () => promptBox.classList.add('focused'));
 urlInput.addEventListener('blur', () => promptBox.classList.remove('focused'));
+urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { document.getElementById('viewSourceBtn').click(); } });
+
+function showToast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('err', !!isErr);
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
 
 function spawnRipple(e) {
   const btn = document.getElementById('viewSourceBtn');
@@ -483,14 +555,14 @@ function fetchSourceCode() {
         }
     } catch (e) {}
 
-    if (!websiteInput) { triggerShake(); alert("অনুগ্রহ করে একটি URL দিন।"); return; }
+    if (!websiteInput) { triggerShake(); showToast("অনুগ্রহ করে একটি URL দিন।", true); return; }
 
     viewButton.disabled = true;
     actionButtons.classList.add('hidden');
     if (window.__cancelRender) window.__cancelRender();
     outputElement.textContent = '';
     outputArea.classList.add('loading');
-    
+
     statusMessage.textContent = 'Bypassing Security... Fetching Source Code...';
     statusMessage.classList.remove('hidden');
 
@@ -508,6 +580,7 @@ function fetchSourceCode() {
             window.__renderSource(htmlCode, () => {
                 outputArea.classList.remove('success-flash'); void outputArea.offsetWidth;
                 outputArea.classList.add('success-flash');
+                showToast("Source dumped successfully!");
             });
         })
         .catch(error => {
@@ -519,6 +592,7 @@ function fetchSourceCode() {
             outputElement.textContent = `[CONNECTION FAILED] >> Error: ${error.message}`;
             outputArea.classList.remove('error-flash'); void outputArea.offsetWidth;
             outputArea.classList.add('error-flash');
+            showToast("Connection failed: " + error.message, true);
         });
 }
 
@@ -531,8 +605,8 @@ function triggerShake() {
 
 function copyCode() {
     navigator.clipboard.writeText(document.getElementById('sourceCodeOutput').textContent)
-        .then(() => alert('Payload Copied Successfully!'))
-        .catch(() => alert('Copy failed!'));
+        .then(() => showToast('Payload Copied Successfully!'))
+        .catch(() => showToast('Copy failed!', true));
 }
 
 function downloadCode() {
@@ -544,15 +618,35 @@ function downloadCode() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('HTML downloaded!');
 }
 </script>
 
 <script>
 // Boot Sequence
+(function () {
+  const bootText = document.getElementById('bootText');
+  const lines = [
+    "INITIALIZING CSM ULTRA KERNEL...",
+    "[OK] Loading crypto modules",
+    "[OK] Mounting /dev/exploit",
+    "[OK] Spoofing MAC address",
+    "[OK] Establishing proxy chain",
+    ">> ROOT ACCESS GRANTED"
+  ];
+  let li = 0, out = "";
+  const iv = setInterval(() => {
+    if (li >= lines.length) { clearInterval(iv); return; }
+    out += lines[li] + "\n";
+    if (bootText) bootText.textContent = out;
+    li++;
+  }, 230);
+})();
+
 setTimeout(() => {
   const overlay = document.getElementById('bootOverlay');
-  if(overlay) { overlay.classList.add('hide'); setTimeout(()=>overlay.remove(), 500); }
-}, 1500);
+  if(overlay) { overlay.classList.add('hide'); setTimeout(()=>overlay.remove(), 600); }
+}, 1700);
 
 // Matrix Background
 const canvas = document.getElementById('matrixCanvas');
@@ -566,7 +660,7 @@ function initMatrix() {
 initMatrix();
 window.addEventListener('resize', initMatrix);
 setInterval(() => {
-  ctx.fillStyle = 'rgba(5, 5, 5, 0.15)';
+  ctx.fillStyle = 'rgba(3, 4, 10, 0.16)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = '#00f2ff'; ctx.font = '15px monospace';
   drops.forEach((y, i) => {
@@ -576,6 +670,51 @@ setInterval(() => {
     drops[i]++;
   });
 }, 50);
+
+// Ambient particle network
+(function () {
+  const pc = document.getElementById('particleCanvas');
+  const pctx = pc.getContext('2d');
+  let particles = [];
+  function initP() {
+    pc.width = window.innerWidth; pc.height = window.innerHeight;
+    const count = Math.min(70, Math.floor(pc.width / 22));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * pc.width, y: Math.random() * pc.height,
+      vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 1.8 + 0.6
+    }));
+  }
+  initP();
+  window.addEventListener('resize', initP);
+  function drawP() {
+    pctx.clearRect(0, 0, pc.width, pc.height);
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > pc.width) p.vx *= -1;
+      if (p.y < 0 || p.y > pc.height) p.vy *= -1;
+      pctx.beginPath();
+      pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      pctx.fillStyle = 'rgba(0, 242, 255, 0.7)';
+      pctx.fill();
+      for (let j = i + 1; j < particles.length; j++) {
+        const q = particles[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          pctx.beginPath();
+          pctx.moveTo(p.x, p.y); pctx.lineTo(q.x, q.y);
+          pctx.strokeStyle = 'rgba(176, 38, 255, ' + (0.18 * (1 - dist / 120)) + ')';
+          pctx.lineWidth = 0.6;
+          pctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawP);
+  }
+  drawP();
+})();
 
 // Fake Stats
 const threats = ["LOW", "MODERATE", "ELEVATED", "HIGH", "CRITICAL"];
@@ -587,6 +726,19 @@ setInterval(() => {
   document.getElementById('statThreat').textContent = threats[Math.floor(Math.random() * threats.length)];
   document.getElementById('statThreat').style.color = document.getElementById('statThreat').textContent === "CRITICAL" ? "var(--red)" : "var(--accent)";
 }, 1000);
+
+// Live Uptime counter
+(function () {
+  const start = Date.now();
+  const el = document.getElementById('statUptime');
+  setInterval(() => {
+    const s = Math.floor((Date.now() - start) / 1000);
+    const hh = String(Math.floor(s / 3600)).padStart(2, '0');
+    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    const ss = String(s % 60).padStart(2, '0');
+    if (el) el.textContent = `${hh}:${mm}:${ss}`;
+  }, 1000);
+})();
 </script>
 
 <script>
@@ -596,7 +748,7 @@ setInterval(() => {
   const loader = document.getElementById('terminalLoader');
   const scanBar = document.getElementById('scanBar');
   const signal = document.getElementById('terminalSignal');
-  
+
   let typingInterval = null;
   let loadingInterval = null;
 
@@ -609,15 +761,31 @@ setInterval(() => {
   });
 
   // Loader Observer
+  const hackStages = [
+    "[CONNECTING TO TARGET HOST]",
+    "[RESOLVING DNS RECORDS]",
+    "[INJECTING PROXY PACKETS]",
+    "[BYPASSING FIREWALL]",
+    "[EXTRACTING DOM NODES]",
+    "[DECRYPTING RESPONSE]"
+  ];
   new MutationObserver(() => {
     if (codeArea.classList.contains('loading')) {
       loader.classList.remove('hidden'); scanBar.classList.remove('hidden');
       signal.textContent = "[HACKING]"; signal.classList.add('live');
-      let dots = '';
+      let dots = '', stage = 0, tick = 0;
       loadingInterval = setInterval(() => {
         dots = dots.length > 3 ? '' : dots + '.';
-        loader.textContent = `[CONNECTING TO TARGET HOST]${dots}\nExtracting nodes...\nBypassing firewall...`;
-      }, 300);
+        tick++;
+        if (tick % 6 === 0) stage = (stage + 1) % hackStages.length;
+        const bar = '█'.repeat((tick % 20)) + '░'.repeat(20 - (tick % 20));
+        const hex = Array.from({length: 8}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(' ');
+        loader.textContent =
+          `${hackStages[stage]}${dots}\n` +
+          `progress [${bar}]\n` +
+          `packet: ${hex}\n` +
+          `status: bypassing security layers...`;
+      }, 250);
     } else {
       clearInterval(loadingInterval);
       loader.classList.add('hidden'); scanBar.classList.add('hidden');
@@ -625,29 +793,113 @@ setInterval(() => {
     }
   }).observe(codeArea, { attributes: true, attributeFilter: ['class'] });
 
-  // Mobile Safe Regex Highlighting
-  function applySyntaxHighlighting(text) {
-    if (text.length > 100000) return escapeHTML(text); // Prevent hang on huge files
-    let safeText = escapeHTML(text);
-    return safeText
-      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-cmt">$1</span>') // Comments
-      .replace(/(&lt;\/?[\w\d:-]+)/g, '<span class="hl-tag">$1</span>') // Tags
-      .replace(/(\/?&gt;)/g, '<span class="hl-tag">$1</span>') // Tag close
-      .replace(/([a-zA-Z\-]+)=/g, '<span class="hl-attr">$1</span>=') // Attributes
-      .replace(/(&quot;.*?&quot;|&#39;.*?&#39;)/g, '<span class="hl-str">$1</span>'); // Strings
-  }
-
+  // ===== TOKENIZER-BASED SYNTAX HIGHLIGHTING (Mobile-Safe) =====
+  // This walks the string once and builds highlighted output token by token,
+  // avoiding the overlapping/nested regex-replace bug that broke rendering on mobile.
   function escapeHTML(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  // BUG-FREE TYPING ENGINE (No Over-Loop)
+  function highlightAttributes(tagInner) {
+    // tagInner is the content between < and > (already the tag body, e.g. `div class="x" id='y'`)
+    // Highlight attr names and string values while escaping everything safely.
+    let result = '';
+    let i = 0;
+    const len = tagInner.length;
+    while (i < len) {
+      const ch = tagInner[i];
+      // string value (double or single quoted)
+      if (ch === '"' || ch === "'") {
+        const quote = ch;
+        let j = i + 1;
+        while (j < len && tagInner[j] !== quote) j++;
+        const str = tagInner.slice(i, j + 1);
+        result += '<span class="hl-str">' + escapeHTML(str) + '</span>';
+        i = j + 1;
+        continue;
+      }
+      // attribute name: letters, digits, hyphen, colon followed by '='
+      if (/[a-zA-Z]/.test(ch)) {
+        let j = i;
+        while (j < len && /[a-zA-Z0-9\-:]/.test(tagInner[j])) j++;
+        const word = tagInner.slice(i, j);
+        // is it an attribute (followed by = possibly with spaces)?
+        let k = j;
+        while (k < len && tagInner[k] === ' ') k++;
+        if (tagInner[k] === '=') {
+          result += '<span class="hl-attr">' + escapeHTML(word) + '</span>';
+        } else {
+          result += escapeHTML(word);
+        }
+        i = j;
+        continue;
+      }
+      result += escapeHTML(ch);
+      i++;
+    }
+    return result;
+  }
+
+  function applySyntaxHighlighting(text) {
+    if (text.length > 200000) return escapeHTML(text); // safety cap for huge files
+    let result = '';
+    let i = 0;
+    const len = text.length;
+
+    while (i < len) {
+      // HTML comment
+      if (text.startsWith('<!--', i)) {
+        const end = text.indexOf('-->', i);
+        const stop = end === -1 ? len : end + 3;
+        result += '<span class="hl-cmt">' + escapeHTML(text.slice(i, stop)) + '</span>';
+        i = stop;
+        continue;
+      }
+      // DOCTYPE
+      if (/^<!doctype/i.test(text.slice(i, i + 9))) {
+        const end = text.indexOf('>', i);
+        const stop = end === -1 ? len : end + 1;
+        result += '<span class="hl-doctype">' + escapeHTML(text.slice(i, stop)) + '</span>';
+        i = stop;
+        continue;
+      }
+      // Tag
+      if (text[i] === '<') {
+        const end = text.indexOf('>', i);
+        if (end === -1) { result += escapeHTML(text.slice(i)); break; }
+        const inner = text.slice(i + 1, end); // without < and >
+        // split tag name from the rest
+        const nameMatch = inner.match(/^\/?\s*[a-zA-Z0-9:-]+/);
+        if (nameMatch) {
+          const tagName = nameMatch[0];
+          const rest = inner.slice(tagName.length);
+          result += '<span class="hl-tag">&lt;' + escapeHTML(tagName) + '</span>';
+          result += highlightAttributes(rest);
+          result += '<span class="hl-tag">&gt;</span>';
+        } else {
+          result += '<span class="hl-tag">' + escapeHTML(text.slice(i, end + 1)) + '</span>';
+        }
+        i = end + 1;
+        continue;
+      }
+      // Text node — collect until next '<'
+      let next = text.indexOf('<', i);
+      if (next === -1) next = len;
+      const chunk = text.slice(i, next);
+      // highlight standalone numbers inside text
+      result += escapeHTML(chunk).replace(/\b(\d+)\b/g, '<span class="hl-num">$1</span>');
+      i = next;
+    }
+    return result;
+  }
+
+  // TYPING ENGINE
   window.__renderSource = function(rawText, onComplete) {
-    window.__cancelRender(); // Kill any running instance
+    window.__cancelRender();
 
     const isTypeMode = document.getElementById('modeType').checked;
-    
+
     if (!isTypeMode) {
       output.innerHTML = applySyntaxHighlighting(rawText);
       if (typeof onComplete === 'function') onComplete();
@@ -660,14 +912,14 @@ setInterval(() => {
 
     const len = rawText.length;
     let index = 0;
-    const duration = 10000; // Complete typing in 10 seconds regardless of size
+    const duration = 10000;
     const tickRate = 30;
     const chunkSize = Math.max(1, Math.ceil(len / (duration / tickRate)));
 
     typingInterval = setInterval(() => {
       if (index >= len) {
-        window.__cancelRender(); // Clear styling and intervals properly
-        output.innerHTML = applySyntaxHighlighting(rawText); // Apply color at the end
+        window.__cancelRender();
+        output.innerHTML = applySyntaxHighlighting(rawText);
         if (typeof onComplete === 'function') onComplete();
         return;
       }
